@@ -148,6 +148,10 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("Given the findings, C is the correct choice.", "C"),
         ("So my final choice would be C", "C"),
         ("Vitamin D is the best option for this patient's deficiency.", "D"),
+        ("I think the answer is A. Wait, reconsidering, C is the best choice.", "C"),
+        ("Answer: A. Actually, on reflection, B is correct.", "B"),
+        ("Option A is wrong. Option B is incorrect. The correct answer is C.", "C"),
+        ("A is not right, B can be excluded, so the best choice is D.", "D"),
         ("I cannot determine this.", None),
         ("", None),
     ],
@@ -166,6 +170,8 @@ def test_extract_letter_is_lenient_about_format(text, expected):
         "A 45-year-old man presents with acute chest pain radiating to the jaw.",
         "The correct management of pneumonia requires antibiotics.",
         "Choose wisely when interpreting serology results.",
+        "The diagnosis was incorrect, and A does not fit either.",
+        "This is not correct: option A is wrong, and there is no clear best fit here.",
     ],
 )
 def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):
@@ -253,12 +259,19 @@ SYSTEM_CHAT = (
 # letter, in either order.
 _CUE = r"(?:answers?|options?|choice|choose|select(?:ed)?|correct|best)"
 _CUE_THEN_LETTER = re.compile(
-    _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
+    r"\b" + _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
 # Without the reverse direction the extractor misses the base model, whose
 # phrasing varies most -- and understating the base score flatters the
 # fine-tune, which is the one direction this project must not be wrong in.
 _LETTER_THEN_CUE = re.compile(
     r"\b([A-D])\b[^\n]{0,28}?\b" + _CUE + r"\b", re.IGNORECASE)
+# A letter the model is rejecting rather than choosing. Without this,
+# "option A is wrong" reads as a vote for A -- and elimination reasoning
+# ("A is wrong, B is incorrect, the answer is C") is a standard
+# chain-of-thought shape, so the mistake would be common.
+_NEGATED = re.compile(
+    r"^\W{0,3}(?:is|are|was|were|does|do|can)?\s*(?:not\b|n't\b|never\b|wrong\b"
+    r"|incorrect\b|excluded\b|ruled out\b|unlikely\b)", re.IGNORECASE)
 # A letter standing alone as the final line: "C", "(C)", "C."
 _FINAL_BARE = re.compile(r"^\s*\(?([A-D])[).:]?\s*$")
 # A final line that opens with a choice marker: "C) Vitamin D"
@@ -300,18 +313,24 @@ def extract_letter(text: str) -> str | None:
     correctness would distort the base-vs-tuned comparison. But a letter
     guessed from prose that states no answer is worse than no answer at
     all: it is indistinguishable from a real one in the aggregate, while
-    None costs both models equally. So the fallback only fires on the
-    last non-empty line, and only when that line is itself a choice.
+    None costs both models equally.
 
-    The last explicit match wins, because a model that reconsiders states
-    its conclusion last.
+    So a letter counts only with evidence: a cue word within 28 characters
+    of a standalone letter, in either order, and not one the model is
+    rejecting. The candidate that ends LAST wins across both directions,
+    because a model that reconsiders states its conclusion last.
     """
     if not text:
         return None
+    best: tuple[int, str] | None = None
     for pattern in (_CUE_THEN_LETTER, _LETTER_THEN_CUE):
-        matches = pattern.findall(text)
-        if matches:
-            return matches[-1].upper()
+        for match in pattern.finditer(text):
+            if _NEGATED.match(text[match.end(1):match.end(1) + 24]):
+                continue
+            if best is None or match.end(1) > best[0]:
+                best = (match.end(1), match.group(1).upper())
+    if best:
+        return best[1]
     lines = [line for line in text.splitlines() if line.strip()]
     if lines:
         for pattern in (_FINAL_BARE, _FINAL_MARKER):
@@ -324,7 +343,7 @@ def extract_letter(text: str) -> str | None:
 - [ ] **Step 6: Run the tests and confirm they pass**
 
 Run: `.venv/bin/python -m pytest tests/test_prompts.py -q`
-Expected: PASS, 33 passed.
+Expected: PASS, 39 passed.
 
 - [ ] **Step 7: Commit**
 
@@ -1464,7 +1483,7 @@ Expected: PASS, 3 passed.
 - [ ] **Step 5: Confirm the whole suite still passes**
 
 Run: `.venv/bin/python -m pytest -q`
-Expected: PASS, 64 passed. No test requires a GPU or network.
+Expected: PASS, 70 passed. No test requires a GPU or network.
 
 - [ ] **Step 6: Commit**
 
@@ -1751,7 +1770,7 @@ print('no GPU-only import at module scope:', sorted(names))
 .venv/bin/python -m pytest -q
 ```
 
-Expected: the confirmation line, then PASS, 69 passed.
+Expected: the confirmation line, then PASS, 75 passed.
 
 - [ ] **Step 7: Commit**
 
