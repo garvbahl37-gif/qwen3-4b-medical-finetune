@@ -70,6 +70,10 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("Given the findings, C is the correct choice.", "C"),
         ("So my final choice would be C", "C"),
         ("Vitamin D is the best option for this patient's deficiency.", "D"),
+        ("I think the answer is A. Wait, reconsidering, C is the best choice.", "C"),
+        ("Answer: A. Actually, on reflection, B is correct.", "B"),
+        ("Option A is wrong. Option B is incorrect. The correct answer is C.", "C"),
+        ("A is not right, B can be excluded, so the best choice is D.", "D"),
     ],
 )
 def test_extract_letter_is_lenient_about_format(text, expected):
@@ -94,6 +98,8 @@ def test_extract_letter_prefers_an_explicit_answer_line_over_a_stray_letter():
         "A 45-year-old man presents with acute chest pain radiating to the jaw.",
         "The correct management of pneumonia requires antibiotics.",
         "Choose wisely when interpreting serology results.",
+        "The diagnosis was incorrect, and A does not fit either.",
+        "This is not correct: option A is wrong, and there is no clear best fit here.",
     ],
 )
 def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):
