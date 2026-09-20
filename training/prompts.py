@@ -25,12 +25,19 @@ SYSTEM_CHAT = (
 _CUE = r"(?:answers?|options?|choice|choose|select(?:ed)?|correct|best)"
 # Forward: cue then letter ("the correct option is D").
 _CUE_THEN_LETTER = re.compile(
-    _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
+    r"\b" + _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
 # Reverse: letter then cue ("C is the correct choice"). Without this the
 # extractor misses the base model, whose phrasing varies most -- and
 # understating the base score would flatter the fine-tune.
 _LETTER_THEN_CUE = re.compile(
     r"\b([A-D])\b[^\n]{0,28}?\b" + _CUE + r"\b", re.IGNORECASE)
+# A letter the model is rejecting rather than choosing. Without this,
+# "option A is wrong" reads as a vote for A -- and elimination reasoning
+# ("A is wrong, B is incorrect, the answer is C") is a standard
+# chain-of-thought shape, so the mistake would be common.
+_NEGATED = re.compile(
+    r"^\W{0,3}(?:is|are|was|were|does|do|can)?\s*(?:not\b|n't\b|never\b|wrong\b"
+    r"|incorrect\b|excluded\b|ruled out\b|unlikely\b)", re.IGNORECASE)
 # A letter standing alone as the final line: "C", "(C)", "C."
 _FINAL_BARE = re.compile(r"^\s*\(?([A-D])[).:]?\s*$")
 # A final line that opens with a choice marker: "C) Vitamin D"
@@ -75,16 +82,21 @@ def extract_letter(text: str) -> str | None:
     None costs both models equally.
 
     So a letter counts only with evidence: a cue word within 28 characters
-    of a standalone letter, in either order, or a final line that is
-    itself a choice. The last match wins, because a model that reconsiders
-    states its conclusion last.
+    of a standalone letter, in either order, and not one the model is
+    rejecting. The candidate that ends LAST wins across both directions,
+    because a model that reconsiders states its conclusion last.
     """
     if not text:
         return None
+    best: tuple[int, str] | None = None
     for pattern in (_CUE_THEN_LETTER, _LETTER_THEN_CUE):
-        matches = pattern.findall(text)
-        if matches:
-            return matches[-1].upper()
+        for match in pattern.finditer(text):
+            if _NEGATED.match(text[match.end(1):match.end(1) + 24]):
+                continue
+            if best is None or match.end(1) > best[0]:
+                best = (match.end(1), match.group(1).upper())
+    if best:
+        return best[1]
     lines = [line for line in text.splitlines() if line.strip()]
     if lines:
         for pattern in (_FINAL_BARE, _FINAL_MARKER):
