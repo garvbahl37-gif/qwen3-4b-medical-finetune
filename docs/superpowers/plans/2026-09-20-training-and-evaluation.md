@@ -144,6 +144,10 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("A 23-year-old woman presents. The answer is B.", "B"),
         ("The correct option is D.", "D"),
         ("Reasoning about Vitamin C and Hepatitis A.\n\nAnswer: B", "B"),
+        ("The correct answer here would be C.", "C"),
+        ("Given the findings, C is the correct choice.", "C"),
+        ("So my final choice would be C", "C"),
+        ("Vitamin D is the best option for this patient's deficiency.", "D"),
         ("I cannot determine this.", None),
         ("", None),
     ],
@@ -160,6 +164,8 @@ def test_extract_letter_is_lenient_about_format(text, expected):
         "The patient has blood group A and is Rh negative.",
         "I am uncertain, but this could relate to A or B depending on labs.",
         "A 45-year-old man presents with acute chest pain radiating to the jaw.",
+        "The correct management of pneumonia requires antibiotics.",
+        "Choose wisely when interpreting serology results.",
     ],
 )
 def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):
@@ -240,16 +246,19 @@ SYSTEM_CHAT = (
     "their description warrants it."
 )
 
-# CORRECTED AFTER TASK 1 REVIEW (ruling R6). The first version matched the
-# first A-D anywhere in the text, so it returned "A" for "A 45-year-old man
-# ... choice C." Medical vignettes open that way, and "Vitamin D" /
-# "Hepatitis B" / "blood group A" are everywhere in this domain. Leniency is
-# anchored to answer-indicating language instead.
-_ANSWER_LINE = re.compile(
-    r"(?:answer|option|choice|select(?:ed)?|correct)\b[^A-Za-z0-9\n]{0,10}"
-    r"(?:(?:is|was|:)[^A-Za-z0-9\n]{0,5})?([A-D])(?![A-Za-z])",
-    re.IGNORECASE,
-)
+# CORRECTED AFTER TASK 1 REVIEW (rulings R6, R8). The first version matched
+# the first A-D anywhere, returning "A" for "A 45-year-old man ... choice C."
+# The second over-corrected and missed "C is the correct choice." A letter
+# counts only with evidence: a cue word within 28 characters of a standalone
+# letter, in either order.
+_CUE = r"(?:answers?|options?|choice|choose|select(?:ed)?|correct|best)"
+_CUE_THEN_LETTER = re.compile(
+    _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
+# Without the reverse direction the extractor misses the base model, whose
+# phrasing varies most -- and understating the base score flatters the
+# fine-tune, which is the one direction this project must not be wrong in.
+_LETTER_THEN_CUE = re.compile(
+    r"\b([A-D])\b[^\n]{0,28}?\b" + _CUE + r"\b", re.IGNORECASE)
 # A letter standing alone as the final line: "C", "(C)", "C."
 _FINAL_BARE = re.compile(r"^\s*\(?([A-D])[).:]?\s*$")
 # A final line that opens with a choice marker: "C) Vitamin D"
@@ -299,9 +308,10 @@ def extract_letter(text: str) -> str | None:
     """
     if not text:
         return None
-    matches = _ANSWER_LINE.findall(text)
-    if matches:
-        return matches[-1].upper()
+    for pattern in (_CUE_THEN_LETTER, _LETTER_THEN_CUE):
+        matches = pattern.findall(text)
+        if matches:
+            return matches[-1].upper()
     lines = [line for line in text.splitlines() if line.strip()]
     if lines:
         for pattern in (_FINAL_BARE, _FINAL_MARKER):
@@ -314,7 +324,7 @@ def extract_letter(text: str) -> str | None:
 - [ ] **Step 6: Run the tests and confirm they pass**
 
 Run: `.venv/bin/python -m pytest tests/test_prompts.py -q`
-Expected: PASS, 27 passed.
+Expected: PASS, 33 passed.
 
 - [ ] **Step 7: Commit**
 
@@ -1454,7 +1464,7 @@ Expected: PASS, 3 passed.
 - [ ] **Step 5: Confirm the whole suite still passes**
 
 Run: `.venv/bin/python -m pytest -q`
-Expected: PASS, 58 passed. No test requires a GPU or network.
+Expected: PASS, 64 passed. No test requires a GPU or network.
 
 - [ ] **Step 6: Commit**
 
@@ -1741,7 +1751,7 @@ print('no GPU-only import at module scope:', sorted(names))
 .venv/bin/python -m pytest -q
 ```
 
-Expected: the confirmation line, then PASS, 63 passed.
+Expected: the confirmation line, then PASS, 69 passed.
 
 - [ ] **Step 7: Commit**
 
