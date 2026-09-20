@@ -3,6 +3,51 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+# The notebook's code-fetch cell cannot `import training.kaggle_paths`: the
+# whole point of find_code_dir is to locate the uploaded code before it has
+# been copied anywhere importable. So its real implementation lives in
+# training/kaggle_paths.py (where tests/test_kaggle_paths.py can import and
+# test it directly), and this reads that file's source and inlines the part
+# below its marker comment into the cell verbatim, rather than hand-copying
+# it into both places and letting them drift apart.
+_KAGGLE_PATHS = Path("training/kaggle_paths.py").read_text()
+_MARKER = "# --- inline below ---\n"
+if _MARKER not in _KAGGLE_PATHS:
+    raise SystemExit(f"marker {_MARKER!r} not found in training/kaggle_paths.py")
+FIND_CODE_DIR_SRC = _KAGGLE_PATHS.split(_MARKER, 1)[1].rstrip("\n")
+
+CELL_GET_CODE = ('''# --- 3. Get the code from the attached dataset -----------------------------
+import os, shutil, subprocess, sys
+from pathlib import Path
+
+INPUT = Path("/kaggle/input")
+WORK  = Path("/kaggle/working/ft")
+PKG   = WORK / "training"
+PKG.mkdir(parents=True, exist_ok=True)
+
+''' + FIND_CODE_DIR_SRC + '''
+
+SRC = find_code_dir(INPUT)
+print("found the code at:", SRC)
+
+for src_file in sorted(SRC.glob("*.py")):
+    shutil.copy(src_file, PKG / src_file.name)
+(PKG / "__init__.py").touch()
+
+os.chdir(WORK)
+sys.path.insert(0, str(WORK))
+print("cwd:", os.getcwd(), "|", len(list(PKG.glob("*.py"))), "modules:",
+      ", ".join(sorted(p.stem for p in PKG.glob("*.py"))))
+
+# A failing `!python x.py` returns non-zero but does not raise in Jupyter, so the
+# notebook would sail past a dead step and fail later somewhere confusing.
+def step(cmd: str):
+    print(f"$ {cmd}\\n", flush=True)
+    p = subprocess.run(cmd, shell=True)
+    if p.returncode != 0:
+        raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
+    print("\\nok\\n", flush=True)''')
+
 CELLS: list[tuple[str, str]] = [
     ("markdown", """# Qwen3-4B medical fine-tune (training)
 
@@ -60,57 +105,7 @@ except Exception as e:
     print("\\nFallback, then Run > Restart session and skip the install cell:")
     print("  !pip install -q --upgrade --force-reinstall --no-cache-dir "
           "unsloth unsloth_zoo")'''),
-    ("code", '''# --- 3. Get the code from the attached dataset -----------------------------
-import os, shutil, subprocess, sys
-from pathlib import Path
-
-SRC  = Path("/kaggle/input/medical-ft-code")
-WORK = Path("/kaggle/working/ft")
-PKG  = WORK / "training"
-PKG.mkdir(parents=True, exist_ok=True)
-
-# The dataset is flat, so the package is reassembled here rather than copied.
-if not SRC.exists():
-    inputs = Path("/kaggle/input")
-    available = (sorted(p.name for p in inputs.iterdir())
-                 if inputs.exists() else [])
-    raise SystemExit(
-        f"\\nSTOP. {SRC} does not exist, so the dataset is not attached.\\n"
-        f"Inputs present: {available}\\n"
-        "FIX: sidebar -> + Add Input -> Datasets -> medical-ft-code. If it was "
-        "just uploaded, Kaggle may still have been processing it when this run "
-        "started; re-run once it reports ready.")
-
-modules = sorted(SRC.glob("*.py"))
-if not modules:
-    raise SystemExit(
-        f"\\nSTOP. No .py files in {SRC}.\\n"
-        f"Contents: {sorted(p.name for p in SRC.iterdir())}\\n"
-        "FIX: re-run scripts/push_kaggle.sh to refresh the dataset.")
-for src_file in modules:
-    shutil.copy(src_file, PKG / src_file.name)
-(PKG / "__init__.py").touch()
-
-os.chdir(WORK)
-sys.path.insert(0, str(WORK))
-print("cwd:", os.getcwd(), "|", len(list(PKG.glob("*.py"))), "modules:",
-      ", ".join(sorted(p.stem for p in PKG.glob("*.py"))))
-
-required = {"records", "prompts", "sources", "prepare_data",
-            "check_lengths", "budget", "train"}
-missing = required - {p.stem for p in PKG.glob("*.py")}
-if missing:
-    raise SystemExit(f"\\nSTOP. Missing modules: {sorted(missing)}\\n"
-                     "FIX: re-run scripts/push_kaggle.sh to refresh the dataset.")
-
-# A failing `!python x.py` returns non-zero but does not raise in Jupyter, so the
-# notebook would sail past a dead step and fail later somewhere confusing.
-def step(cmd: str):
-    print(f"$ {cmd}\\n", flush=True)
-    p = subprocess.run(cmd, shell=True)
-    if p.returncode != 0:
-        raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
-    print("\\nok\\n", flush=True)'''),
+    ("code", CELL_GET_CODE),
     ("markdown", """## 4. Build the training set
 
 14,000 MedMCQA + 8,000 MedQA + 6,000 medical-o1 + 12,000 ChatDoctor, which is
