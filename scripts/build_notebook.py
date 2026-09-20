@@ -51,8 +51,10 @@ def step(cmd: str):
 CELLS: list[tuple[str, str]] = [
     ("markdown", """# Qwen3-4B medical fine-tune (training)
 
-Trains a QLoRA adapter on ~40,000 examples from four medical sources. This
-notebook only trains. Evaluation against two held-out benchmarks it never
+Trains a QLoRA adapter on ~17,700 examples from four medical sources -- sized
+to measured T4 throughput, not the original 40,000-example estimate; see
+"Build the training set" below. This notebook only trains. Evaluation
+against two held-out benchmarks it never
 saw -- MedQA-USMLE test (1,273) and MedMCQA validation (4,183) -- runs as a
 **separate** Kaggle notebook once the evaluation code lands, fed the adapter
 this notebook produces.
@@ -108,11 +110,18 @@ except Exception as e:
     ("code", CELL_GET_CODE),
     ("markdown", """## 4. Build the training set
 
-14,000 MedMCQA + 8,000 MedQA + 6,000 medical-o1 + 12,000 ChatDoctor, which is
-70% exam/reasoning and 30% conversational. Both benchmarks load first so every
-training row can be decontaminated against them."""),
-    ("code", '''step("python -m training.prepare_data --medmcqa 14000 --medqa 8000 "
-     "--medical-o1 6000 --chatdoctor 12000 --val-size 500 --out data")
+6,300 MedMCQA + 3,700 MedQA + 2,600 medical-o1 + 5,400 ChatDoctor -- 18,000
+requested, holding the spec's 70% exam/reasoning and 30% patient-dialogue
+split (12,600 / 5,400). This size is set by measured throughput, not chosen
+in advance: the step-50 probe on run 1 measured 35.5s/step at effective
+batch 32 on a single T4, i.e. 0.9 examples/sec, and 40,000 examples at that
+rate is a 12-hour run against a 9-hour Kaggle session cap. 18,000 lands
+around 17,700 after decontamination and the length drop, which is 552 steps
+-- about 5.4 hours, inside the 6-hour training budget with real margin.
+Both benchmarks load first so every training row can be decontaminated
+against them."""),
+    ("code", '''step("python -m training.prepare_data --medmcqa 6300 --medqa 3700 "
+     "--medical-o1 2600 --chatdoctor 5400 --val-size 500 --out data")
 
 import json
 print(json.dumps(json.load(open("data/report.json")), indent=2))'''),
@@ -157,10 +166,11 @@ print("\\nSaved to /kaggle/working -- download run1-adapter.zip from the "
       "Output panel.")'''),
     ("markdown", """## Done
 
-`run1-adapter.zip` and `data_report.json` are in the **Output** panel.
-Download `run1-adapter.zip` and feed it to the evaluation notebook, which
-runs as a separate Kaggle session once `training/evalcore.py` and
-`training/evaluate.py` exist."""),
+`run1-adapter.zip` and `data_report.json` are in the **Output** panel. The
+adapter was trained on ~17,700 examples (not the spec's original 40,000 --
+see "Build the training set" above for why). Download `run1-adapter.zip`
+and feed it to the evaluation notebook, which runs as a separate Kaggle
+session once `training/evalcore.py` and `training/evaluate.py` exist."""),
 ]
 
 nb = {
