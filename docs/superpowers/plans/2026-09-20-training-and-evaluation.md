@@ -140,12 +140,37 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("C.", "C"),
         ("C) Vitamin D", "C"),
         ("```\nAnswer: A\n```", "A"),
+        ("A 45-year-old man presents, most consistent with choice C.", "C"),
+        ("A 23-year-old woman presents. The answer is B.", "B"),
+        ("The correct option is D.", "D"),
+        ("Reasoning about Vitamin C and Hepatitis A.\n\nAnswer: B", "B"),
         ("I cannot determine this.", None),
         ("", None),
     ],
 )
 def test_extract_letter_is_lenient_about_format(text, expected):
     assert extract_letter(text) == expected
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Vitamin D deficiency is the most likely cause given the presentation.",
+        "This is likely due to Hepatitis B infection based on the serology.",
+        "The patient has blood group A and is Rh negative.",
+        "I am uncertain, but this could relate to A or B depending on labs.",
+        "A 45-year-old man presents with acute chest pain radiating to the jaw.",
+    ],
+)
+def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):
+    # A false positive is worse than None: None scores wrong for base and
+    # tuned alike, while a guessed letter is indistinguishable from a real
+    # answer in the aggregate accuracy the project reports.
+    assert extract_letter(text) is None
+
+
+def test_record_survives_a_dict_round_trip():
+    assert Record.from_dict(MCQ.to_dict()) == MCQ
 
 
 def test_extract_letter_ignores_letters_inside_words():
@@ -215,13 +240,20 @@ SYSTEM_CHAT = (
     "their description warrants it."
 )
 
-# Matches "Answer: C", "**Answer:** C", "answer - a". The letter must not be
-# followed by another letter, so "Answer: About" does not yield "A".
+# CORRECTED AFTER TASK 1 REVIEW (ruling R6). The first version matched the
+# first A-D anywhere in the text, so it returned "A" for "A 45-year-old man
+# ... choice C." Medical vignettes open that way, and "Vitamin D" /
+# "Hepatitis B" / "blood group A" are everywhere in this domain. Leniency is
+# anchored to answer-indicating language instead.
 _ANSWER_LINE = re.compile(
-    r"answer\s*\**\s*[:\-–]\s*\**\s*([A-D])(?![A-Za-z])", re.IGNORECASE
+    r"(?:answer|option|choice|select(?:ed)?|correct)\b[^A-Za-z0-9\n]{0,10}"
+    r"(?:(?:is|was|:)[^A-Za-z0-9\n]{0,5})?([A-D])(?![A-Za-z])",
+    re.IGNORECASE,
 )
-# A letter standing alone as a choice marker: "(C)", "C.", "C)", " C ".
-_BARE_LETTER = re.compile(r"(?:^|[\s(\[])([A-D])(?=[\s.):\]]|$)")
+# A letter standing alone as the final line: "C", "(C)", "C."
+_FINAL_BARE = re.compile(r"^\s*\(?([A-D])[).:]?\s*$")
+# A final line that opens with a choice marker: "C) Vitamin D"
+_FINAL_MARKER = re.compile(r"^\s*\(?([A-D])[).]\s+\S")
 
 
 def format_question(rec: Record) -> str:
@@ -254,24 +286,35 @@ def build_messages(rec: Record, *, with_answer: bool) -> list[dict]:
 def extract_letter(text: str) -> str | None:
     """Pull the chosen letter out of a model response.
 
-    Deliberately lenient. The base model wraps answers in prose and markdown,
-    and penalising formatting rather than correctness would distort the
-    base-vs-tuned comparison. The last explicit answer line wins, because a
-    model that reconsiders states its conclusion last.
+    Lenient about format, strict about evidence. The base model wraps
+    answers in markdown and prose, and penalising formatting rather than
+    correctness would distort the base-vs-tuned comparison. But a letter
+    guessed from prose that states no answer is worse than no answer at
+    all: it is indistinguishable from a real one in the aggregate, while
+    None costs both models equally. So the fallback only fires on the
+    last non-empty line, and only when that line is itself a choice.
+
+    The last explicit match wins, because a model that reconsiders states
+    its conclusion last.
     """
     if not text:
         return None
     matches = _ANSWER_LINE.findall(text)
     if matches:
         return matches[-1].upper()
-    bare = _BARE_LETTER.findall(text)
-    return bare[0].upper() if bare else None
+    lines = [line for line in text.splitlines() if line.strip()]
+    if lines:
+        for pattern in (_FINAL_BARE, _FINAL_MARKER):
+            found = pattern.match(lines[-1])
+            if found:
+                return found.group(1).upper()
+    return None
 ```
 
 - [ ] **Step 6: Run the tests and confirm they pass**
 
 Run: `.venv/bin/python -m pytest tests/test_prompts.py -q`
-Expected: PASS, 17 passed.
+Expected: PASS, 27 passed.
 
 - [ ] **Step 7: Commit**
 
@@ -1411,7 +1454,7 @@ Expected: PASS, 3 passed.
 - [ ] **Step 5: Confirm the whole suite still passes**
 
 Run: `.venv/bin/python -m pytest -q`
-Expected: PASS, 48 passed. No test requires a GPU or network.
+Expected: PASS, 58 passed. No test requires a GPU or network.
 
 - [ ] **Step 6: Commit**
 
@@ -1698,7 +1741,7 @@ print('no GPU-only import at module scope:', sorted(names))
 .venv/bin/python -m pytest -q
 ```
 
-Expected: the confirmation line, then PASS, 53 passed.
+Expected: the confirmation line, then PASS, 63 passed.
 
 - [ ] **Step 7: Commit**
 
