@@ -15,14 +15,6 @@ def project(steps_done: int, seconds_elapsed: int, total_steps: int) -> dict:
     }
 
 
-# The probe extrapolates from a 50-step sample -- noisy on its own -- and a
-# real run still has to save the adapter/tokenizer and run a final eval pass,
-# neither of which shows up in the step-timing loop it is measuring. Ten
-# percent of headroom keeps the probe from waving through a run that has no
-# slack left for either.
-SAFETY_MARGIN = 0.9
-
-
 def check(projection: dict, budget_seconds: int) -> str | None:
     """Return an abort message if the run will not fit, else None.
 
@@ -32,11 +24,11 @@ def check(projection: dict, budget_seconds: int) -> str | None:
     and a chunk of the weekly GPU quota.
     """
     projected = projection["projected_seconds"]
-    if projected <= 0 or projected <= budget_seconds * SAFETY_MARGIN:
+    if projected <= 0 or projected <= budget_seconds:
         return None
     return (
-        f"\nSTOP. Projected training time is {projected / 3600:.1f} hours "
-        f"against a budget of {budget_seconds / 3600:.1f} hours "
+        f"\nSTOP. Projected training time is {projected / 3600:.1f}h "
+        f"against a budget of {budget_seconds / 3600:.1f}h "
         f"({projection['seconds_per_step']:.2f}s/step).\n"
         f"FIX: halve --batch-size and double --grad-accum, which keeps the "
         f"effective batch identical, or cut the training set with the "

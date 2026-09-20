@@ -20,11 +20,20 @@ def test_check_passes_a_run_that_fits():
     assert check(project(50, 100, 500), budget_seconds=21600) is None
 
 
+def test_check_allows_a_run_that_lands_just_inside_the_budget():
+    # 40s/step x 500 steps = 20,000s against a 21,600s budget. It fits, so
+    # the probe must stay silent -- a false abort costs a queue wait and a
+    # restart for nothing.
+    assert check(project(50, 2000, 500), budget_seconds=21600) is None
+
+
 def test_check_aborts_a_run_that_overruns_and_names_the_fix():
-    msg = check(project(50, 2000, 500), budget_seconds=21600)
+    # 60s/step x 500 steps = 30,000s = 8.3h against a 6.0h budget.
+    msg = check(project(50, 3000, 500), budget_seconds=21600)
     assert msg is not None
-    assert "batch" in msg.lower()
-    assert "5h" in msg or "hours" in msg.lower()
+    assert "8.3h" in msg          # the projection
+    assert "6.0h" in msg          # the budget it is measured against
+    assert "--batch-size" in msg  # the fix it names
 
 
 def test_check_is_a_no_op_before_any_step_has_run():
