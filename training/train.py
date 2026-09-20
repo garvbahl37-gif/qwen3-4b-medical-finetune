@@ -126,6 +126,17 @@ def main() -> None:
         model_name=BASE_MODEL, max_seq_length=args.max_seq,
         load_in_4bit=True, dtype=None,
     )
+
+    # TRL 0.24 validates SFTConfig.eos_token against the vocabulary, and under
+    # Unsloth's patching it arrives as the literal placeholder '<EOS_TOKEN>',
+    # which is not a real token. Resolve it from the tokenizer. Guarded by the
+    # same signature inspection as the other renames, so an older TRL without
+    # the field is unaffected.
+    eos_kwargs = {}
+    if "eos_token" in inspect.signature(SFTConfig.__init__).parameters:
+        eos_kwargs["eos_token"] = tok.eos_token
+    print(f"eos_token resolved to {tok.eos_token!r} (id {tok.eos_token_id})")
+
     model = FastLanguageModel.get_peft_model(
         model, r=args.rank, lora_alpha=args.rank, lora_dropout=0.0,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
@@ -186,6 +197,7 @@ def main() -> None:
             output_dir=str(args.out),
             report_to="none",
             **{max_seq_kwarg: args.max_seq},
+            **eos_kwargs,
         ),
         callbacks=[Probe()],
         **{tokenizer_kwarg: tok},

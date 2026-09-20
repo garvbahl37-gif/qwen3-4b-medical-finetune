@@ -92,24 +92,29 @@ def main() -> None:
     mix = {}
     for rec in train:
         mix[rec.source] = mix.get(rec.source, 0) + 1
-    exam = sum(1 for r in train if r.kind == "mcq")
-    exam_fraction = round(exam / len(train), 4) if train else 0.0
+    mcq = sum(1 for r in train if r.kind == "mcq")
+    reasoning = sum(1 for r in train if r.source != "chatdoctor")
 
     report = {
         "train_size": len(train), "val_size": len(val),
         "holdout_pool": len(holdouts),
         "decontaminated_removed": removed, "decontaminated_from": before,
         "mix": mix,
-        "exam_fraction": exam_fraction,
+        "mcq_fraction": round(mcq / len(train), 4) if train else 0.0,
+        "reasoning_fraction": round(reasoning / len(train), 4) if train else 0.0,
         "seed": args.seed,
     }
     (args.out / "report.json").write_text(json.dumps(report, indent=2))
     print(f"\nmix: {mix}")
     if train:
-        print(f"exam/reasoning {exam / len(train):.0%}, conversational "
-              f"{1 - exam / len(train):.0%}")
+        print(f"multiple-choice {mcq / len(train):.0%}, "
+              f"free-text {1 - mcq / len(train):.0%}")
+        print(f"exam+reasoning {reasoning / len(train):.0%}, "
+              f"patient dialogue {1 - reasoning / len(train):.0%}  "
+              f"(spec target 70/30)")
     else:
-        print("exam/reasoning 0%, conversational 0%")
+        print("multiple-choice 0%, free-text 0%")
+        print("exam+reasoning 0%, patient dialogue 0%  (spec target 70/30)")
 
 
 if __name__ == "__main__":
