@@ -62,6 +62,10 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("```\nAnswer: A\n```", "A"),
         ("I cannot determine this.", None),
         ("", None),
+        ("A 45-year-old man presents, most consistent with choice C.", "C"),
+        ("A 23-year-old woman presents. The answer is B.", "B"),
+        ("The correct option is D.", "D"),
+        ("Reasoning about Vitamin C and Hepatitis A.\n\nAnswer: B", "B"),
     ],
 )
 def test_extract_letter_is_lenient_about_format(text, expected):
@@ -74,3 +78,26 @@ def test_extract_letter_ignores_letters_inside_words():
 
 def test_extract_letter_prefers_an_explicit_answer_line_over_a_stray_letter():
     assert extract_letter("A patient presents.\nAnswer: D") == "D"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Vitamin D deficiency is the most likely cause given the presentation.",
+        "This is likely due to Hepatitis B infection based on the serology.",
+        "The patient has blood group A and is Rh negative.",
+        "I am uncertain, but this could relate to A or B depending on labs.",
+        "A 45-year-old man presents with acute chest pain radiating to the jaw.",
+    ],
+)
+def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):
+    # A false positive is worse than None: None scores wrong for base and
+    # tuned alike, while a guessed letter is indistinguishable from a real
+    # answer in the aggregate accuracy the project reports.
+    assert extract_letter(text) is None
+
+
+def test_record_survives_a_dict_round_trip():
+    assert Record.from_dict(MCQ.to_dict()) == MCQ
+    assert MCQ.to_dict()["options"] == {"A": "Vitamin A", "B": "Vitamin C",
+                                        "C": "Vitamin D", "D": "Vitamin K"}
