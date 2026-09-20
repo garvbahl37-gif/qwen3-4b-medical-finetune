@@ -1,0 +1,32 @@
+# secrets
+.env
+.env.local
+.env*.local
+*.key
+kaggle.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# training artifacts
+training/data/
+training/outputs/
+training/*.jsonl
+*.gguf
+*.safetensors
+*.zip
+
+# node / next
+node_modules/
+.next/
+out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# os
+.DS_Store
