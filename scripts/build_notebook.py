@@ -70,12 +70,23 @@ PKG  = WORK / "training"
 PKG.mkdir(parents=True, exist_ok=True)
 
 # The dataset is flat, so the package is reassembled here rather than copied.
+if not SRC.exists():
+    inputs = Path("/kaggle/input")
+    available = (sorted(p.name for p in inputs.iterdir())
+                 if inputs.exists() else [])
+    raise SystemExit(
+        f"\\nSTOP. {SRC} does not exist, so the dataset is not attached.\\n"
+        f"Inputs present: {available}\\n"
+        "FIX: sidebar -> + Add Input -> Datasets -> medical-ft-code. If it was "
+        "just uploaded, Kaggle may still have been processing it when this run "
+        "started; re-run once it reports ready.")
+
 modules = sorted(SRC.glob("*.py"))
 if not modules:
     raise SystemExit(
         f"\\nSTOP. No .py files in {SRC}.\\n"
         f"Contents: {sorted(p.name for p in SRC.iterdir())}\\n"
-        "FIX: check the medical-ft-code dataset is attached in the sidebar.")
+        "FIX: re-run scripts/push_kaggle.sh to refresh the dataset.")
 for src_file in modules:
     shutil.copy(src_file, PKG / src_file.name)
 (PKG / "__init__.py").touch()

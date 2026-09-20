@@ -39,6 +39,23 @@ else
   "$KAGGLE" datasets create -p "$STAGE" --dir-mode skip
 fi
 
+echo "==> waiting for the dataset to finish processing"
+# `datasets create` is asynchronous. Pushing the kernel before the dataset is
+# ready means Kaggle starts the run with nothing attached, and the notebook
+# dies at the code-fetch cell after burning a queue slot.
+for attempt in $(seq 1 60); do
+  status="$("$KAGGLE" datasets status "$USER/$SLUG" 2>&1 || true)"
+  case "$status" in
+    *ready*)  echo "    dataset ready"; break ;;
+    *error*)  echo "    dataset processing FAILED: $status"; exit 1 ;;
+  esac
+  if [ "$attempt" -eq 60 ]; then
+    echo "    dataset still not ready after 5 minutes: $status"
+    exit 1
+  fi
+  sleep 5
+done
+
 echo "==> pushing the notebook"
 "$KAGGLE" kernels push -p training
 
