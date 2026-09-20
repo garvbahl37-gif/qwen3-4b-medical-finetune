@@ -126,17 +126,6 @@ def main() -> None:
         model_name=BASE_MODEL, max_seq_length=args.max_seq,
         load_in_4bit=True, dtype=None,
     )
-
-    # TRL 0.24 validates SFTConfig.eos_token against the vocabulary, and under
-    # Unsloth's patching it arrives as the literal placeholder '<EOS_TOKEN>',
-    # which is not a real token. Resolve it from the tokenizer. Guarded by the
-    # same signature inspection as the other renames, so an older TRL without
-    # the field is unaffected.
-    eos_kwargs = {}
-    if "eos_token" in inspect.signature(SFTConfig.__init__).parameters:
-        eos_kwargs["eos_token"] = tok.eos_token
-    print(f"eos_token resolved to {tok.eos_token!r} (id {tok.eos_token_id})")
-
     model = FastLanguageModel.get_peft_model(
         model, r=args.rank, lora_alpha=args.rank, lora_dropout=0.0,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
@@ -175,30 +164,63 @@ def main() -> None:
                 raise SystemExit(message)
             print("projection fits the budget; continuing\n", flush=True)
 
+    # Build the config first, then force the EOS token onto the instance.
+    # Signature inspection is not reliable here: Unsloth patches SFTConfig, and
+    # inspecting a patched class describes the patch rather than the original.
+    # An earlier fix resolved '<|im_end|>' correctly and still passed TRL the
+    # unresolved placeholder '<EOS_TOKEN>', because the signature guard
+    # silently evaluated False against the patched __init__.
+    config = SFTConfig(
+        dataset_text_field="text",
+        per_device_train_batch_size=args.batch_size,
+        gradient_accumulation_steps=args.grad_accum,
+        num_train_epochs=args.epochs,
+        learning_rate=args.lr,
+        warmup_ratio=0.03,
+        lr_scheduler_type="cosine",
+        logging_steps=10,
+        save_steps=args.save_steps,
+        save_total_limit=2,
+        optim="adamw_8bit",
+        weight_decay=0.01,
+        fp16=not is_bfloat16_supported(),
+        bf16=is_bfloat16_supported(),
+        seed=42,
+        output_dir=str(args.out),
+        report_to="none",
+        **{max_seq_kwarg: args.max_seq},
+    )
+
+    eos = tok.eos_token
+    current = getattr(config, "eos_token", None)
+    if eos and current != eos:
+        try:
+            config.eos_token = eos
+        except Exception as exc:                      # frozen or property-backed
+            raise SystemExit(
+                f"\nSTOP. Could not set SFTConfig.eos_token: "
+                f"{type(exc).__name__}: {exc}\n"
+                f"Tokenizer EOS is {eos!r}; the config holds {current!r}.\n"
+                "FIX: TRL rejects a config whose eos_token is not in the "
+                "vocabulary, so this must be corrected before training.")
+
+    print(f"SFTConfig.eos_token = {getattr(config, 'eos_token', '<absent>')!r} "
+          f"(tokenizer EOS {eos!r}, id {tok.eos_token_id})")
+
+    # A silent no-op is exactly what cost the earlier run: the assignment
+    # above looked like it worked and TRL still saw the stale placeholder.
+    # Verify the instance actually holds what was just assigned to it.
+    if eos and getattr(config, "eos_token", None) != eos:
+        raise SystemExit(
+            f"\nSTOP. SFTConfig.eos_token is still "
+            f"{getattr(config, 'eos_token', None)!r} after assignment, "
+            f"not {eos!r}.\nFIX: TRL will reject this at trainer construction; "
+            "the assignment is being overridden somewhere.")
+
     trainer = SFTTrainer(
         model=model,
+        args=config,
         train_dataset=train_ds,
-        args=SFTConfig(
-            dataset_text_field="text",
-            per_device_train_batch_size=args.batch_size,
-            gradient_accumulation_steps=args.grad_accum,
-            num_train_epochs=args.epochs,
-            learning_rate=args.lr,
-            warmup_ratio=0.03,
-            lr_scheduler_type="cosine",
-            logging_steps=10,
-            save_steps=args.save_steps,
-            save_total_limit=2,
-            optim="adamw_8bit",
-            weight_decay=0.01,
-            fp16=not is_bfloat16_supported(),
-            bf16=is_bfloat16_supported(),
-            seed=42,
-            output_dir=str(args.out),
-            report_to="none",
-            **{max_seq_kwarg: args.max_seq},
-            **eos_kwargs,
-        ),
         callbacks=[Probe()],
         **{tokenizer_kwarg: tok},
     )
