@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import pytest
+
+from training.records import Record
 from training.sources import (
+    load,
     normalise_chatdoctor,
     normalise_medical_o1,
     normalise_medmcqa,
@@ -91,7 +95,7 @@ def test_medical_o1_keeps_the_chain_of_thought_as_the_rationale():
     assert "patent foramen ovale" in rec.response
 
 
-def test_chatdoctor_joins_instruction_and_input_into_the_question():
+def test_chatdoctor_builds_question_from_patient_input_only():
     raw = {
         "instruction": "If you are a doctor, answer based on the description.",
         "input": "I woke up feeling the room spinning and felt nauseous.",
@@ -108,3 +112,65 @@ def test_chatdoctor_drops_empty_turns():
         {"instruction": "x", "input": "", "output": "y"}, 0) is None
     assert normalise_chatdoctor(
         {"instruction": "x", "input": "y", "output": "  "}, 0) is None
+
+
+def _medmcqa_row(i: int, *, usable: bool = True) -> dict:
+    return {
+        "id": f"r{i}",
+        "question": f"Question number {i}?",
+        "opa": "one", "opb": "two", "opc": "three", "opd": "four",
+        "cop": i % 4,
+        "choice_type": "single" if usable else "multi",
+        "exp": "e" * 100,
+        "subject_name": "Anatomy",
+    }
+
+
+def _fetch(rows):
+    """Stand in for datasets.load_dataset so the sampling tests stay offline."""
+    return lambda hf_id, config, split: rows
+
+
+def test_load_returns_exactly_the_limit_when_enough_rows_survive():
+    rows = [_medmcqa_row(i) for i in range(200)]
+    got = load("medmcqa", limit=10, fetch=_fetch(rows))
+    assert len(got) == 10
+    assert all(isinstance(r, Record) for r in got)
+
+
+def test_load_stops_early_instead_of_scanning_the_whole_source():
+    rows = [_medmcqa_row(i) for i in range(500)]
+    assert len(load("medmcqa", limit=5, fetch=_fetch(rows))) == 5
+
+
+def test_load_raises_rather_than_silently_returning_short():
+    # Only 8 of 20 survive the filters. Asking for 15 must fail loudly: a
+    # training mix that comes up short reports a ratio it does not have.
+    rows = [_medmcqa_row(i, usable=i < 8) for i in range(20)]
+    with pytest.raises(SystemExit) as excinfo:
+        load("medmcqa", limit=15, fetch=_fetch(rows))
+    message = str(excinfo.value)
+    assert "8" in message
+    assert "--medmcqa" in message
+
+
+def test_load_with_limit_zero_returns_every_surviving_row():
+    rows = [_medmcqa_row(i, usable=i % 2 == 0) for i in range(20)]
+    assert len(load("medmcqa", limit=0, fetch=_fetch(rows))) == 10
+
+
+def test_load_is_deterministic_for_a_seed_and_varies_across_seeds():
+    rows = [_medmcqa_row(i) for i in range(200)]
+    first = [r.id for r in load("medmcqa", limit=10, fetch=_fetch(rows))]
+    again = [r.id for r in load("medmcqa", limit=10, fetch=_fetch(rows))]
+    other = [r.id for r in load("medmcqa", limit=10, seed=7, fetch=_fetch(rows))]
+    assert first == again
+    assert first != other
+
+
+def test_load_threads_require_rationale_through_to_the_normaliser():
+    rows = [dict(_medmcqa_row(i), exp="") for i in range(20)]
+    with pytest.raises(SystemExit):
+        load("medmcqa", limit=5, fetch=_fetch(rows))
+    assert len(load("medmcqa", limit=5, require_rationale=False,
+                    fetch=_fetch(rows))) == 5
