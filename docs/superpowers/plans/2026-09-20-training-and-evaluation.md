@@ -377,7 +377,9 @@ against fixture dictionaries. This is what keeps the suite fast and network-free
   - `sources.normalise_medical_o1(raw: dict, idx: int) -> Record | None`
   - `sources.normalise_chatdoctor(raw: dict, idx: int) -> Record | None`
   - `sources.MIN_RATIONALE_CHARS: int = 80`
-  - `sources.load(name: str, *, limit: int, seed: int = 42, split: str | None = None, require_rationale: bool = True) -> list[Record]`
+  - `sources.load(name: str, *, limit: int, seed: int = 42, split: str | None = None, require_rationale: bool = True, fetch=None) -> list[Record]`
+    — raises `SystemExit` when a non-zero `limit` cannot be met; `limit=0` means
+    every surviving row
   - `sources.SOURCES: dict[str, tuple[str, str, str]]` mapping short name to
     `(hf_id, config, default_split)`
 
@@ -388,7 +390,11 @@ Create `tests/test_sources.py`:
 ```python
 from __future__ import annotations
 
+import pytest
+
+from training.records import Record
 from training.sources import (
+    load,
     normalise_chatdoctor,
     normalise_medical_o1,
     normalise_medmcqa,
@@ -479,7 +485,7 @@ def test_medical_o1_keeps_the_chain_of_thought_as_the_rationale():
     assert "patent foramen ovale" in rec.response
 
 
-def test_chatdoctor_joins_instruction_and_input_into_the_question():
+def test_chatdoctor_builds_question_from_patient_input_only():
     raw = {
         "instruction": "If you are a doctor, answer based on the description.",
         "input": "I woke up feeling the room spinning and felt nauseous.",
@@ -496,6 +502,68 @@ def test_chatdoctor_drops_empty_turns():
         {"instruction": "x", "input": "", "output": "y"}, 0) is None
     assert normalise_chatdoctor(
         {"instruction": "x", "input": "y", "output": "  "}, 0) is None
+
+
+def _medmcqa_row(i: int, *, usable: bool = True) -> dict:
+    return {
+        "id": f"r{i}",
+        "question": f"Question number {i}?",
+        "opa": "one", "opb": "two", "opc": "three", "opd": "four",
+        "cop": i % 4,
+        "choice_type": "single" if usable else "multi",
+        "exp": "e" * 100,
+        "subject_name": "Anatomy",
+    }
+
+
+def _fetch(rows):
+    """Stand in for datasets.load_dataset so the sampling tests stay offline."""
+    return lambda hf_id, config, split: rows
+
+
+def test_load_returns_exactly_the_limit_when_enough_rows_survive():
+    rows = [_medmcqa_row(i) for i in range(200)]
+    got = load("medmcqa", limit=10, fetch=_fetch(rows))
+    assert len(got) == 10
+    assert all(isinstance(r, Record) for r in got)
+
+
+def test_load_stops_early_instead_of_scanning_the_whole_source():
+    rows = [_medmcqa_row(i) for i in range(500)]
+    assert len(load("medmcqa", limit=5, fetch=_fetch(rows))) == 5
+
+
+def test_load_raises_rather_than_silently_returning_short():
+    # Only 8 of 20 survive the filters. Asking for 15 must fail loudly: a
+    # training mix that comes up short reports a ratio it does not have.
+    rows = [_medmcqa_row(i, usable=i < 8) for i in range(20)]
+    with pytest.raises(SystemExit) as excinfo:
+        load("medmcqa", limit=15, fetch=_fetch(rows))
+    message = str(excinfo.value)
+    assert "8" in message
+    assert "--medmcqa" in message
+
+
+def test_load_with_limit_zero_returns_every_surviving_row():
+    rows = [_medmcqa_row(i, usable=i % 2 == 0) for i in range(20)]
+    assert len(load("medmcqa", limit=0, fetch=_fetch(rows))) == 10
+
+
+def test_load_is_deterministic_for_a_seed_and_varies_across_seeds():
+    rows = [_medmcqa_row(i) for i in range(200)]
+    first = [r.id for r in load("medmcqa", limit=10, fetch=_fetch(rows))]
+    again = [r.id for r in load("medmcqa", limit=10, fetch=_fetch(rows))]
+    other = [r.id for r in load("medmcqa", limit=10, seed=7, fetch=_fetch(rows))]
+    assert first == again
+    assert first != other
+
+
+def test_load_threads_require_rationale_through_to_the_normaliser():
+    rows = [dict(_medmcqa_row(i), exp="") for i in range(20)]
+    with pytest.raises(SystemExit):
+        load("medmcqa", limit=5, fetch=_fetch(rows))
+    assert len(load("medmcqa", limit=5, require_rationale=False,
+                    fetch=_fetch(rows))) == 5
 ```
 
 - [ ] **Step 2: Run it and confirm it fails**
@@ -624,12 +692,28 @@ _NORMALISERS = {
 
 
 def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
-         require_rationale: bool = True) -> list[Record]:
-    """Fetch a source from the Hub and normalise it. Requires network."""
-    from datasets import load_dataset  # imported here so tests stay offline
+         require_rationale: bool = True, fetch=None) -> list[Record]:
+    """Fetch a source from the Hub and normalise it.
 
+    `limit=0` means every row that survives the filters, and is what the
+    held-out benchmarks use. Any other limit is a requirement rather than
+    a ceiling: if the filters cannot produce that many rows this raises,
+    because a training mix that quietly comes up short goes on to report
+    a mixture ratio the data does not have.
+
+    `fetch` exists so the sampling can be tested without a network; it
+    takes (hf_id, config, split) and returns an indexable sequence of raw
+    rows. Production callers leave it None.
+    """
     hf_id, config, default_split = SOURCES[name]
-    ds = load_dataset(hf_id, config, split=split or default_split)
+
+    if fetch is None:
+        from datasets import load_dataset  # imported here so tests stay offline
+
+        def fetch(hf_id: str, config: str, split: str):
+            return load_dataset(hf_id, config, split=split)
+
+    ds = fetch(hf_id, config, split or default_split)
 
     order = list(range(len(ds)))
     random.Random(seed).shuffle(order)
@@ -648,13 +732,21 @@ def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
 
     rate = len(kept) / seen if seen else 0.0
     print(f"  {name:<12} kept {len(kept):>6,} of {seen:>6,} inspected ({rate:.1%})")
+
+    if limit and len(kept) < limit:
+        raise SystemExit(
+            f"\nSTOP. {name} yielded only {len(kept):,} usable rows of "
+            f"{len(ds):,} inspected, but {limit:,} were requested.\n"
+            f"FIX: lower --{name.replace('_', '-')} to {len(kept):,} or below, "
+            f"or use a larger split."
+        )
     return kept
 ```
 
 - [ ] **Step 4: Run the tests and confirm they pass**
 
 Run: `.venv/bin/python -m pytest tests/test_sources.py -q`
-Expected: PASS, 11 passed.
+Expected: PASS, 17 passed.
 
 - [ ] **Step 5: Verify the normalisers against the real Hub data**
 
@@ -1483,7 +1575,7 @@ Expected: PASS, 3 passed.
 - [ ] **Step 5: Confirm the whole suite still passes**
 
 Run: `.venv/bin/python -m pytest -q`
-Expected: PASS, 70 passed. No test requires a GPU or network.
+Expected: PASS, 76 passed. No test requires a GPU or network.
 
 - [ ] **Step 6: Commit**
 
@@ -1770,7 +1862,7 @@ print('no GPU-only import at module scope:', sorted(names))
 .venv/bin/python -m pytest -q
 ```
 
-Expected: the confirmation line, then PASS, 75 passed.
+Expected: the confirmation line, then PASS, 81 passed.
 
 - [ ] **Step 7: Commit**
 
