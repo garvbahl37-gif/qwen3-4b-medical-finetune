@@ -116,12 +116,28 @@ _NORMALISERS = {
 
 
 def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
-         require_rationale: bool = True) -> list[Record]:
-    """Fetch a source from the Hub and normalise it. Requires network."""
-    from datasets import load_dataset  # imported here so tests stay offline
+         require_rationale: bool = True, fetch=None) -> list[Record]:
+    """Fetch a source from the Hub and normalise it.
 
+    `limit=0` means every row that survives the filters, and is what the
+    held-out benchmarks use. Any other limit is a requirement rather than
+    a ceiling: if the filters cannot produce that many rows this raises,
+    because a training mix that quietly comes up short goes on to report
+    a mixture ratio the data does not have.
+
+    `fetch` exists so the sampling can be tested without a network; it
+    takes (hf_id, config, split) and returns an indexable sequence of raw
+    rows. Production callers leave it None.
+    """
     hf_id, config, default_split = SOURCES[name]
-    ds = load_dataset(hf_id, config, split=split or default_split)
+
+    if fetch is None:
+        from datasets import load_dataset  # imported here so tests stay offline
+
+        def fetch(hf_id: str, config: str, split: str):
+            return load_dataset(hf_id, config, split=split)
+
+    ds = fetch(hf_id, config, split or default_split)
 
     order = list(range(len(ds)))
     random.Random(seed).shuffle(order)
@@ -140,4 +156,12 @@ def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
 
     rate = len(kept) / seen if seen else 0.0
     print(f"  {name:<12} kept {len(kept):>6,} of {seen:>6,} inspected ({rate:.1%})")
+
+    if limit and len(kept) < limit:
+        raise SystemExit(
+            f"\nSTOP. {name} yielded only {len(kept):,} usable rows of "
+            f"{len(ds):,} inspected, but {limit:,} were requested.\n"
+            f"FIX: lower --{name.replace('_', '-')} to {len(kept):,} or below, "
+            f"or use a larger split."
+        )
     return kept
