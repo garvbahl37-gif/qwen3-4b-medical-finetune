@@ -16,9 +16,12 @@ command -v "$KAGGLE" >/dev/null || { echo "kaggle CLI not found at $KAGGLE"; exi
 
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
-mkdir -p "$STAGE/training"
-cp training/*.py "$STAGE/training/"
-cp training/requirements.txt "$STAGE/training/"
+# Flat, no subdirectories: --dir-mode's "zip" would upload training/ as
+# training.zip, and whether Kaggle extracts that back into a directory is not
+# something worth discovering during a six-hour GPU run. The notebook
+# reassembles the package itself.
+cp training/*.py "$STAGE/"
+cp training/requirements.txt "$STAGE/"
 
 cat > "$STAGE/dataset-metadata.json" <<JSON
 {
@@ -30,10 +33,10 @@ JSON
 
 if "$KAGGLE" datasets status "$USER/$SLUG" >/dev/null 2>&1; then
   echo "==> updating dataset $USER/$SLUG"
-  "$KAGGLE" datasets version -p "$STAGE" -m "code update $(date -u +%FT%TZ)" --dir-mode zip
+  "$KAGGLE" datasets version -p "$STAGE" -m "code update $(date -u +%FT%TZ)" --dir-mode skip
 else
   echo "==> creating dataset $USER/$SLUG"
-  "$KAGGLE" datasets create -p "$STAGE" --dir-mode zip
+  "$KAGGLE" datasets create -p "$STAGE" --dir-mode skip
 fi
 
 echo "==> pushing the notebook"

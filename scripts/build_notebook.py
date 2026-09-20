@@ -66,12 +66,31 @@ from pathlib import Path
 
 SRC  = Path("/kaggle/input/medical-ft-code")
 WORK = Path("/kaggle/working/ft")
-WORK.mkdir(parents=True, exist_ok=True)
-shutil.copytree(SRC / "training", WORK / "training", dirs_exist_ok=True)
-(WORK / "training" / "__init__.py").touch()
+PKG  = WORK / "training"
+PKG.mkdir(parents=True, exist_ok=True)
+
+# The dataset is flat, so the package is reassembled here rather than copied.
+modules = sorted(SRC.glob("*.py"))
+if not modules:
+    raise SystemExit(
+        f"\\nSTOP. No .py files in {SRC}.\\n"
+        f"Contents: {sorted(p.name for p in SRC.iterdir())}\\n"
+        "FIX: check the medical-ft-code dataset is attached in the sidebar.")
+for src_file in modules:
+    shutil.copy(src_file, PKG / src_file.name)
+(PKG / "__init__.py").touch()
+
 os.chdir(WORK)
 sys.path.insert(0, str(WORK))
-print("cwd:", os.getcwd(), "|", len(list((WORK / "training").glob("*.py"))), "modules")
+print("cwd:", os.getcwd(), "|", len(list(PKG.glob("*.py"))), "modules:",
+      ", ".join(sorted(p.stem for p in PKG.glob("*.py"))))
+
+required = {"records", "prompts", "sources", "prepare_data",
+            "check_lengths", "budget", "train"}
+missing = required - {p.stem for p in PKG.glob("*.py")}
+if missing:
+    raise SystemExit(f"\\nSTOP. Missing modules: {sorted(missing)}\\n"
+                     "FIX: re-run scripts/push_kaggle.sh to refresh the dataset.")
 
 # A failing `!python x.py` returns non-zero but does not raise in Jupyter, so the
 # notebook would sail past a dead step and fail later somewhere confusing.
