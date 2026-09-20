@@ -27,11 +27,15 @@ def test_pick_kwarg_prefers_the_first_candidate_when_both_are_accepted():
     assert pick_kwarg(both_init, "tokenizer", "processing_class") == "tokenizer"
 
 
-def test_pick_kwarg_falls_back_to_the_first_candidate_under_a_kwargs_catchall():
+def test_pick_kwarg_raises_even_under_a_kwargs_catchall_when_neither_name_is_declared():
+    # A **kwargs catch-all would silently swallow a value under a third,
+    # unrecognised name -- exactly the rename this function exists to catch
+    # loudly instead. There must be no fallback through it.
     def catchall_init(self, *args, **kwargs):
         pass
 
-    assert pick_kwarg(catchall_init, "processing_class", "tokenizer") == "processing_class"
+    with pytest.raises(TypeError):
+        pick_kwarg(catchall_init, "processing_class", "tokenizer")
 
 
 def test_pick_kwarg_raises_a_clear_error_when_neither_name_is_accepted():

@@ -32,13 +32,17 @@ def pick_kwarg(func, *candidates: str) -> str:
     Raises TypeError immediately, with the candidates and the real
     parameter names, if none match -- loud and in the first second, rather
     than a cryptic error from deep inside TRL after the model has loaded.
+
+    There is deliberately no `**kwargs` catch-all fallback: this exists
+    precisely to catch TRL renaming a field to a name not in `candidates`,
+    and a catch-all would swallow that exact case silently -- the value
+    would be accepted by the call and consumed by nothing, which is a
+    silent wrong-training bug worse than the one this function prevents.
     """
     params = inspect.signature(func).parameters
     for name in candidates:
         if name in params:
             return name
-    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()):
-        return candidates[0]
     raise TypeError(
         f"none of {candidates!r} are accepted by {func!r}; "
         f"it takes {sorted(params)!r}"
@@ -55,6 +59,40 @@ def build_dataset(path: Path, tok):
         for row in rows
     ]
     return Dataset.from_dict({"text": texts})
+
+
+def verify_masking(trainer, tok) -> None:
+    """Prove the completion-only mask did something before spending six hours.
+
+    Unsloth matches the markers against tokenised subsequences. If that match
+    fails it masks nothing, silently: training still runs, still finishes inside
+    budget, and still produces an adapter -- just a worse one, with nothing
+    anywhere to say why.
+    """
+    try:
+        rows = [trainer.train_dataset[i] for i in range(2)]
+        labels = trainer.data_collator(rows)["labels"][0]
+        masked = int((labels == -100).sum())
+        trained = int((labels != -100).sum())
+    except Exception as exc:
+        raise SystemExit(
+            f"\nSTOP. Could not verify completion-only masking: "
+            f"{type(exc).__name__}: {exc}\n"
+            "FIX: investigate rather than skipping -- this check is the only "
+            "evidence the mask works.")
+
+    if masked == 0 or trained == 0:
+        raise SystemExit(
+            f"\nSTOP. Completion-only masking did nothing usable: "
+            f"{masked} masked, {trained} trained.\n"
+            "The markers did not match the tokenised sequence, so the model "
+            "would train on the prompt as well as the response.\n"
+            f"FIX: print tok.apply_chat_template(...) for one example and "
+            f"correct RESPONSE_MARKER / INSTRUCTION_MARKER.")
+
+    preview = tok.decode([t for t in labels.tolist() if t != -100][:40])
+    print(f"masking verified: {masked:,} tokens masked, {trained:,} trained")
+    print(f"  first trained tokens: {preview!r}")
 
 
 def main() -> None:
@@ -77,6 +115,13 @@ def main() -> None:
     from unsloth import FastLanguageModel, is_bfloat16_supported
     from unsloth.chat_templates import train_on_responses_only
 
+    # TRL has renamed both of these between versions; pick whichever name the
+    # installed SFTTrainer/SFTConfig actually accepts now, before spending
+    # minutes on the model download and dataset tokenisation below. A third,
+    # unrecognised rename must fail here, loudly, not after all that work.
+    tokenizer_kwarg = pick_kwarg(SFTTrainer.__init__, "processing_class", "tokenizer")
+    max_seq_kwarg = pick_kwarg(SFTConfig.__init__, "max_seq_length", "max_length")
+
     model, tok = FastLanguageModel.from_pretrained(
         model_name=BASE_MODEL, max_seq_length=args.max_seq,
         load_in_4bit=True, dtype=None,
@@ -88,19 +133,27 @@ def main() -> None:
         use_gradient_checkpointing="unsloth", random_state=42,
     )
 
+    # Evaluation now runs in its own, separate Kaggle notebook, and no
+    # eval_strategy is set here, so a val split would be tokenised and never
+    # consulted. Only the training set is built.
     train_ds = build_dataset(args.data / "train.jsonl", tok)
-    val_ds = build_dataset(args.data / "val.jsonl", tok)
-    print(f"train {len(train_ds):,}   val {len(val_ds):,}   max_seq {args.max_seq}")
+    print(f"train {len(train_ds):,}   max_seq {args.max_seq}")
 
     class Probe(TrainerCallback):
         """Abort at --probe-steps if the run will not fit the budget."""
 
         def __init__(self) -> None:
             self.started = time.time()
+            self.fired = False
 
         def on_step_end(self, cfg, state, control, **kw):
-            if state.global_step != args.probe_steps:
+            # >= rather than ==, with a one-shot guard: a run with fewer
+            # total steps than --probe-steps would never hit the equality,
+            # and would then train with no budget check at all while
+            # appearing to be guarded.
+            if self.fired or state.global_step < args.probe_steps:
                 return
+            self.fired = True
             proj = project(state.global_step, int(time.time() - self.started),
                            int(state.max_steps))
             print(f"\nprobe: {proj['seconds_per_step']:.2f}s/step, "
@@ -111,15 +164,9 @@ def main() -> None:
                 raise SystemExit(message)
             print("projection fits the budget; continuing\n", flush=True)
 
-    # TRL has renamed both of these between versions; pick whichever name
-    # the installed SFTTrainer/SFTConfig actually accepts rather than
-    # hardcoding one. See pick_kwarg's docstring.
-    tokenizer_kwarg = pick_kwarg(SFTTrainer.__init__, "processing_class", "tokenizer")
-    max_seq_kwarg = pick_kwarg(SFTConfig.__init__, "max_seq_length", "max_length")
-
     trainer = SFTTrainer(
         model=model,
-        train_dataset=train_ds, eval_dataset=val_ds,
+        train_dataset=train_ds,
         args=SFTConfig(
             dataset_text_field="text",
             per_device_train_batch_size=args.batch_size,
@@ -147,6 +194,8 @@ def main() -> None:
     # Mask the prompt so gradient is spent only on the response.
     trainer = train_on_responses_only(
         trainer, instruction_part=INSTRUCTION_MARKER, response_part=RESPONSE_MARKER)
+
+    verify_masking(trainer, tok)
 
     resume = any(args.out.glob("checkpoint-*")) if args.out.exists() else False
     if resume:
