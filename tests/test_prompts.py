@@ -66,6 +66,10 @@ def test_dialogue_uses_the_chat_system_prompt_not_the_mcq_one():
         ("A 23-year-old woman presents. The answer is B.", "B"),
         ("The correct option is D.", "D"),
         ("Reasoning about Vitamin C and Hepatitis A.\n\nAnswer: B", "B"),
+        ("The correct answer here would be C.", "C"),
+        ("Given the findings, C is the correct choice.", "C"),
+        ("So my final choice would be C", "C"),
+        ("Vitamin D is the best option for this patient's deficiency.", "D"),
     ],
 )
 def test_extract_letter_is_lenient_about_format(text, expected):
@@ -88,6 +92,8 @@ def test_extract_letter_prefers_an_explicit_answer_line_over_a_stray_letter():
         "The patient has blood group A and is Rh negative.",
         "I am uncertain, but this could relate to A or B depending on labs.",
         "A 45-year-old man presents with acute chest pain radiating to the jaw.",
+        "The correct management of pneumonia requires antibiotics.",
+        "Choose wisely when interpreting serology results.",
     ],
 )
 def test_extract_letter_refuses_to_invent_an_answer_from_clinical_prose(text):

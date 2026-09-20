@@ -19,16 +19,18 @@ SYSTEM_CHAT = (
     "their description warrants it."
 )
 
-# Leniency is anchored to answer-indicating language rather than "the first
-# A-D anywhere". The base model wraps answers in prose, and the earlier
-# unanchored form returned "A" for "A 45-year-old man ... choice C." —
-# medical vignettes open that way, and "Vitamin D" / "Hepatitis B" /
-# "blood group A" are everywhere in this domain.
-_ANSWER_LINE = re.compile(
-    r"(?:answer|option|choice|select(?:ed)?|correct)\b[^A-Za-z0-9\n]{0,10}"
-    r"(?:(?:is|was|:)[^A-Za-z0-9\n]{0,5})?([A-D])(?![A-Za-z])",
-    re.IGNORECASE,
-)
+# Cue words that mark a stated answer. Leniency is anchored to these rather
+# than to "the first A-D anywhere": the unanchored form returned "A" for
+# "A 45-year-old man ... choice C.", and medical vignettes open that way.
+_CUE = r"(?:answers?|options?|choice|choose|select(?:ed)?|correct|best)"
+# Forward: cue then letter ("the correct option is D").
+_CUE_THEN_LETTER = re.compile(
+    _CUE + r"\b[^\n]{0,28}?\b([A-D])\b(?![A-Za-z])", re.IGNORECASE)
+# Reverse: letter then cue ("C is the correct choice"). Without this the
+# extractor misses the base model, whose phrasing varies most -- and
+# understating the base score would flatter the fine-tune.
+_LETTER_THEN_CUE = re.compile(
+    r"\b([A-D])\b[^\n]{0,28}?\b" + _CUE + r"\b", re.IGNORECASE)
 # A letter standing alone as the final line: "C", "(C)", "C."
 _FINAL_BARE = re.compile(r"^\s*\(?([A-D])[).:]?\s*$")
 # A final line that opens with a choice marker: "C) Vitamin D"
@@ -70,17 +72,19 @@ def extract_letter(text: str) -> str | None:
     correctness would distort the base-vs-tuned comparison. But a letter
     guessed from prose that states no answer is worse than no answer at
     all: it is indistinguishable from a real one in the aggregate, while
-    None costs both models equally. So the fallback only fires on the
-    last non-empty line, and only when that line is itself a choice.
+    None costs both models equally.
 
-    The last explicit match wins, because a model that reconsiders states
-    its conclusion last.
+    So a letter counts only with evidence: a cue word within 28 characters
+    of a standalone letter, in either order, or a final line that is
+    itself a choice. The last match wins, because a model that reconsiders
+    states its conclusion last.
     """
     if not text:
         return None
-    matches = _ANSWER_LINE.findall(text)
-    if matches:
-        return matches[-1].upper()
+    for pattern in (_CUE_THEN_LETTER, _LETTER_THEN_CUE):
+        matches = pattern.findall(text)
+        if matches:
+            return matches[-1].upper()
     lines = [line for line in text.splitlines() if line.strip()]
     if lines:
         for pattern in (_FINAL_BARE, _FINAL_MARKER):
