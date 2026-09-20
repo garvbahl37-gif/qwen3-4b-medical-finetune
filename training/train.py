@@ -234,11 +234,14 @@ def main() -> None:
 
     # If eos_token still isn't right by the time SFTTrainer validates it, this
     # is the evidence that answers why in one pass instead of another round.
-    import trl as _trl
-    print(f"trl {_trl.__version__}")
-    print(f"SFTConfig class: {SFTConfig.__module__}.{SFTConfig.__qualname__}")
-    print(f"config is an instance of it: {isinstance(config, SFTConfig)}")
-    print(f"config.eos_token = {getattr(config, 'eos_token', '<absent>')!r}")
+    try:
+        import trl as _trl
+        print(f"trl {getattr(_trl, '__version__', 'unknown')}")
+        print(f"SFTConfig class: {SFTConfig.__module__}.{SFTConfig.__qualname__}")
+        print(f"config is an instance of it: {isinstance(config, SFTConfig)}")
+        print(f"config.eos_token = {getattr(config, 'eos_token', '<absent>')!r}")
+    except Exception as exc:  # diagnostics must never be the thing that fails
+        print(f"(diagnostics unavailable: {type(exc).__name__}: {exc})")
 
     trainer = SFTTrainer(
         model=model,
