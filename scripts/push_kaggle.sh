@@ -44,4 +44,4 @@ echo "==> pushing the notebook"
 
 echo
 echo "Open it, set Accelerator to GPU T4 x2 and Internet On, then Save & Run All:"
-echo "  https://www.kaggle.com/code/$USER/qwen3-4b-medical-fine-tune"
+echo "  https://www.kaggle.com/code/$USER/qwen3-4b-medical-fine-tune-training"
