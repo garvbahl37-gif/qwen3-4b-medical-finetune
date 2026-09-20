@@ -61,6 +61,16 @@ def test_medmcqa_drops_rows_with_a_blank_option():
     assert normalise_medmcqa(dict(GOOD_MEDMCQA, opb=""), 0) is None
 
 
+def test_medmcqa_keeps_multi_choice_rows_when_single_choice_is_not_required():
+    # Training drops these as noisy. Evaluation must keep them: scoring a
+    # filtered subset of MedMCQA validation would not be comparable to any
+    # published MedMCQA number.
+    raw = dict(GOOD_MEDMCQA, choice_type="multi")
+    assert normalise_medmcqa(raw, 0) is None
+    rec = normalise_medmcqa(raw, 0, require_single_choice=False)
+    assert rec is not None and rec.answer == "C"
+
+
 def test_medqa_uses_its_own_answer_idx():
     raw = {
         "question": "A 23-year-old pregnant woman presents with dysuria.",
@@ -173,4 +183,12 @@ def test_load_threads_require_rationale_through_to_the_normaliser():
     with pytest.raises(SystemExit):
         load("medmcqa", limit=5, fetch=_fetch(rows))
     assert len(load("medmcqa", limit=5, require_rationale=False,
+                    fetch=_fetch(rows))) == 5
+
+
+def test_load_threads_require_single_choice_through_to_the_normaliser():
+    rows = [dict(_medmcqa_row(i), choice_type="multi") for i in range(20)]
+    with pytest.raises(SystemExit):
+        load("medmcqa", limit=5, fetch=_fetch(rows))
+    assert len(load("medmcqa", limit=5, require_single_choice=False,
                     fetch=_fetch(rows))) == 5

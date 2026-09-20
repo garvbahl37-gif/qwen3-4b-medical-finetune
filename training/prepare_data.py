@@ -57,7 +57,7 @@ def main() -> None:
     holdouts = (
         load("medqa", limit=0, seed=args.seed, split="test")
         + load("medmcqa", limit=0, seed=args.seed, split="validation",
-               require_rationale=False)
+               require_rationale=False, require_single_choice=False)
     )
     print(f"  holdout pool: {len(holdouts):,} questions\n")
 
