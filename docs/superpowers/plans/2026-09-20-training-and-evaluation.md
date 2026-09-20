@@ -1110,7 +1110,12 @@ def main() -> None:
     lengths = []
     for row in rows:
         msgs = build_messages(Record.from_dict(row), with_answer=True)
-        lengths.append(len(tok.apply_chat_template(msgs, tokenize=True)))
+        # return_dict=False is load-bearing. transformers 5.x returns a
+        # BatchEncoding here, so len() would count its dict keys -- 2 -- rather
+        # than tokens. That yields p99=2, a suggested max_seq of 64, and a
+        # training run that truncates every example to fragments without error.
+        lengths.append(
+            len(tok.apply_chat_template(msgs, tokenize=True, return_dict=False)))
 
     stats = summarise(lengths)
     print(f"tokens  n={stats['n']:,}  median={stats['median']}  "
