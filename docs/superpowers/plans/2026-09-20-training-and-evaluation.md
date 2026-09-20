@@ -600,10 +600,14 @@ def _clean(value) -> str:
 
 
 def normalise_medmcqa(raw: dict, idx: int, *,
-                      require_rationale: bool = True) -> Record | None:
+                      require_rationale: bool = True,
+                      require_single_choice: bool = True) -> Record | None:
     # MedMCQA marks a third of its rows choice_type != "single" while still
-    # exposing a single `cop` index. Those are the known-noisy rows; drop them.
-    if _clean(raw.get("choice_type")).lower() != "single":
+    # exposing a single `cop` index. Those are the known-noisy rows, so training
+    # drops them. Evaluation keeps them: scoring 2,858 of the 4,183 published
+    # validation questions would make the number incomparable to every reported
+    # MedMCQA figure, and the noise costs base and tuned alike.
+    if require_single_choice and _clean(raw.get("choice_type")).lower() != "single":
         return None
 
     options = {letter: _clean(raw.get(f"op{letter.lower()}")) for letter in LETTERS}
@@ -692,7 +696,8 @@ _NORMALISERS = {
 
 
 def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
-         require_rationale: bool = True, fetch=None) -> list[Record]:
+         require_rationale: bool = True, require_single_choice: bool = True,
+         fetch=None) -> list[Record]:
     """Fetch a source from the Hub and normalise it.
 
     `limit=0` means every row that survives the filters, and is what the
@@ -719,7 +724,11 @@ def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
     random.Random(seed).shuffle(order)
 
     normalise = _NORMALISERS[name]
-    extra = {"require_rationale": require_rationale} if name == "medmcqa" else {}
+    extra = (
+        {"require_rationale": require_rationale,
+         "require_single_choice": require_single_choice}
+        if name == "medmcqa" else {}
+    )
     kept: list[Record] = []
     seen = 0
     for idx in order:
@@ -746,7 +755,7 @@ def load(name: str, *, limit: int, seed: int = 42, split: str | None = None,
 - [ ] **Step 4: Run the tests and confirm they pass**
 
 Run: `.venv/bin/python -m pytest tests/test_sources.py -q`
-Expected: PASS, 17 passed.
+Expected: PASS, 19 passed.
 
 - [ ] **Step 5: Verify the normalisers against the real Hub data**
 
@@ -912,7 +921,7 @@ def main() -> None:
     holdouts = (
         load("medqa", limit=0, seed=args.seed, split="test")
         + load("medmcqa", limit=0, seed=args.seed, split="validation",
-               require_rationale=False)
+               require_rationale=False, require_single_choice=False)
     )
     print(f"  holdout pool: {len(holdouts):,} questions\n")
 
@@ -1575,7 +1584,7 @@ Expected: PASS, 3 passed.
 - [ ] **Step 5: Confirm the whole suite still passes**
 
 Run: `.venv/bin/python -m pytest -q`
-Expected: PASS, 76 passed. No test requires a GPU or network.
+Expected: PASS, 78 passed. No test requires a GPU or network.
 
 - [ ] **Step 6: Commit**
 
@@ -1862,7 +1871,7 @@ print('no GPU-only import at module scope:', sorted(names))
 .venv/bin/python -m pytest -q
 ```
 
-Expected: the confirmation line, then PASS, 81 passed.
+Expected: the confirmation line, then PASS, 83 passed.
 
 - [ ] **Step 7: Commit**
 
