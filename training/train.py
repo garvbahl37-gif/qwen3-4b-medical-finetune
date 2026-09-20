@@ -110,10 +110,15 @@ def main() -> None:
     p.add_argument("--probe-steps", type=int, default=50)
     args = p.parse_args()
 
-    from transformers import TrainerCallback
-    from trl import SFTConfig, SFTTrainer
+    # Unsloth patches trl and transformers at import time and must come first.
+    # Importing trl first binds the unpatched classes, so the SFTConfig we
+    # build is not the class SFTTrainer validates against -- an earlier fix
+    # set eos_token to '<|im_end|>' successfully and TRL still read its own
+    # default, because it was validating a different SFTConfig class.
     from unsloth import FastLanguageModel, is_bfloat16_supported
     from unsloth.chat_templates import train_on_responses_only
+    from transformers import TrainerCallback
+    from trl import SFTConfig, SFTTrainer
 
     # TRL has renamed both of these between versions; pick whichever name the
     # installed SFTTrainer/SFTConfig actually accepts now, before spending
@@ -164,13 +169,11 @@ def main() -> None:
                 raise SystemExit(message)
             print("projection fits the budget; continuing\n", flush=True)
 
-    # Build the config first, then force the EOS token onto the instance.
-    # Signature inspection is not reliable here: Unsloth patches SFTConfig, and
-    # inspecting a patched class describes the patch rather than the original.
-    # An earlier fix resolved '<|im_end|>' correctly and still passed TRL the
-    # unresolved placeholder '<EOS_TOKEN>', because the signature guard
-    # silently evaluated False against the patched __init__.
-    config = SFTConfig(
+    # Pass eos_token in the constructor, unconditionally, with a fallback for
+    # an older TRL that has no such field. Not guarded by signature
+    # inspection: that already failed once, silently, against a class
+    # Unsloth had patched.
+    config_kwargs = dict(
         dataset_text_field="text",
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
@@ -190,7 +193,19 @@ def main() -> None:
         report_to="none",
         **{max_seq_kwarg: args.max_seq},
     )
+    try:
+        config = SFTConfig(**config_kwargs, eos_token=tok.eos_token)
+    except TypeError:
+        # older TRL has no such field; the instance assignment below covers it
+        config = SFTConfig(**config_kwargs)
 
+    # Still force it onto the instance afterward. Signature inspection is not
+    # reliable here: Unsloth patches SFTConfig, and inspecting a patched class
+    # describes the patch rather than the original. An earlier fix resolved
+    # '<|im_end|>' correctly and still passed TRL the unresolved placeholder
+    # '<EOS_TOKEN>', because the signature guard silently evaluated False
+    # against the patched __init__, and even the constructor kwarg above is
+    # not proven sufficient on its own -- see the diagnostics below.
     eos = tok.eos_token
     current = getattr(config, "eos_token", None)
     if eos and current != eos:
@@ -216,6 +231,14 @@ def main() -> None:
             f"{getattr(config, 'eos_token', None)!r} after assignment, "
             f"not {eos!r}.\nFIX: TRL will reject this at trainer construction; "
             "the assignment is being overridden somewhere.")
+
+    # If eos_token still isn't right by the time SFTTrainer validates it, this
+    # is the evidence that answers why in one pass instead of another round.
+    import trl as _trl
+    print(f"trl {_trl.__version__}")
+    print(f"SFTConfig class: {SFTConfig.__module__}.{SFTConfig.__qualname__}")
+    print(f"config is an instance of it: {isinstance(config, SFTConfig)}")
+    print(f"config.eos_token = {getattr(config, 'eos_token', '<absent>')!r}")
 
     trainer = SFTTrainer(
         model=model,
