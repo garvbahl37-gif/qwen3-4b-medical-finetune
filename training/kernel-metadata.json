@@ -1,0 +1,15 @@
+{
+  "id": "gb1105/qwen3-4b-medical-fine-tune",
+  "title": "Qwen3-4B Medical Fine-tune (training)",
+  "code_file": "kaggle_medical.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": ["gb1105/medical-ft-code"],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
