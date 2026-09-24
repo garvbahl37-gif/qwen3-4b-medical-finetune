@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import argparse
-import gc
+import contextlib
 import json
+import math
+import time
 from pathlib import Path
 
 from training.evalcore import paired_report
-from training.prompts import LETTERS, build_messages, extract_letter
+from training.modeling import DEFAULT_BASE, load_model, release_memory
+from training.prompts import LETTERS, extract_letter, render_inference_prompt
 from training.records import Record
-
-BASE_MODEL = "unsloth/Qwen3-4B-unsloth-bnb-4bit"
 
 # Confirmed on a real Kaggle run. MedQA-USMLE test yields its full 1,273 rows
 # under load()'s defaults. MedMCQA validation yields its full 4,183 only when
@@ -40,12 +41,19 @@ def letter_token_ids(tok) -> dict[str, int]:
 
 
 def pick_from_logits(logits_row, letter_ids: dict[str, int]) -> str:
-    """Argmax restricted to the four answer letters. Ties go to the earliest."""
+    """Argmax restricted to the four answer letters. Ties go to the earliest.
+
+    Refuses non-finite scores. float16 overflow on a T4 turns logits into inf
+    or nan, and argmax over those silently returns the first letter for every
+    question -- a plausible-looking accuracy that measures nothing.
+    """
+    scores = {letter: float(logits_row[letter_ids[letter]]) for letter in LETTERS}
+    if not all(math.isfinite(s) for s in scores.values()):
+        raise FloatingPointError(f"non-finite letter logits {scores}")
     best, best_score = None, None
     for letter in LETTERS:
-        score = float(logits_row[letter_ids[letter]])
-        if best_score is None or score > best_score:
-            best, best_score = letter, score
+        if best_score is None or scores[letter] > best_score:
+            best, best_score = letter, scores[letter]
     return best
 
 
@@ -118,63 +126,103 @@ def require_aligned(recs: list[Record], base_preds: list, tuned_preds: list,
         )
 
 
-def _load(adapter: str | None, max_seq: int):
-    from unsloth import FastLanguageModel
-
-    model, tok = FastLanguageModel.from_pretrained(
-        model_name=adapter or BASE_MODEL,
-        max_seq_length=max_seq, load_in_4bit=True, dtype=None,
-    )
-    FastLanguageModel.for_inference(model)
-    return model, tok
+def batched(items: list, size: int) -> list[list]:
+    if size < 1:
+        raise ValueError(f"batch size must be at least 1, got {size}")
+    return [items[i:i + size] for i in range(0, len(items), size)]
 
 
-def score_constrained(model, tok, recs: list[Record]) -> list[str]:
+def _require_left_padding(tok) -> None:
+    if getattr(tok, "padding_side", "left") != "left":
+        raise SystemExit(
+            "\nSTOP. The tokenizer pads on the right. Batched scoring reads the "
+            "final position, which right padding fills with a pad token for "
+            "every shorter sequence.\nFIX: load through training.modeling."
+            "load_model, which sets padding_side='left'.")
+
+
+def score_constrained(model, tok, recs: list[Record], *, batch_size: int = 16
+                      ) -> list[str]:
+    """One forward pass per batch; compare the four letter logits.
+
+    Position ids are derived from the attention mask so a left-padded
+    sequence sees the same positions it would see alone, and only the last
+    position's logits are materialised -- the full vocabulary at every
+    position would be 4GB per batch of 16 on a T4.
+    """
+    _require_left_padding(tok)
     import torch
 
     ids = letter_token_ids(tok)
     out: list[str] = []
-    for rec in recs:
-        msgs = build_messages(rec, with_answer=False)
-        text = tok.apply_chat_template(msgs, tokenize=False,
-                                       add_generation_prompt=True) + "Answer:"
-        batch = tok(text, return_tensors="pt").to(model.device)
+    for group in batched(recs, batch_size):
+        texts = [render_inference_prompt(tok, r, answer_prefix=True) for r in group]
+        enc = tok(texts, return_tensors="pt", padding=True,
+                  add_special_tokens=False).to(model.device)
+        positions = (enc["attention_mask"].long().cumsum(-1) - 1).clamp(min=0)
         with torch.no_grad():
-            logits = model(**batch).logits[0, -1]
-        out.append(pick_from_logits(logits, ids))
+            last = model(**enc, position_ids=positions,
+                         logits_to_keep=1).logits[:, -1, :]
+        for row in last:
+            try:
+                out.append(pick_from_logits(row, ids))
+            except FloatingPointError as exc:
+                raise SystemExit(
+                    f"\nSTOP. {exc}.\nHalf precision overflowed, so every "
+                    "prediction from here on would be meaningless.\n"
+                    "FIX: re-run with --device cpu, which runs in float32.")
     return out
 
 
-def score_generative(model, tok, recs: list[Record], max_new_tokens: int = 320
-                     ) -> list[str | None]:
+def score_generative(model, tok, recs: list[Record], *, batch_size: int = 16,
+                     max_new_tokens: int = 512) -> tuple[list[str | None], list[str]]:
+    """Greedy decode, then extract the stated letter. Returns letters and texts.
+
+    With left padding every prompt in a batch ends at the same column, so
+    each completion is everything after that column.
+    """
+    _require_left_padding(tok)
     import torch
 
-    out: list[str | None] = []
-    for rec in recs:
-        msgs = build_messages(rec, with_answer=False)
-        batch = tok(
-            tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True),
-            return_tensors="pt",
-        ).to(model.device)
+    letters: list[str | None] = []
+    texts: list[str] = []
+    for group in batched(recs, batch_size):
+        prompts = [render_inference_prompt(tok, r) for r in group]
+        enc = tok(prompts, return_tensors="pt", padding=True,
+                  add_special_tokens=False).to(model.device)
         with torch.no_grad():
-            gen = model.generate(**batch, max_new_tokens=max_new_tokens,
-                                 do_sample=False, temperature=None, top_p=None,
-                                 pad_token_id=tok.eos_token_id)
-        completion = tok.decode(gen[0][batch["input_ids"].shape[1]:],
-                                skip_special_tokens=True)
-        out.append(extract_letter(completion))
-    return out
+            generated = model.generate(
+                **enc, max_new_tokens=max_new_tokens, do_sample=False,
+                temperature=None, top_p=None, top_k=None,
+                pad_token_id=tok.pad_token_id)
+        width = enc["input_ids"].shape[1]
+        for row in generated:
+            text = tok.decode(row[width:], skip_special_tokens=True)
+            texts.append(text)
+            letters.append(extract_letter(text))
+    return letters, texts
+
+
+def project_eval_seconds(timing: dict, *, n_constrained: int,
+                         n_generative: int) -> int:
+    """Scale a smoke pass's measured per-model rates to a full run of both models."""
+    per_model = (n_constrained * timing["constrained_s_per_example"]
+                 + n_generative * timing["generative_s_per_example"])
+    return int(2 * per_model)
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Score base against tuned, paired.")
-    p.add_argument("--adapter", required=True)
+    p.add_argument("--adapter", required=True, help="LoRA adapter directory")
+    p.add_argument("--base", default=DEFAULT_BASE, help="full-precision base weights")
     p.add_argument("--test", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--max-seq", type=int, required=True)
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--gen-limit", type=int, default=300,
                    help="how many examples also get generative scoring")
+    p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--max-new-tokens", type=int, default=512)
+    p.add_argument("--device", choices=("cuda", "mps", "cpu"), default=None)
     args = p.parse_args()
 
     recs = [Record.from_dict(json.loads(line))
@@ -186,28 +234,41 @@ def main() -> None:
     gen_recs = recs[: args.gen_limit]
     print(f"scoring {len(recs):,} constrained, {len(gen_recs):,} generative")
 
-    preds: dict[str, dict] = {}
-    for tag, adapter in (("base", None), ("tuned", args.adapter)):
-        model, tok = _load(adapter, args.max_seq)
-        print(f"  {tag}: constrained...", flush=True)
-        preds.setdefault("constrained", {})[tag] = score_constrained(model, tok, recs)
-        print(f"  {tag}: generative...", flush=True)
-        preds.setdefault("generative", {})[tag] = score_generative(model, tok, gen_recs)
+    started = time.time()
+    model, tok, choice = load_model(args.base, args.adapter, device=args.device)
+    load_s = time.time() - started
+    print(f"loaded {args.base} + adapter on {choice.device} "
+          f"({choice.dtype_name}) in {load_s:.0f}s", flush=True)
 
-        # The model is loaded twice, sequentially, on a 15.6GB T4. `del` alone
-        # leaves the CUDA allocator holding the freed blocks, and the second
-        # from_pretrained can then OOM on a card that objectively has room --
-        # which would waste the completed training run this is scoring.
-        del model
-        del tok
-        gc.collect()
-        import torch
-        torch.cuda.empty_cache()
+    preds: dict[str, dict] = {"constrained": {}, "generative": {}}
+    completions: dict[str, list[str]] = {}
+    spent = {"constrained": 0.0, "generative": 0.0}
+    # One load, two models. The base is the same weights with the adapter
+    # switched off, which guarantees base and tuned share identical base
+    # weights and removes the second load that could run a T4 out of memory.
+    for tag in ("base", "tuned"):
+        ctx = model.disable_adapter() if tag == "base" else contextlib.nullcontext()
+        with ctx:
+            t = time.time()
+            preds["constrained"][tag] = score_constrained(
+                model, tok, recs, batch_size=args.batch_size)
+            spent["constrained"] += time.time() - t
+            t = time.time()
+            letters, texts = score_generative(
+                model, tok, gen_recs, batch_size=args.batch_size,
+                max_new_tokens=args.max_new_tokens)
+            spent["generative"] += time.time() - t
+        preds["generative"][tag] = letters
+        completions[tag] = texts
+        print(f"  {tag}: scored", flush=True)
+
+    del model
+    release_memory(choice.device)
 
     require_aligned(recs, preds["constrained"]["base"],
-                     preds["constrained"]["tuned"], "constrained")
+                    preds["constrained"]["tuned"], "constrained")
     require_aligned(gen_recs, preds["generative"]["base"],
-                     preds["generative"]["tuned"], "generative")
+                    preds["generative"]["tuned"], "generative")
 
     reports = {
         "constrained": paired_report(
@@ -217,10 +278,25 @@ def main() -> None:
             gen_recs, preds["generative"]["base"], preds["generative"]["tuned"],
             mode="generative"),
     }
+    timing = {
+        "load_s": round(load_s, 1),
+        "constrained_s_per_example": round(
+            spent["constrained"] / (2 * max(len(recs), 1)), 4),
+        "generative_s_per_example": round(
+            spent["generative"] / (2 * max(len(gen_recs), 1)), 4),
+    }
+    samples = [
+        {"id": r.id, "answer": r.answer,
+         "base": completions["base"][i], "tuned": completions["tuned"][i]}
+        for i, r in enumerate(gen_recs[:12])
+    ]
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps({"test_set": str(args.test),
-                                    "reports": reports}, indent=2))
+    args.out.write_text(json.dumps({
+        "test_set": str(args.test), "base": args.base, "adapter": args.adapter,
+        "device": choice.device, "timing": timing, "reports": reports,
+        "samples": samples,
+    }, indent=2))
 
     for mode, rep in reports.items():
         m = rep["mcnemar"]
@@ -232,7 +308,7 @@ def main() -> None:
               f"p = {m['p_value']:.4f}")
         print(f"  unparseable: base {rep['base_unparseable']}, "
               f"tuned {rep['tuned_unparseable']}")
-    print(f"\nwrote {args.out}")
+    print(f"\ntiming {timing}\nwrote {args.out}")
 
 
 if __name__ == "__main__":

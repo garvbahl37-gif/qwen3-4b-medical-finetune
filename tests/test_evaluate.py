@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import ast
+from pathlib import Path
+
 import pytest
 
 from training.evaluate import (
+    batched,
     check_holdout_size,
     letter_token_ids,
     pick_from_logits,
+    project_eval_seconds,
     require_aligned,
+    score_constrained,
+    score_generative,
     select_scorable_records,
 )
 from training.records import Record
@@ -133,3 +140,51 @@ def test_check_holdout_size_raises_when_medmcqa_is_short():
 def test_check_holdout_size_ignores_sources_it_does_not_know_about():
     recs = [mk(str(i), "synthetic_smoke_test") for i in range(3)]
     check_holdout_size(recs)  # must not raise
+
+
+def test_batched_splits_into_full_groups_and_a_remainder():
+    assert batched([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]
+
+
+def test_batched_rejects_a_batch_size_below_one():
+    with pytest.raises(ValueError):
+        batched([1], 0)
+
+
+def test_pick_from_logits_refuses_non_finite_scores():
+    # float16 overflow on a T4 turns logits into inf or nan, and argmax over
+    # them silently returns the first letter for every question -- which
+    # reads as a plausible accuracy. It must stop instead.
+    ids = {"A": 0, "B": 1, "C": 2, "D": 3}
+    with pytest.raises(FloatingPointError):
+        pick_from_logits([float("nan"), 0.0, 1.0, 2.0], ids)
+    with pytest.raises(FloatingPointError):
+        pick_from_logits([0.0, float("inf"), 1.0, 2.0], ids)
+
+
+def test_scorers_refuse_a_right_padded_tokenizer():
+    # Right padding puts a pad token at the last position of every shorter
+    # sequence in a batch; the scorer would read it and score noise.
+    class RightPadded:
+        padding_side = "right"
+
+    with pytest.raises(SystemExit, match="left"):
+        score_constrained(None, RightPadded(), [])
+    with pytest.raises(SystemExit, match="left"):
+        score_generative(None, RightPadded(), [])
+
+
+def test_project_eval_seconds_scales_measured_rates_to_both_models():
+    timing = {"constrained_s_per_example": 0.5, "generative_s_per_example": 4.0}
+    # 2 models x (1,000 x 0.5 + 100 x 4.0) = 2 x 900 = 1,800
+    assert project_eval_seconds(timing, n_constrained=1000, n_generative=100) == 1800
+
+
+def test_evaluation_never_imports_unsloth():
+    for path in ("training/evaluate.py", "training/modeling.py"):
+        tree = ast.parse(Path(path).read_text())
+        imported = {a.name for n in ast.walk(tree) if isinstance(n, ast.Import)
+                    for a in n.names}
+        imported |= {n.module for n in ast.walk(tree)
+                     if isinstance(n, ast.ImportFrom) and n.module}
+        assert not any(m.split(".")[0] == "unsloth" for m in imported), path
