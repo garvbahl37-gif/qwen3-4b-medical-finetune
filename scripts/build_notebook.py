@@ -301,9 +301,10 @@ for name, (split, flags) in HOLDOUTS.items():
 
 32 questions per benchmark through the exact code the full run uses. It proves
 the path works on this GPU, measures real throughput, and stops here if the full
-run would not fit the session. It also stops if the fine-tune's answers mostly
-cannot be parsed, which would mean truncated output rather than a real
-result."""),
+run would not fit the session. It also stops if either model's answers mostly
+cannot be parsed -- for the fine-tune that means truncated output, and for the
+base it can also mean fp16 garbage, either of which would produce a comparison
+that flatters the fine-tune rather than a real result."""),
     ("code", '''from training.evaluate import project_eval_seconds
 
 SESSION_BUDGET = 27_000      # 7.5h of Kaggle's 9h GPU session; the rest is margin
@@ -319,12 +320,17 @@ for name in ("medqa", "medmcqa"):
                                       n_constrained=EXPECTED[name],
                                       n_generative=GEN_LIMIT)
     gen = smoke["reports"]["generative"]
-    print(f"{name}: tuned answers unparseable {gen['tuned_unparseable']}/{gen['n']}, "
-          f"base {gen['base_unparseable']}/{gen['n']}")
-    if gen["tuned_unparseable"] > gen["n"] // 2:
+    cap = smoke["generation"]["hit_cap"]
+    print(f"{name}: unparseable tuned {gen['tuned_unparseable']}/{gen['n']}, "
+          f"base {gen['base_unparseable']}/{gen['n']}  |  "
+          f"hit cap tuned {cap['tuned']}/{gen['n']}, base {cap['base']}/{gen['n']}")
+    if (gen["tuned_unparseable"] > gen["n"] // 2
+            or gen["base_unparseable"] > gen["n"] // 2):
         raise SystemExit(
-            f"\\nSTOP. {gen['tuned_unparseable']} of {gen['n']} fine-tuned answers "
-            "could not be parsed, which means truncated output, not a result.\\n"
+            f"\\nSTOP. Unparseable answers exceed half of {gen['n']}: tuned "
+            f"{gen['tuned_unparseable']}, base {gen['base_unparseable']}.\\n"
+            "A base this broken (truncation, fp16 garbage) would flatter the "
+            "fine-tune, so neither direction is a real result.\\n"
             "FIX: raise --max-new-tokens in the full run.")
 
 print(f"\\nprojected full run: {projected / 3600:.2f}h "
