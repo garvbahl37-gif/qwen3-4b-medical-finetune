@@ -8,13 +8,16 @@ import pytest
 from training.evaluate import (
     batched,
     check_holdout_size,
+    hit_the_cap,
     letter_token_ids,
     pick_from_logits,
     project_eval_seconds,
     require_aligned,
+    resolve_eos_ids,
     score_constrained,
     score_generative,
     select_scorable_records,
+    sha256_of_file,
 )
 from training.records import Record
 
@@ -178,6 +181,75 @@ def test_project_eval_seconds_scales_measured_rates_to_both_models():
     timing = {"constrained_s_per_example": 0.5, "generative_s_per_example": 4.0}
     # 2 models x (1,000 x 0.5 + 100 x 4.0) = 2 x 900 = 1,800
     assert project_eval_seconds(timing, n_constrained=1000, n_generative=100) == 1800
+
+
+# --- resolve_eos_ids: I2, an EOS-set builder ---------------------------
+
+def test_resolve_eos_ids_wraps_a_single_int_from_generation_config():
+    assert resolve_eos_ids(151645, 151643) == {151645, 151643}
+
+
+def test_resolve_eos_ids_flattens_a_list_from_generation_config():
+    # Qwen3's generation_config lists more than one stop token; all of them
+    # count, not just the first.
+    assert resolve_eos_ids([151645, 151644], 151643) == {151645, 151644, 151643}
+
+
+def test_resolve_eos_ids_tolerates_a_missing_generation_config_value():
+    assert resolve_eos_ids(None, 151643) == {151643}
+
+
+def test_resolve_eos_ids_tolerates_a_missing_tokenizer_eos():
+    assert resolve_eos_ids(151645, None) == {151645}
+
+
+def test_resolve_eos_ids_deduplicates_an_id_seen_from_both_sources():
+    assert resolve_eos_ids(151643, 151643) == {151643}
+
+
+# --- hit_the_cap: I2, a completion hit the cap when no EOS id shows up -----
+
+def test_hit_the_cap_is_true_when_no_eos_id_appears():
+    assert hit_the_cap([1, 2, 3], {151645}) is True
+
+
+def test_hit_the_cap_is_false_when_an_eos_id_appears():
+    assert hit_the_cap([1, 151645, 3], {151645}) is False
+
+
+def test_hit_the_cap_checks_every_id_in_the_eos_set():
+    assert hit_the_cap([1, 2, 151644], {151645, 151644}) is False
+
+
+def test_hit_the_cap_is_true_for_an_empty_generation():
+    assert hit_the_cap([], {151645}) is True
+
+
+# --- sha256_of_file: I2, streamed so the report can name what was scored --
+
+def test_sha256_of_file_matches_hashlib_for_a_small_file(tmp_path):
+    import hashlib
+
+    f = tmp_path / "adapter_model.safetensors"
+    f.write_bytes(b"some adapter bytes")
+    assert sha256_of_file(f) == hashlib.sha256(b"some adapter bytes").hexdigest()
+
+
+def test_sha256_of_file_matches_hashlib_when_chunked_smaller_than_the_file(tmp_path):
+    import hashlib
+
+    f = tmp_path / "adapter_model.safetensors"
+    data = b"x" * 5_000
+    f.write_bytes(data)
+    assert sha256_of_file(f, chunk_size=64) == hashlib.sha256(data).hexdigest()
+
+
+def test_sha256_of_file_differs_when_a_single_byte_differs(tmp_path):
+    a = tmp_path / "a.safetensors"
+    b = tmp_path / "b.safetensors"
+    a.write_bytes(b"weights-one")
+    b.write_bytes(b"weights-two")
+    assert sha256_of_file(a) != sha256_of_file(b)
 
 
 def test_evaluation_never_imports_unsloth():

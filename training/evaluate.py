@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import json
 import math
 import time
@@ -174,9 +175,37 @@ def score_constrained(model, tok, recs: list[Record], *, batch_size: int = 16
     return out
 
 
+def resolve_eos_ids(generation_config_eos, tokenizer_eos: int | None) -> set[int]:
+    """Every token id that counts as end-of-sequence, from both places it can
+    come from.
+
+    model.generation_config.eos_token_id is a single int or a list -- Qwen3's
+    lists more than one stop token -- and tok.eos_token_id is a separate id
+    that is not always among them. A completion only "hit the cap" (ran to
+    max_new_tokens with no real stop) when none of these ever appeared.
+    """
+    ids: set[int] = set()
+    if generation_config_eos is not None:
+        if isinstance(generation_config_eos, int):
+            ids.add(generation_config_eos)
+        else:
+            ids.update(generation_config_eos)
+    if tokenizer_eos is not None:
+        ids.add(tokenizer_eos)
+    return ids
+
+
+def hit_the_cap(generated_ids, eos_ids: set[int]) -> bool:
+    """True when a completion ran to max_new_tokens without ever producing an
+    end-of-sequence token -- truncated rather than genuinely finished."""
+    return not any(t in eos_ids for t in generated_ids)
+
+
 def score_generative(model, tok, recs: list[Record], *, batch_size: int = 16,
-                     max_new_tokens: int = 512) -> tuple[list[str | None], list[str]]:
-    """Greedy decode, then extract the stated letter. Returns letters and texts.
+                     max_new_tokens: int = 512
+                     ) -> tuple[list[str | None], list[str], list[bool]]:
+    """Greedy decode, then extract the stated letter. Returns letters, texts,
+    and whether each completion hit the max_new_tokens cap unfinished.
 
     With left padding every prompt in a batch ends at the same column, so
     each completion is everything after that column.
@@ -184,8 +213,11 @@ def score_generative(model, tok, recs: list[Record], *, batch_size: int = 16,
     _require_left_padding(tok)
     import torch
 
+    eos_ids = resolve_eos_ids(
+        getattr(model.generation_config, "eos_token_id", None), tok.eos_token_id)
     letters: list[str | None] = []
     texts: list[str] = []
+    hit_caps: list[bool] = []
     for group in batched(recs, batch_size):
         prompts = [render_inference_prompt(tok, r) for r in group]
         enc = tok(prompts, return_tensors="pt", padding=True,
@@ -197,10 +229,12 @@ def score_generative(model, tok, recs: list[Record], *, batch_size: int = 16,
                 pad_token_id=tok.pad_token_id)
         width = enc["input_ids"].shape[1]
         for row in generated:
+            new_ids = row[width:].tolist()
             text = tok.decode(row[width:], skip_special_tokens=True)
             texts.append(text)
             letters.append(extract_letter(text))
-    return letters, texts
+            hit_caps.append(hit_the_cap(new_ids, eos_ids))
+    return letters, texts, hit_caps
 
 
 def project_eval_seconds(timing: dict, *, n_constrained: int,
@@ -209,6 +243,16 @@ def project_eval_seconds(timing: dict, *, n_constrained: int,
     per_model = (n_constrained * timing["constrained_s_per_example"]
                  + n_generative * timing["generative_s_per_example"])
     return int(2 * per_model)
+
+
+def sha256_of_file(path: Path, *, chunk_size: int = 1 << 20) -> str:
+    """Hash a file without reading it whole -- the adapter's safetensors file
+    does not need to fit in memory twice just to be named in the report."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as fh:
+        for chunk in iter(lambda: fh.read(chunk_size), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def main() -> None:
@@ -224,6 +268,10 @@ def main() -> None:
     p.add_argument("--max-new-tokens", type=int, default=512)
     p.add_argument("--device", choices=("cuda", "mps", "cpu"), default=None)
     args = p.parse_args()
+
+    import peft
+    import torch
+    import transformers
 
     recs = [Record.from_dict(json.loads(line))
             for line in args.test.read_text().splitlines() if line]
@@ -242,6 +290,7 @@ def main() -> None:
 
     preds: dict[str, dict] = {"constrained": {}, "generative": {}}
     completions: dict[str, list[str]] = {}
+    hit_caps: dict[str, list[bool]] = {}
     spent = {"constrained": 0.0, "generative": 0.0}
     # One load, two models. The base is the same weights with the adapter
     # switched off, which guarantees base and tuned share identical base
@@ -254,13 +303,18 @@ def main() -> None:
                 model, tok, recs, batch_size=args.batch_size)
             spent["constrained"] += time.time() - t
             t = time.time()
-            letters, texts = score_generative(
+            letters, texts, caps = score_generative(
                 model, tok, gen_recs, batch_size=args.batch_size,
                 max_new_tokens=args.max_new_tokens)
             spent["generative"] += time.time() - t
         preds["generative"][tag] = letters
         completions[tag] = texts
+        hit_caps[tag] = caps
         print(f"  {tag}: scored", flush=True)
+
+    device_name = (torch.cuda.get_device_name(0) if choice.device == "cuda"
+                  else choice.device)
+    adapter_sha256 = sha256_of_file(Path(args.adapter) / "adapter_model.safetensors")
 
     del model
     release_memory(choice.device)
@@ -291,11 +345,44 @@ def main() -> None:
         for i, r in enumerate(gen_recs[:12])
     ]
 
+    # Every constrained prediction, in record order -- this run is the only
+    # chance to learn WHY a result happened, and samples alone (12 rows) throw
+    # almost all of that away.
+    n_gen = len(gen_recs)
+    predictions = []
+    for i, r in enumerate(recs):
+        entry = {
+            "id": r.id, "answer": r.answer, "subject": r.subject,
+            "constrained": {"base": preds["constrained"]["base"][i],
+                            "tuned": preds["constrained"]["tuned"][i]},
+        }
+        if i < n_gen:
+            entry["generative"] = {
+                "base": preds["generative"]["base"][i],
+                "tuned": preds["generative"]["tuned"][i],
+                "base_text": completions["base"][i],
+                "tuned_text": completions["tuned"][i],
+                "base_hit_cap": hit_caps["base"][i],
+                "tuned_hit_cap": hit_caps["tuned"][i],
+            }
+        predictions.append(entry)
+
+    generation = {
+        "max_new_tokens": args.max_new_tokens,
+        "hit_cap": {"base": sum(hit_caps["base"]), "tuned": sum(hit_caps["tuned"])},
+    }
+    environment = {
+        "torch": torch.__version__, "transformers": transformers.__version__,
+        "peft": peft.__version__, "device_name": device_name,
+    }
+
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({
         "test_set": str(args.test), "base": args.base, "adapter": args.adapter,
-        "device": choice.device, "timing": timing, "reports": reports,
-        "samples": samples,
+        "adapter_sha256": adapter_sha256, "device": choice.device,
+        "timing": timing, "reports": reports, "samples": samples,
+        "predictions": predictions, "generation": generation,
+        "environment": environment,
     }, indent=2))
 
     for mode, rep in reports.items():

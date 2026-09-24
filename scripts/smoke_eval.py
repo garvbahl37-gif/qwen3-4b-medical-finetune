@@ -120,6 +120,36 @@ def main() -> None:
     assert len(report["samples"]) == 4
     print("ok  evaluate.py end to end: both modes, timing and samples reported")
 
+    # 6. I2: every constrained prediction is kept, not just 12 samples, and
+    # the report says enough about the run to explain its own result later.
+    assert len(report["predictions"]) == 8
+    with_generative = [p for p in report["predictions"] if "generative" in p]
+    assert len(with_generative) == 4
+    for p in report["predictions"]:
+        assert {"id", "answer", "subject", "constrained"} <= set(p)
+        assert {"base", "tuned"} <= set(p["constrained"])
+    for p in with_generative:
+        assert {"base", "tuned", "base_text", "tuned_text",
+                "base_hit_cap", "tuned_hit_cap"} <= set(p["generative"])
+        assert isinstance(p["generative"]["base_hit_cap"], bool)
+        assert isinstance(p["generative"]["tuned_hit_cap"], bool)
+
+    assert report["generation"]["max_new_tokens"] == 48
+    hit_cap = report["generation"]["hit_cap"]
+    assert set(hit_cap) == {"base", "tuned"}
+    assert 0 <= hit_cap["base"] <= 4 and 0 <= hit_cap["tuned"] <= 4
+
+    env = report["environment"]
+    assert {"torch", "transformers", "peft", "device_name"} <= set(env)
+    assert env["device_name"] == "cpu"  # --device cpu, so no cuda device name
+
+    import hashlib
+    expected_sha = hashlib.sha256(
+        (adapter / "adapter_model.safetensors").read_bytes()).hexdigest()
+    assert report["adapter_sha256"] == expected_sha
+    print("ok  report keeps every prediction, generation hit-cap counts, "
+          "environment versions and the adapter's sha256")
+
     print(f"\nSMOKE PASSED in {time.time() - started:.0f}s  ({work})")
 
 
