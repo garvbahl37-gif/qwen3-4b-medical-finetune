@@ -9,8 +9,8 @@ Plan 1: `docs/superpowers/plans/2026-09-20-training-and-evaluation.md`
 
 **Training is done.** One clean run on 2026-09-21 produced the adapter, now
 kept at `training/outputs/run1` (264 MB, outside git). **The full evaluation
-started on Kaggle on 2026-09-24 at 19:45 UTC** and has not finished, so there is
-no claim yet that fine-tuning helped.
+is running on Kaggle** (version 2, started 2026-09-24 at 19:55 UTC) and has not
+finished, so there is no claim yet that fine-tuning helped.
 
 Training loss levelled off at about step 150, roughly 4,800 examples in, and
 barely moved over the remaining 390 steps. Only evaluation can say whether the
@@ -106,11 +106,20 @@ the scoring path can run on this Mac before it runs on Kaggle.
       one GPU session can answer why, not just what. All nine landed and passed a
       final review, and the pinned transformers 5.5.0 / peft 0.19.1 pair passed the
       local smoke run
-- [x] **The one Kaggle start**: 2026-09-24 19:45 UTC,
-      [the evaluation kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-evaluation) (private). Both uploads were confirmed by
-      Kaggle's own file listing before the push. It runs code fingerprint
-      `487877cf9130fcab` (commit `33897b4`), and the notebook as pushed is kept at
-      `results/run1/kaggle_eval_notebook.ipynb`
+- [x] **Kaggle start, version 1** (2026-09-24 19:45 UTC): stopped after about
+      four minutes, at its first model load. Every gate before that passed on
+      Kaggle: a Tesla T4, the pinned transformers 5.5.0 / peft 0.19.1, the code
+      fingerprint, and the 1,273 + 4,183 held-out questions. The image ships
+      torchao 0.10.0, and peft 0.19.1 raises on any torchao older than 0.16.0
+      while it wraps each layer. Neither local environment had torchao, so no
+      local run could see it. Reproduced locally by installing torchao 0.10.0,
+      then fixed: the install cell removes torchao, which evaluation never uses,
+      and the verify cell wraps one tiny layer with LoRA, so a broken optional
+      package stops a run in seconds instead of after the model download
+- [x] **Kaggle start, version 2** (2026-09-24 19:55 UTC): running,
+      [the evaluation kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-evaluation) (private). Same reviewed evaluation code
+      (fingerprint `487877cf9130fcab`) with the notebook fix; the notebook as
+      pushed is kept at `results/run1/kaggle_eval_notebook.ipynb`
 - [ ] Collect `eval_medqa.json` and `eval_medmcqa.json` into `results/run1/` and
       record the result honestly, including if fine-tuning does not beat base
 

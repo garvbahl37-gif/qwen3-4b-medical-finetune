@@ -13,7 +13,7 @@ advice, and the model can give wrong answers.
 | Stage | State |
 |---|---|
 | Training | Done. One run on 2026-09-21 produced the LoRA adapter (run 1). |
-| Evaluation | Running on Kaggle since 2026-09-24 19:45 UTC, after local tests on a small model and on the trained adapter. |
+| Evaluation | Running on Kaggle since 2026-09-24 19:55 UTC, after local tests on a small model and on the trained adapter. |
 | Result | None yet. |
 | Chat frontend | Planned, not built. |
 
