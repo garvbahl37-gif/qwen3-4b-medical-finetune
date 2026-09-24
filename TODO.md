@@ -8,8 +8,9 @@ Plan 1: `docs/superpowers/plans/2026-09-20-training-and-evaluation.md`
 ## Where it stands
 
 **Training is done.** One clean run on 2026-09-21 produced the adapter, now
-kept at `training/outputs/run1` (264 MB, outside git). **Nothing has been
-evaluated yet**, so there is no claim yet that fine-tuning helped.
+kept at `training/outputs/run1` (264 MB, outside git). **The full evaluation
+started on Kaggle on 2026-09-24 at 19:45 UTC** and has not finished, so there is
+no claim yet that fine-tuning helped.
 
 Training loss levelled off at about step 150, roughly 4,800 examples in, and
 barely moved over the remaining 390 steps. Only evaluation can say whether the
@@ -77,7 +78,7 @@ guarded in code:
 5. `trl` was imported before `unsloth`, so the EOS token was set on the wrong class
 6. the budget probe aborted a 12-hour run at step 50, as designed
 
-## Plan 2 — evaluation (built, launching next)
+## Plan 2 — evaluation (running on Kaggle)
 
 `docs/superpowers/plans/2026-09-24-evaluation.md`. Drops Unsloth from evaluation so
 the scoring path can run on this Mac before it runs on Kaggle.
@@ -99,12 +100,19 @@ the scoring path can run on this Mac before it runs on Kaggle.
       fingerprint of the code it was built for
 - [x] **The real adapter on the real base, locally**: 504 of 504 weights load,
       252 of 252 LoRA matrices non-zero, and it changes the model's answers
-- [ ] **Final-review fixes before the push**: pin the GPU to a T4 (without it the
+- [x] **Final-review fixes before the push**: pin the GPU to a T4 (without it the
       new kernel would likely get a P100 and stop at cell 1); make the upload wait
       immune to a CLI version warning; save every per-question prediction so this
-      one GPU session can answer why, not just what
-- [ ] **The one Kaggle start**, then record the result honestly, including if
-      fine-tuning does not beat base
+      one GPU session can answer why, not just what. All nine landed and passed a
+      final review, and the pinned transformers 5.5.0 / peft 0.19.1 pair passed the
+      local smoke run
+- [x] **The one Kaggle start**: 2026-09-24 19:45 UTC,
+      [the evaluation kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-evaluation) (private). Both uploads were confirmed by
+      Kaggle's own file listing before the push. It runs code fingerprint
+      `487877cf9130fcab` (commit `33897b4`), and the notebook as pushed is kept at
+      `results/run1/kaggle_eval_notebook.ipynb`
+- [ ] Collect `eval_medqa.json` and `eval_medmcqa.json` into `results/run1/` and
+      record the result honestly, including if fine-tuning does not beat base
 
 **Early signal, not a result:** on 16 MedQA test questions run locally, the base
 model scored 12/16 and the fine-tune 9/16 (3 regressions, 0 wins, p = 0.25). Too few
