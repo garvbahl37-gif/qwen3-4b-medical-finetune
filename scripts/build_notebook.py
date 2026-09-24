@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from training.kaggle_paths import code_fingerprint
 
 # The notebook's code-fetch cell cannot `import training.kaggle_paths`: the
 # whole point of find_code_dir is to locate the uploaded code before it has
@@ -16,6 +20,21 @@ if _MARKER not in _KAGGLE_PATHS:
     raise SystemExit(f"marker {_MARKER!r} not found in training/kaggle_paths.py")
 FIND_CODE_DIR_SRC = _KAGGLE_PATHS.split(_MARKER, 1)[1].rstrip("\n")
 
+# The exact code this build produces for upload. If Kaggle ever mounts an
+# older version -- a new upload still processing, or an old one attached by
+# hand -- the modules carry the right names and the wrong code, and nothing
+# else would notice. Both fetch cells check this before doing anything else.
+CODE_FINGERPRINT = code_fingerprint(Path("training"))
+
+CHECK_FINGERPRINT_SRC = ('''EXPECTED_FINGERPRINT = "''' + CODE_FINGERPRINT + '''"
+if code_fingerprint(SRC) != EXPECTED_FINGERPRINT:
+    raise SystemExit(
+        f"\\nSTOP. The attached code ({code_fingerprint(SRC)}) is not the code this "
+        f"notebook was built for ({EXPECTED_FINGERPRINT}).\\n"
+        "Kaggle may still be processing a new version of medical-ft-code, or an "
+        "older version is attached.\\n"
+        "FIX: wait a minute and re-run; if it persists, run scripts/push_kaggle.sh again.")''')
+
 CELL_GET_CODE = ('''# --- 3. Get the code from the attached dataset -----------------------------
 import os, shutil, subprocess, sys
 from pathlib import Path
@@ -28,6 +47,7 @@ PKG.mkdir(parents=True, exist_ok=True)
 ''' + FIND_CODE_DIR_SRC + '''
 
 SRC = find_code_dir(INPUT)
+''' + CHECK_FINGERPRINT_SRC + '''
 print("found the code at:", SRC)
 
 for src_file in sorted(SRC.glob("*.py")):
@@ -60,6 +80,7 @@ PKG.mkdir(parents=True, exist_ok=True)
 ''' + FIND_CODE_DIR_SRC + '''
 
 SRC = find_code_dir(INPUT, EVAL_REQUIRED)
+''' + CHECK_FINGERPRINT_SRC + '''
 ADAPTER = find_adapter_dir(INPUT)
 # step() runs through a shell, so the path is quoted: a mount path with a space
 # in it would otherwise split into two arguments.
@@ -227,6 +248,7 @@ start.
 and `medical-ft-adapter`."""),
     CELLS[1],
     ("code", """%%capture
+# --no-deps keeps pip from replacing the preinstalled transformers 5.5.0 this code was checked against.
 !pip install -q --no-deps peft
 !pip install -q datasets"""),
     ("code", '''# --- 2. Verify the install before spending GPU time on it ------------------
@@ -241,6 +263,7 @@ loaded with both filters off: training drops rows without an explanation and
 rows marked multi-choice, but the benchmark keeps all 4,183, or the score would
 not be comparable to any published MedMCQA figure."""),
     ("code", '''import json
+from training.evaluate import EXPECTED_HOLDOUT_SIZES as EXPECTED
 from training.sources import load
 
 HOLDOUTS = {
@@ -248,15 +271,15 @@ HOLDOUTS = {
     "medmcqa": ("validation", {"require_rationale": False,
                                "require_single_choice": False}),
 }
-EXPECTED = {"medqa": 1273, "medmcqa": 4183}
 
 for name, (split, flags) in HOLDOUTS.items():
     recs = load(name, limit=0, split=split, **flags)
     if len(recs) != EXPECTED[name]:
         raise SystemExit(
             f"\\nSTOP. {name} {split} gave {len(recs):,} rows, expected "
-            f"{EXPECTED[name]:,}.\\nFIX: these must be the exact sets training "
-            "was decontaminated against.")
+            f"{EXPECTED[name]:,}.\\n"
+            "FIX: the dataset on the Hugging Face Hub has changed since these "
+            "sizes were confirmed. Check its revision before scoring anything.")
     with open(f"data/holdout_{name}.jsonl", "w") as fh:
         for rec in recs:
             fh.write(json.dumps(rec.to_dict()) + "\\n")

@@ -19,6 +19,14 @@ cat > "$SRC/dataset-metadata.json" <<JSON
 {"title": "$TITLE", "id": "$USER/$SLUG", "licenses": [{"name": "CC0-1.0"}]}
 JSON
 
+# What this upload should leave on Kaggle, as name,size. After `datasets version`
+# the status can still read "ready" from the PREVIOUS version, so readiness alone
+# would let a kernel start on stale code; the listing has to match too.
+expected="$(cd "$SRC" && for f in *; do
+  [ "$f" = dataset-metadata.json ] && continue
+  printf '%s,%s\n' "$f" "$(wc -c < "$f" | tr -d ' ')"
+done | sort)"
+
 if "$KAGGLE" datasets status "$USER/$SLUG" >/dev/null 2>&1; then
   echo "==> updating dataset $USER/$SLUG"
   "$KAGGLE" datasets version -p "$SRC" -m "update $(date -u +%FT%TZ)" --dir-mode skip
@@ -32,7 +40,13 @@ status=""
 for _ in $(seq 1 120); do
   status="$("$KAGGLE" datasets status "$USER/$SLUG" 2>&1 || true)"
   case "$status" in
-    *ready*) echo "    ready"; exit 0 ;;
+    *ready*)
+      listed="$("$KAGGLE" datasets files "$USER/$SLUG" --csv 2>/dev/null \
+                | tail -n +2 | cut -d, -f1,2 | sort || true)"
+      if [ "$listed" = "$expected" ]; then
+        echo "    ready, serving the files just uploaded"; exit 0
+      fi
+      echo "    reads ready but still lists the previous files; waiting" ;;
     *error*) echo "    processing FAILED: $status"; exit 1 ;;
   esac
   sleep 5

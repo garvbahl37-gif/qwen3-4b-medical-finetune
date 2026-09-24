@@ -73,3 +73,19 @@ def find_adapter_dir(root: Path) -> Path:
         f"First entries under /kaggle/input: {tree}\n"
         "FIX: run scripts/push_adapter.sh, then attach medical-ft-adapter in "
         "the sidebar.")
+
+
+def code_fingerprint(directory: Path) -> str:
+    """A short hash of every .py file's name and bytes, in name order.
+
+    Each notebook is built for one exact set of modules. If Kaggle mounts an
+    older version of the code dataset -- a new version still processing, or an
+    old one attached by hand -- the modules carry the right names and the wrong
+    code, and nothing else would notice.
+    """
+    import hashlib
+
+    digest = hashlib.sha256()
+    for path in sorted(directory.glob("*.py")):
+        digest.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+    return digest.hexdigest()[:16]

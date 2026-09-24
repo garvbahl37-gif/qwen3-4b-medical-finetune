@@ -14,6 +14,11 @@ KAGGLE="${KAGGLE_BIN:-$HOME/.local/bin/kaggle}"
 [ -f "$KERNEL_DIR/kernel-metadata.json" ] || {
   echo "no kernel-metadata.json in $KERNEL_DIR"; exit 1; }
 
+# Rebuild both notebooks so each one's baked-in EXPECTED_FINGERPRINT matches
+# the training/*.py bytes this run is about to upload, not whatever was on
+# disk the last time someone ran build_notebook.py by hand.
+"${PYTHON:-.venv/bin/python}" scripts/build_notebook.py
+
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 # Flat, no subdirectories: --dir-mode zip would upload training/ as a zip, and

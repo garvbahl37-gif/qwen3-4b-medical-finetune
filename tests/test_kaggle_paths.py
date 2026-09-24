@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from training.kaggle_paths import EVAL_REQUIRED, REQUIRED, find_adapter_dir, find_code_dir
+from training.kaggle_paths import (EVAL_REQUIRED, REQUIRED, code_fingerprint,
+                                   find_adapter_dir, find_code_dir)
 
 
 def _touch_modules(directory, names=REQUIRED, extra: tuple[str, ...] = ()):
@@ -87,3 +88,35 @@ def test_find_adapter_dir_ignores_a_config_with_no_weights_beside_it(tmp_path):
     (half / "adapter_config.json").write_text("{}")
     with pytest.raises(SystemExit, match="No LoRA adapter"):
         find_adapter_dir(tmp_path)
+
+
+def test_code_fingerprint_is_the_same_for_the_same_files(tmp_path):
+    a = _touch_modules(tmp_path / "a", names={"records"})
+    (a / "records.py").write_text("print('same')\n")
+    b = _touch_modules(tmp_path / "b", names={"records"})
+    (b / "records.py").write_text("print('same')\n")
+    assert code_fingerprint(a) == code_fingerprint(b)
+
+
+def test_code_fingerprint_changes_when_one_byte_changes(tmp_path):
+    a = _touch_modules(tmp_path / "a", names={"records"})
+    (a / "records.py").write_text("print('one')\n")
+    before = code_fingerprint(a)
+    (a / "records.py").write_text("print('two')\n")
+    assert code_fingerprint(a) != before
+
+
+def test_code_fingerprint_changes_when_a_file_is_renamed(tmp_path):
+    a = _touch_modules(tmp_path / "a", names={"records"})
+    (a / "records.py").write_text("print('same')\n")
+    before = code_fingerprint(a)
+    (a / "records.py").rename(a / "renamed.py")
+    assert code_fingerprint(a) != before
+
+
+def test_code_fingerprint_ignores_a_non_python_file(tmp_path):
+    a = _touch_modules(tmp_path / "a", names={"records"})
+    (a / "records.py").write_text("print('same')\n")
+    before = code_fingerprint(a)
+    (a / "notes.txt").write_text("this should not move the fingerprint")
+    assert code_fingerprint(a) == before
