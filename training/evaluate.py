@@ -172,9 +172,11 @@ def score_constrained(model, tok, recs: list[Record], *, batch_size: int = 16
                 out.append(pick_from_logits(row, ids))
             except FloatingPointError as exc:
                 raise SystemExit(
-                    f"\nSTOP. {exc}.\nHalf precision overflowed, so every "
-                    "prediction from here on would be meaningless.\n"
-                    "FIX: re-run with --device cpu, which runs in float32.")
+                    f"\nSTOP. {exc}.\nHalf precision overflowed on this GPU; "
+                    "there is no T4 fallback, and this result must not be "
+                    "reported.\n--device cpu (float32) is a local diagnostic "
+                    "only -- full-precision 4B on a T4's CPU is not a "
+                    "workable substitute here.")
     return out
 
 
