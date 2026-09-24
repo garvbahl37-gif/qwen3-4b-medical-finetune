@@ -16,6 +16,14 @@ barely moved over the remaining 390 steps. Only evaluation can say whether the
 second half helped, but it is a reason not to assume more of the same data is
 the lever.
 
+## Documentation
+
+- [x] `README.md` and three guides, written 2026-09-25 from the code and
+      `results/run1/`: `docs/training.md` (data, prompt format, QLoRA, the failed
+      attempts), `docs/evaluation.md` (method, report JSON, biases) and
+      `docs/kaggle.md` (reproducing both runs on your own account)
+- [ ] Add the evaluation result to the README and the guides once it exists
+
 ## Plan 1 — training (complete)
 
 - [x] **Task 1** shared prompt template and `Record`
@@ -44,9 +52,9 @@ the lever.
 | examples trained | 17,285 (18,000 requested; 90 decontaminated, rest over-length) |
 | mix | 69.9% exam and reasoning, 30.1% patient dialogue |
 | held out, never trained on | 5,456 (1,273 MedQA test + 4,183 MedMCQA validation) |
-| `max_seq` | 960, from a measured p99 of 931 |
+| `max_seq` | 960, from a measured p99 of 929 |
 | runtime | 4.81 h on one T4, 541 steps, 1.00 examples/sec |
-| mean training loss | 1.796 (3.03 at the first logged step) |
+| mean training loss | 1.796 (2.912 at the first logged step) |
 | adapter | LoRA rank 32 on all seven projections, 264 MB |
 
 The notebook exactly as it ran on Kaggle, and its output, are kept in
@@ -56,10 +64,11 @@ next to the loss curve, the data report and the training stats.
 Scaled down from 40,000 because the budget probe measured the T4 at 0.9
 examples/sec: 40,000 would have taken 12 hours against Kaggle's 9-hour cap.
 
-### Seven Kaggle attempts before that one
+### What stopped the attempts before it
 
-Each died in the first minutes, so the GPU quota barely moved. Every cause is
-now guarded in code:
+Run 1 is version 7 of the training notebook. The attempts before it stopped
+early, most within minutes, so the GPU quota barely moved. Every cause is now
+guarded in code:
 
 1. `datasets create` is asynchronous; the kernel started before the data existed
 2. the dataset mounted at `/kaggle/input/datasets/...`, not where assumed
@@ -111,6 +120,12 @@ questions to conclude anything, and exactly what the full 5,456 will settle.
 - MedMCQA answers lean towards A (32%). A model can gain on MedMCQA by guessing A
   more often, which is not medical knowledge; per-question predictions will show
   whether that happened. MedQA's answers are balanced, so it is the cleaner test.
+- Generation stops at 512 new tokens. A completion cut off before its final
+  answer loses that answer, so the cap costs whichever model writes longer
+  answers; the report's hit-cap counts show how often each model hit it.
+- The fine-tune was trained to answer MedQA at once. If the base reasons before
+  it answers, generative MedQA compares reasoning first with answering directly,
+  which can favour the base.
 
 ## Plan 3 — serving and frontend
 
@@ -130,7 +145,8 @@ questions to conclude anything, and exactly what the full 5,456 will settle.
 - [ ] **Task 5** Results view, laid out as a laboratory report; the loss chart
       follows the dataviz checks (its line colour was re-picked after the
       validator failed the page green on chroma)
-- [ ] **Task 6** Method view, Playwright end-to-end tests, README
+- [ ] **Task 6** Method view, Playwright end-to-end tests, and the chat frontend's
+      run commands added to the README
 - [ ] Screenshot every page at 1280px and 360px and fix what collides or overflows
 
 ## Possibly later
@@ -146,5 +162,9 @@ questions to conclude anything, and exactly what the full 5,456 will settle.
       from before the author email was corrected, crediting 12 commits to
       `jiteshbhalla1-web`. After the push, all 43 commits are authored by
       garvbahl37-gif, and GitHub's contributor list shows only that account.
+- [ ] Correct the comment in `training/train.py` claiming the probe's `>=` check
+      protects runs shorter than `--probe-steps`: such runs never reach it. After
+      the evaluation run, since any change to `training/*.py` changes the code
+      fingerprint the notebooks check
 - [ ] **Rotate the Kaggle token** `KGAT_...` at kaggle.com/settings: it was pasted
       into a chat session
