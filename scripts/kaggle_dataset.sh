@@ -51,7 +51,7 @@ for _ in $(seq 1 120); do
         echo "    ready, serving the files just uploaded"; exit 0
       fi
       echo "    reads ready but still lists the previous files; waiting" ;;
-    *error*) echo "    processing FAILED: $status"; exit 1 ;;
+    *error*|*failed*) echo "    processing FAILED: $status"; exit 1 ;;
   esac
   sleep 5
 done
