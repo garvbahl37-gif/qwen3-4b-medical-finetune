@@ -1,0 +1,9 @@
+{
+  "train_runtime_seconds": 17332.0738,
+  "train_loss": 1.795876946114348,
+  "examples": 17285,
+  "max_seq": 960,
+  "batch_size": 8,
+  "grad_accum": 4,
+  "rank": 32
+}

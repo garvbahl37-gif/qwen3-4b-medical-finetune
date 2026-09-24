@@ -1,0 +1,16 @@
+{
+  "train_size": 17410,
+  "val_size": 500,
+  "holdout_pool": 5456,
+  "decontaminated_removed": 90,
+  "decontaminated_from": 18000,
+  "mix": {
+    "medical_o1": 2520,
+    "chatdoctor": 5246,
+    "medmcqa": 6043,
+    "medqa": 3601
+  },
+  "mcq_fraction": 0.5539,
+  "reasoning_fraction": 0.6987,
+  "seed": 42
+}
