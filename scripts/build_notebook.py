@@ -256,7 +256,12 @@ and `medical-ft-adapter`."""),
 # resolution from replacing the transformers version just pinned.
 !pip install -q "transformers==5.5.0"
 !pip install -q --no-deps "peft==0.19.1"
-!pip install -q datasets"""),
+!pip install -q datasets
+# The image ships torchao 0.10.0. peft 0.19.1 checks torchao while it wraps
+# every layer and raises on anything older than 0.16.0 instead of skipping it,
+# which stopped the first run at its first model load. Evaluation never uses
+# torchao, so remove it rather than upgrade it against the image's torch.
+!pip uninstall -y -q torchao"""),
     ("code", '''# --- 2. Verify the install before spending GPU time on it ------------------
 import torch, transformers, peft
 print(f"ok | torch {torch.__version__} | transformers {transformers.__version__} "
@@ -267,7 +272,31 @@ if transformers.__version__ != "5.5.0" or peft.__version__ != "0.19.1":
         f"\\nSTOP. transformers {transformers.__version__} / peft {peft.__version__} "
         "-- expected the pinned transformers==5.5.0 / peft==0.19.1 this adapter "
         "was trained with.\\nFIX: the pip install above did not take effect on "
-        "this kernel image. Run > Restart session, then Run All again.")'''),
+        "this kernel image. Run > Restart session, then Run All again.")
+
+# peft checks every optional quantization package on the image while it wraps
+# each layer, and some of those checks raise on an old version instead of
+# skipping it. Wrap one tiny layer the same way, so a broken optional package
+# stops the run here in seconds, not after an 8GB model download.
+import torch.nn as nn
+from peft import LoraConfig, get_peft_model
+
+class _OneLayer(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.q_proj = nn.Linear(8, 8)
+
+    def forward(self, x):
+        return self.q_proj(x)
+
+try:
+    get_peft_model(_OneLayer(), LoraConfig(r=2, target_modules=["q_proj"]))
+except ImportError as e:
+    raise SystemExit(
+        f"\\nSTOP. peft cannot wrap a layer on this image: {e}\\n"
+        "FIX: add a pip uninstall of the package it names to the install cell, "
+        "then Run > Restart session and Run All again.")
+print("ok | peft can wrap a layer on this image")'''),
     ("code", CELL_GET_CODE_EVAL),
     ("markdown", """## 4. Build the held-out sets
 
