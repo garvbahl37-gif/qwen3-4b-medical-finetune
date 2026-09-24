@@ -48,6 +48,43 @@ def step(cmd: str):
         raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
     print("\\nok\\n", flush=True)''')
 
+CELL_GET_CODE_EVAL = ('''# --- 3. Get the code and the adapter from the attached datasets ------------
+import os, shlex, shutil, subprocess, sys
+from pathlib import Path
+
+INPUT = Path("/kaggle/input")
+WORK  = Path("/kaggle/working/ft")
+PKG   = WORK / "training"
+PKG.mkdir(parents=True, exist_ok=True)
+
+''' + FIND_CODE_DIR_SRC + '''
+
+SRC = find_code_dir(INPUT, EVAL_REQUIRED)
+ADAPTER = find_adapter_dir(INPUT)
+# step() runs through a shell, so the path is quoted: a mount path with a space
+# in it would otherwise split into two arguments.
+ADAPTER_ARG = shlex.quote(str(ADAPTER))
+print("code:   ", SRC)
+print("adapter:", ADAPTER)
+
+for src_file in sorted(SRC.glob("*.py")):
+    shutil.copy(src_file, PKG / src_file.name)
+(PKG / "__init__.py").touch()
+
+os.chdir(WORK)
+sys.path.insert(0, str(WORK))
+Path("data").mkdir(exist_ok=True)
+Path("outputs").mkdir(exist_ok=True)
+
+# A failing `!python x.py` returns non-zero but does not raise in Jupyter, so the
+# notebook would sail past a dead step and fail later somewhere confusing.
+def step(cmd: str):
+    print(f"$ {cmd}\\n", flush=True)
+    p = subprocess.run(cmd, shell=True)
+    if p.returncode != 0:
+        raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
+    print("\\nok\\n", flush=True)''')
+
 CELLS: list[tuple[str, str]] = [
     ("markdown", """# Qwen3-4B medical fine-tune (training)
 
@@ -173,24 +210,150 @@ and feed it to the evaluation notebook, which runs as a separate Kaggle
 session once `training/evalcore.py` and `training/evaluate.py` exist."""),
 ]
 
-nb = {
-    "cells": [
-        {"cell_type": kind, "metadata": {},
-         **({"source": src.splitlines(keepends=True)} if kind == "markdown"
-            else {"source": src.splitlines(keepends=True),
-                  "execution_count": None, "outputs": []})}
-        for kind, src in CELLS
-    ],
-    "metadata": {
-        "kernelspec": {"display_name": "Python 3", "language": "python",
-                       "name": "python3"},
-        "language_info": {"name": "python", "version": "3.11.13"},
-        "accelerator": "GPU",
-    },
-    "nbformat": 4,
-    "nbformat_minor": 5,
-}
+EVAL_CELLS: list[tuple[str, str]] = [
+    ("markdown", """# Qwen3-4B medical fine-tune (evaluation)
 
-path = Path("training/kaggle_medical.ipynb")
-path.write_text(json.dumps(nb, indent=1))
-print(f"wrote {path}, {len(CELLS)} cells")
+Scores the fine-tuned adapter against the base model on two benchmarks it never
+trained on: MedQA-USMLE test (1,273) and MedMCQA validation (4,183). Same
+prompts, same greedy decoding, both models from one load -- the base is the same
+weights with the adapter switched off.
+
+It runs in two stages in one session. A smoke pass scores 32 questions per
+benchmark through the exact code the full run uses, measures its speed, and
+stops if the full run would not fit the session. Only then does the full run
+start.
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`
+and `medical-ft-adapter`."""),
+    CELLS[1],
+    ("code", """%%capture
+!pip install -q --no-deps peft
+!pip install -q datasets"""),
+    ("code", '''# --- 2. Verify the install before spending GPU time on it ------------------
+import torch, transformers, peft
+print(f"ok | torch {torch.__version__} | transformers {transformers.__version__} "
+      f"| peft {peft.__version__}")'''),
+    ("code", CELL_GET_CODE_EVAL),
+    ("markdown", """## 4. Build the held-out sets
+
+Exactly the sets training was decontaminated against. MedMCQA validation is
+loaded with both filters off: training drops rows without an explanation and
+rows marked multi-choice, but the benchmark keeps all 4,183, or the score would
+not be comparable to any published MedMCQA figure."""),
+    ("code", '''import json
+from training.sources import load
+
+HOLDOUTS = {
+    "medqa": ("test", {}),
+    "medmcqa": ("validation", {"require_rationale": False,
+                               "require_single_choice": False}),
+}
+EXPECTED = {"medqa": 1273, "medmcqa": 4183}
+
+for name, (split, flags) in HOLDOUTS.items():
+    recs = load(name, limit=0, split=split, **flags)
+    if len(recs) != EXPECTED[name]:
+        raise SystemExit(
+            f"\\nSTOP. {name} {split} gave {len(recs):,} rows, expected "
+            f"{EXPECTED[name]:,}.\\nFIX: these must be the exact sets training "
+            "was decontaminated against.")
+    with open(f"data/holdout_{name}.jsonl", "w") as fh:
+        for rec in recs:
+            fh.write(json.dumps(rec.to_dict()) + "\\n")
+    print(f"data/holdout_{name}.jsonl  {len(recs):,}")'''),
+    ("markdown", """## 5. Smoke pass
+
+32 questions per benchmark through the exact code the full run uses. It proves
+the path works on this GPU, measures real throughput, and stops here if the full
+run would not fit the session. It also stops if the fine-tune's answers mostly
+cannot be parsed, which would mean truncated output rather than a real
+result."""),
+    ("code", '''from training.evaluate import project_eval_seconds
+
+SESSION_BUDGET = 27_000      # 7.5h of Kaggle's 9h GPU session; the rest is margin
+GEN_LIMIT = 300
+
+projected = 0
+for name in ("medqa", "medmcqa"):
+    step(f"python -m training.evaluate --adapter {ADAPTER_ARG} "
+         f"--test data/holdout_{name}.jsonl --limit 32 --gen-limit 16 "
+         f"--out outputs/smoke_{name}.json")
+    smoke = json.load(open(f"outputs/smoke_{name}.json"))
+    projected += project_eval_seconds(smoke["timing"],
+                                      n_constrained=EXPECTED[name],
+                                      n_generative=GEN_LIMIT)
+    gen = smoke["reports"]["generative"]
+    print(f"{name}: tuned answers unparseable {gen['tuned_unparseable']}/{gen['n']}, "
+          f"base {gen['base_unparseable']}/{gen['n']}")
+    if gen["tuned_unparseable"] > gen["n"] // 2:
+        raise SystemExit(
+            f"\\nSTOP. {gen['tuned_unparseable']} of {gen['n']} fine-tuned answers "
+            "could not be parsed, which means truncated output, not a result.\\n"
+            "FIX: raise --max-new-tokens in the full run.")
+
+print(f"\\nprojected full run: {projected / 3600:.2f}h "
+      f"against a {SESSION_BUDGET / 3600:.1f}h budget")
+if projected > SESSION_BUDGET:
+    raise SystemExit(
+        f"\\nSTOP. The full evaluation projects to {projected / 3600:.1f}h.\\n"
+        "FIX: lower GEN_LIMIT; generation dominates the runtime.")
+print("fits; starting the full run")'''),
+    ("markdown", """## 6. Full evaluation
+
+All 1,273 and all 4,183 questions by constrained scoring, and the first 300 of
+each by greedy generation, paired against the base model."""),
+    ("code", '''for name in ("medqa", "medmcqa"):
+    step(f"python -m training.evaluate --adapter {ADAPTER_ARG} "
+         f"--test data/holdout_{name}.jsonl --gen-limit {GEN_LIMIT} "
+         f"--out outputs/eval_{name}.json")'''),
+    ("code", '''# --- 7. Results, and save everything to the Output panel -------------------
+out = Path("/kaggle/working")
+for label, name in (("MedQA-USMLE test", "medqa"),
+                    ("MedMCQA validation", "medmcqa")):
+    data = json.load(open(f"outputs/eval_{name}.json"))
+    print(f"\\n########## {label} ##########")
+    for mode, rep in data["reports"].items():
+        m = rep["mcnemar"]
+        delta = (rep["tuned_accuracy"] - rep["base_accuracy"]) * 100
+        print(f"  {mode:<12} n={rep['n']:>5,}  base {rep['base_accuracy']:6.1%}  "
+              f"tuned {rep['tuned_accuracy']:6.1%}  ({delta:+.1f})  "
+              f"wins {m['wins']} / regressions {m['regressions']}  "
+              f"p={m['p_value']:.4f}")
+        if m["p_value"] >= 0.05:
+            print("               not significant at p<0.05: "
+                  "indistinguishable from base")
+    shutil.copy(f"outputs/eval_{name}.json", out / f"eval_{name}.json")
+print("\\nSaved eval_medqa.json and eval_medmcqa.json to the Output panel.")'''),
+    ("markdown", """## Done
+
+`eval_medqa.json` and `eval_medmcqa.json` are in the **Output** panel: accuracy
+for both models in both modes, McNemar significance, a per-subject breakdown,
+timing, and twelve raw completions per model for reading by eye."""),
+]
+
+
+def write_notebook(cells: list[tuple[str, str]], path: Path) -> None:
+    nb = {
+        "cells": [
+            {"cell_type": kind, "metadata": {},
+             **({"source": src.splitlines(keepends=True)} if kind == "markdown"
+                else {"source": src.splitlines(keepends=True),
+                      "execution_count": None, "outputs": []})}
+            for kind, src in cells
+        ],
+        "metadata": {
+            "kernelspec": {"display_name": "Python 3", "language": "python",
+                           "name": "python3"},
+            "language_info": {"name": "python", "version": "3.11.13"},
+            "accelerator": "GPU",
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(nb, indent=1))
+    print(f"wrote {path}, {len(cells)} cells")
+
+
+write_notebook(CELLS, Path("training/kaggle_medical.ipynb"))
+write_notebook(EVAL_CELLS, Path("evaluation/kaggle_eval.ipynb"))

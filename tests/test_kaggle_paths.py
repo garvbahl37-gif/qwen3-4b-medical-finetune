@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from training.kaggle_paths import REQUIRED, find_code_dir
+from training.kaggle_paths import EVAL_REQUIRED, REQUIRED, find_adapter_dir, find_code_dir
 
 
 def _touch_modules(directory, names=REQUIRED, extra: tuple[str, ...] = ()):
@@ -53,3 +53,37 @@ def test_find_code_dir_picks_the_lexicographically_first_match_when_tied(tmp_pat
     first = _touch_modules(tmp_path / "aaa")
     _touch_modules(tmp_path / "zzz")
     assert find_code_dir(tmp_path) == first
+
+
+def test_find_code_dir_accepts_a_different_required_set(tmp_path):
+    code = tmp_path / "datasets" / "gb1105" / "medical-ft-code"
+    code.mkdir(parents=True)
+    for stem in EVAL_REQUIRED:
+        (code / f"{stem}.py").write_text("")
+    assert find_code_dir(tmp_path, EVAL_REQUIRED) == code
+
+
+def _adapter(directory):
+    directory.mkdir(parents=True)
+    (directory / "adapter_config.json").write_text("{}")
+    (directory / "adapter_model.safetensors").write_bytes(b"weights")
+    return directory
+
+
+def test_find_adapter_dir_finds_an_adapter_mounted_two_levels_deep(tmp_path):
+    adapter = _adapter(tmp_path / "datasets" / "gb1105" / "medical-ft-adapter")
+    assert find_adapter_dir(tmp_path) == adapter
+
+
+def test_find_adapter_dir_prefers_the_final_adapter_over_a_checkpoint(tmp_path):
+    final = _adapter(tmp_path / "run1")
+    _adapter(tmp_path / "run1" / "checkpoint-541")
+    assert find_adapter_dir(tmp_path) == final
+
+
+def test_find_adapter_dir_ignores_a_config_with_no_weights_beside_it(tmp_path):
+    half = tmp_path / "half"
+    half.mkdir()
+    (half / "adapter_config.json").write_text("{}")
+    with pytest.raises(SystemExit, match="No LoRA adapter"):
+        find_adapter_dir(tmp_path)
