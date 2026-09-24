@@ -249,13 +249,25 @@ start.
 and `medical-ft-adapter`."""),
     CELLS[1],
     ("code", """%%capture
-# --no-deps keeps pip from replacing the preinstalled transformers 5.5.0 this code was checked against.
-!pip install -q --no-deps peft
+# Pin the exact pair that already trained the adapter on this image: peft
+# 0.19.1 wrote the adapter's config, and the image's default transformers has
+# never been confirmed -- an older default could ignore dtype= and load 16GB
+# of fp32 weights onto a 15GB T4. --no-deps on peft keeps its own dependency
+# resolution from replacing the transformers version just pinned.
+!pip install -q "transformers==5.5.0"
+!pip install -q --no-deps "peft==0.19.1"
 !pip install -q datasets"""),
     ("code", '''# --- 2. Verify the install before spending GPU time on it ------------------
 import torch, transformers, peft
 print(f"ok | torch {torch.__version__} | transformers {transformers.__version__} "
-      f"| peft {peft.__version__}")'''),
+      f"| peft {peft.__version__}")
+
+if transformers.__version__ != "5.5.0" or peft.__version__ != "0.19.1":
+    raise SystemExit(
+        f"\\nSTOP. transformers {transformers.__version__} / peft {peft.__version__} "
+        "-- expected the pinned transformers==5.5.0 / peft==0.19.1 this adapter "
+        "was trained with.\\nFIX: the pip install above did not take effect on "
+        "this kernel image. Run > Restart session, then Run All again.")'''),
     ("code", CELL_GET_CODE_EVAL),
     ("markdown", """## 4. Build the held-out sets
 
