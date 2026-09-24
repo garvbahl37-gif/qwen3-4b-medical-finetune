@@ -71,6 +71,31 @@ def build_messages(rec: Record, *, with_answer: bool) -> list[dict]:
     return msgs
 
 
+def render_chat(tok, messages: list[dict]) -> str:
+    """Render a conversation for the model to continue, in the trained format.
+
+    Every training example rendered the assistant turn after an empty think
+    block, '<think>\\n\\n</think>\\n\\n'. Qwen3's chat template only emits that
+    prefix at inference when told enable_thinking=False. At its default the
+    model starts in thinking mode instead: the fine-tune is then scored on a
+    format it never saw, and the base spends its token budget thinking.
+    """
+    return tok.apply_chat_template(messages, tokenize=False,
+                                   add_generation_prompt=True,
+                                   enable_thinking=False)
+
+
+def render_inference_prompt(tok, rec: Record, *, answer_prefix: bool = False) -> str:
+    """The prompt a benchmark question is scored with.
+
+    answer_prefix=True appends 'Answer:' for constrained scoring, so the very
+    next token is the choice itself -- ' A' to ' D', exactly what follows
+    'Answer:' in every training target.
+    """
+    text = render_chat(tok, build_messages(rec, with_answer=False))
+    return text + "Answer:" if answer_prefix else text
+
+
 def extract_letter(text: str) -> str | None:
     """Pull the chosen letter out of a model response.
 

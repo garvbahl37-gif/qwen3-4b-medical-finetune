@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from training.prompts import build_messages, extract_letter, target_text
+from training.prompts import (
+    build_messages,
+    extract_letter,
+    render_chat,
+    render_inference_prompt,
+    target_text,
+)
 from training.records import Record
 
 MCQ = Record(
@@ -113,3 +119,35 @@ def test_record_survives_a_dict_round_trip():
     assert Record.from_dict(MCQ.to_dict()) == MCQ
     assert MCQ.to_dict()["options"] == {"A": "Vitamin A", "B": "Vitamin C",
                                         "C": "Vitamin D", "D": "Vitamin K"}
+
+
+class _RecordingTokenizer:
+    """Stands in for a real tokenizer; records what the template was asked."""
+
+    def __init__(self) -> None:
+        self.messages = None
+        self.kwargs = None
+
+    def apply_chat_template(self, messages, **kwargs):
+        self.messages, self.kwargs = messages, kwargs
+        return "<rendered>"
+
+
+def test_render_chat_disables_thinking_to_match_the_trained_format():
+    tok = _RecordingTokenizer()
+    render_chat(tok, [{"role": "user", "content": "hi"}])
+    assert tok.kwargs["enable_thinking"] is False
+    assert tok.kwargs["add_generation_prompt"] is True
+    assert tok.kwargs["tokenize"] is False
+
+
+def test_render_inference_prompt_sends_the_question_without_its_answer():
+    tok = _RecordingTokenizer()
+    render_inference_prompt(tok, MCQ)
+    assert [m["role"] for m in tok.messages] == ["system", "user"]
+
+
+def test_answer_prefix_appends_the_cue_so_the_next_token_is_the_letter():
+    tok = _RecordingTokenizer()
+    assert render_inference_prompt(tok, MCQ, answer_prefix=True) == "<rendered>Answer:"
+    assert render_inference_prompt(tok, MCQ) == "<rendered>"
