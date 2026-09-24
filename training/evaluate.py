@@ -149,7 +149,10 @@ def score_constrained(model, tok, recs: list[Record], *, batch_size: int = 16
     Position ids are derived from the attention mask so a left-padded
     sequence sees the same positions it would see alone, and only the last
     position's logits are materialised -- the full vocabulary at every
-    position would be 4GB per batch of 16 on a T4.
+    position would be 4GB per batch of 16 on a T4. use_cache=False skips
+    building a KV cache nothing ever reads back, since this is a single
+    forward pass rather than incremental decoding -- about 2.2GiB freed at
+    the widest batch on a T4.
     """
     _require_left_padding(tok)
     import torch
@@ -163,7 +166,7 @@ def score_constrained(model, tok, recs: list[Record], *, batch_size: int = 16
         positions = (enc["attention_mask"].long().cumsum(-1) - 1).clamp(min=0)
         with torch.no_grad():
             last = model(**enc, position_ids=positions,
-                         logits_to_keep=1).logits[:, -1, :]
+                         logits_to_keep=1, use_cache=False).logits[:, -1, :]
         for row in last:
             try:
                 out.append(pick_from_logits(row, ids))
