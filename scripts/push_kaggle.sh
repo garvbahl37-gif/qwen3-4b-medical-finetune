@@ -28,7 +28,18 @@ cp training/*.py training/requirements.txt "$STAGE/"
 bash scripts/kaggle_dataset.sh medical-ft-code "Medical Fine-tune Code" "$STAGE"
 
 echo "==> pushing the notebook in $KERNEL_DIR"
-"$KAGGLE" kernels push -p "$KERNEL_DIR"
+# kaggle kernels push prints its own error text ("Kernel push error...",
+# "...not valid dataset sources...") but exits 0 regardless, so the exit code
+# alone cannot tell a real push from a rejected one -- the output has to be
+# read.
+PUSH_OUTPUT="$("$KAGGLE" -W kernels push -p "$KERNEL_DIR" 2>&1)" || true
+echo "$PUSH_OUTPUT"
+if echo "$PUSH_OUTPUT" | grep -qiE 'error|not valid'; then
+  echo "==> kernel push failed"; exit 1
+fi
+if ! echo "$PUSH_OUTPUT" | grep -qi 'successfully pushed'; then
+  echo "==> kernel push did not report success"; exit 1
+fi
 
 ID="$(python3 -c "import json;print(json.load(open('$KERNEL_DIR/kernel-metadata.json'))['id'])")"
 echo
