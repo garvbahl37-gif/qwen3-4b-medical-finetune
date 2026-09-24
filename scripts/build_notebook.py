@@ -145,8 +145,9 @@ print(f"torch       : {torch.__version__}   bf16: {torch.cuda.is_bf16_supported(
 if major < 7:
     raise SystemExit(
         f"\\nSTOP. Compute capability {major}.{minor} ({name.split(',')[0]}) has no "
-        "kernels in modern PyTorch builds.\\nFIX: sidebar -> Accelerator -> "
-        "'GPU T4 x2', then Run All. The GPU type cannot be set through the API.")
+        "kernels in modern PyTorch builds.\\nFIX: kernel-metadata.json pins "
+        "machine_shape to a T4 already; if a P100 still arrived, set sidebar -> "
+        "Accelerator -> 'GPU T4 x2' by hand, then Run All again.")
 print("\\nGPU supported." if torch.cuda.is_bf16_supported()
       else "\\nGPU supported. Turing has no bf16; fp16 is selected automatically.")'''),
     ("code", """%%capture

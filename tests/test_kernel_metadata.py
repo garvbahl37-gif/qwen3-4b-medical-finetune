@@ -21,6 +21,15 @@ def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
     assert slug == slugify(meta["title"])
 
 
+@pytest.mark.parametrize("path", ["training/kernel-metadata.json",
+                                  "evaluation/kernel-metadata.json"])
+def test_kernel_is_pinned_to_a_t4(path):
+    # Without machine_shape a push most likely lands on a P100, which the
+    # hardware-check cell then stops on at cell 1.
+    meta = json.loads(Path(path).read_text())
+    assert meta["machine_shape"] == "NvidiaTeslaT4"
+
+
 def test_the_evaluation_kernel_attaches_code_and_adapter_on_a_private_gpu():
     meta = json.loads(Path("evaluation/kernel-metadata.json").read_text())
     assert set(meta["dataset_sources"]) == {"gb1105/medical-ft-code",
