@@ -7,9 +7,14 @@ Plan 1: `docs/superpowers/plans/2026-09-20-training-and-evaluation.md`
 
 ## Where it stands
 
-**Training is done.** One clean run on 2026-09-21 produced the adapter.
-**Nothing has been evaluated yet**, so there is no claim yet that fine-tuning
-helped. The next GPU job is the base-vs-tuned comparison.
+**Training is done.** One clean run on 2026-09-21 produced the adapter, now
+kept at `training/outputs/run1` (264 MB, outside git). **Nothing has been
+evaluated yet**, so there is no claim yet that fine-tuning helped.
+
+Training loss levelled off at about step 150, roughly 4,800 examples in, and
+barely moved over the remaining 390 steps. Only evaluation can say whether the
+second half helped, but it is a reason not to assume more of the same data is
+the lever.
 
 ## Plan 1 — training (complete)
 
@@ -59,25 +64,44 @@ now guarded in code:
 5. `trl` was imported before `unsloth`, so the EOS token was set on the wrong class
 6. the budget probe aborted a 12-hour run at step 50, as designed
 
-## Plan 2 — evaluate and serve (next)
+## Plan 2 — evaluation (next)
 
-- [ ] Run `evaluate.py` end to end **locally** on a tiny Qwen3 before any GPU time,
-      so the Kaggle run cannot fail on untested code
-- [ ] Upload the adapter as a Kaggle dataset
-- [ ] Evaluation notebook: an 8-question smoke pass, then the full 5,456, in one
-      session
-- [ ] Record the result honestly, including if fine-tuning does not beat base
-- [ ] Merge the adapter into full-precision weights for serving
-- [ ] FastAPI server with `screen_message()`: emergency red flags shown above the
-      answer, validated against a benign control set so it does not fire on
-      everything
+`docs/superpowers/plans/2026-09-24-evaluation.md`. Drops Unsloth from evaluation so
+the scoring path can run on this Mac before it runs on Kaggle.
 
-## Plan 3 — frontend
+- [ ] **Task 1** load models with plain transformers + peft; render prompts with
+      `enable_thinking=False`. Writing the plan found the scoring prompt left Qwen3
+      in thinking mode, while every training example put the answer after an empty
+      think block: the fine-tune would have been scored off-format.
+- [ ] **Task 2** batched scoring from one load (base = adapter switched off), left
+      padding, position ids from the mask, and a hard stop on non-finite logits
+- [ ] **Task 3** end-to-end smoke run on Qwen3-0.6B locally: prompt format, batch
+      size changes no answer, the disabled adapter scores the true base
+- [ ] **Task 4** evaluation notebook: a 32-question smoke pass projects the runtime
+      in-session before the full 5,456; adapter uploaded as a Kaggle dataset
+- [ ] **The one Kaggle start**, then record the result honestly, including if
+      fine-tuning does not beat base
 
-- [ ] Next.js chat: streaming, multi-turn, safety banner, red-flag callout
-- [ ] Benchmark tab: base vs fine-tuned, both scoring modes, per-subject table
-- [ ] Method tab: how the data was filtered, decontaminated and scored
-- [ ] `MOCK_BACKEND=1` so the UI builds and tests without the model
+## Plan 3 — serving and frontend
+
+`docs/superpowers/plans/2026-09-24-serving-and-frontend.md`
+
+- [ ] **Task 1** `screen_message()`: seven emergencies in lay language, notes on
+      dosing, stopping medication and diagnosis. Pasted exam vignettes are read as
+      exam context, so the red panel is kept for people describing themselves.
+      Its patterns pass all 42 of their own tests, verified before the plan was
+      committed.
+- [ ] **Task 2** FastAPI server: every stream opens with the screen, before the
+      first token; mock backend for building without the model
+- [ ] **Task 3** web app shell and design system: operating-theatre green with red
+      reserved for emergencies; Atkinson Hyperlegible for the interface, STIX Two
+      for the model's answers
+- [ ] **Task 4** Ask view: streamed answers under their safety screen
+- [ ] **Task 5** Results view, laid out as a laboratory report; the loss chart
+      follows the dataviz checks (its line colour was re-picked after the
+      validator failed the page green on chroma)
+- [ ] **Task 6** Method view, Playwright end-to-end tests, README
+- [ ] Screenshot every page at 1280px and 360px and fix what collides or overflows
 
 ## Possibly later
 
