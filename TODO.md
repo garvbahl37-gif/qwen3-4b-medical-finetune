@@ -49,6 +49,10 @@ the lever.
 | mean training loss | 1.796 (3.03 at the first logged step) |
 | adapter | LoRA rank 32 on all seven projections, 264 MB |
 
+The notebook exactly as it ran on Kaggle, and its output, are kept in
+`results/run1/` (`kaggle_training_notebook.ipynb`, `kaggle_training_output.txt`),
+next to the loss curve, the data report and the training stats.
+
 Scaled down from 40,000 because the budget probe measured the T4 at 0.9
 examples/sec: 40,000 would have taken 12 hours against Kaggle's 9-hour cap.
 
@@ -138,10 +142,9 @@ questions to conclude anything, and exactly what the full 5,456 will settle.
 
 ## Housekeeping
 
-- [ ] **Force-push `main` to GitHub.** PR #1 merged the branch from before the
-      author email was corrected, so GitHub still credits 12 commits to
-      `jiteshbhalla1-web`. Local `main` has the corrected history, and every file
-      on the remote is also present locally, so nothing is lost:
-      `git push --force-with-lease origin main`
+- [x] **Force-push `main` to GitHub** (2026-09-25). PR #1 had merged the branch
+      from before the author email was corrected, crediting 12 commits to
+      `jiteshbhalla1-web`. After the push, all 43 commits are authored by
+      garvbahl37-gif, and GitHub's contributor list shows only that account.
 - [ ] **Rotate the Kaggle token** `KGAT_...` at kaggle.com/settings: it was pasted
       into a chat session
