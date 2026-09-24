@@ -331,7 +331,10 @@ for name in ("medqa", "medmcqa"):
             f"{gen['tuned_unparseable']}, base {gen['base_unparseable']}.\\n"
             "A base this broken (truncation, fp16 garbage) would flatter the "
             "fine-tune, so neither direction is a real result.\\n"
-            "FIX: raise --max-new-tokens in the full run.")
+            f"FIX: read the completions in outputs/smoke_{name}.json. If "
+            "they are cut off, raise --max-new-tokens. If they are garbage, "
+            "half precision is failing on this GPU and the result must not "
+            "be reported.")
 
 print(f"\\nprojected full run: {projected / 3600:.2f}h "
       f"against a {SESSION_BUDGET / 3600:.1f}h budget")
@@ -364,13 +367,20 @@ for label, name in (("MedQA-USMLE test", "medqa"),
         if m["p_value"] >= 0.05:
             print("               not significant at p<0.05: "
                   "indistinguishable from base")
+    gen = data["reports"]["generative"]
+    cap = data["generation"]["hit_cap"]
+    print(f"  generative answers with no letter: base {gen['base_unparseable']}, "
+          f"tuned {gen['tuned_unparseable']} of {gen['n']}  |  "
+          f"hit the {data['generation']['max_new_tokens']}-token cap: "
+          f"base {cap['base']}, tuned {cap['tuned']}")
     shutil.copy(f"outputs/eval_{name}.json", out / f"eval_{name}.json")
 print("\\nSaved eval_medqa.json and eval_medmcqa.json to the Output panel.")'''),
     ("markdown", """## Done
 
 `eval_medqa.json` and `eval_medmcqa.json` are in the **Output** panel: accuracy
 for both models in both modes, McNemar significance, a per-subject breakdown,
-timing, and twelve raw completions per model for reading by eye."""),
+timing, every question's prediction from both models, hit-cap counts, and
+twelve raw completions per model for reading by eye."""),
 ]
 
 
