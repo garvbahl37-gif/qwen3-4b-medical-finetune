@@ -1,0 +1,146 @@
+# Output of the training run on Kaggle, 2026-09-21
+# Kernel gb1105/qwen3-4b-medical-fine-tune-training, version 7, Tesla T4.
+# Standard output only, de-duplicated; the notebook that produced it is
+# kaggle_training_notebook.ipynb in this directory.
+
+GPU         : Tesla T4, 15360 MiB
+Tesla T4, 15360 MiB
+visible GPUs: 1 (pinned to one on purpose)
+capability  : 7.5
+torch       : 2.10.0+cu128   bf16: True
+
+GPU supported.
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+ok | transformers 5.5.0 | trl 0.24.0 | peft 0.19.1
+found the code at: /kaggle/input/datasets/gb1105/medical-ft-code
+cwd: /kaggle/working/ft | 11 modules: __init__, budget, check_lengths, evalcore, evaluate, kaggle_paths, prepare_data, prompts, records, sources, train
+$ python -m training.prepare_data --medmcqa 6300 --medqa 3700 --medical-o1 2600 --chatdoctor 5400 --val-size 500 --out data
+Loading held-out benchmarks first, so training can be cleaned against them.
+  medqa        kept  1,273 of  1,273 inspected (100.0%)
+  medmcqa      kept  4,183 of  4,183 inspected (100.0%)
+  holdout pool: 5,456 questions
+Loading training sources.
+  medmcqa      kept  6,300 of 12,527 inspected (50.3%)
+  medqa        kept  3,700 of  3,700 inspected (100.0%)
+  medical_o1   kept  2,600 of  2,600 inspected (100.0%)
+  chatdoctor   kept  5,400 of  5,400 inspected (100.0%)
+decontamination: dropped 90 of 18,000 (0.50%) as holdout overlap or duplicate
+wrote data/train.jsonl  17,410 rows
+wrote data/val.jsonl  500 rows
+mix: {'medical_o1': 2520, 'chatdoctor': 5246, 'medmcqa': 6043, 'medqa': 3601}
+multiple-choice 55%, free-text 45%
+exam+reasoning 70%, patient dialogue 30%  (spec target 70/30)
+ok
+{
+  "train_size": 17410,
+  "val_size": 500,
+  "holdout_pool": 5456,
+  "decontaminated_removed": 90,
+  "decontaminated_from": 18000,
+  "mix": {
+    "medical_o1": 2520,
+    "chatdoctor": 5246,
+    "medmcqa": 6043,
+    "medqa": 3601
+  },
+  "mcq_fraction": 0.5539,
+  "reasoning_fraction": 0.6987,
+  "seed": 42
+}
+tokens  n=17,410  median=270  p90=621  p99=929  max=3403
+suggested --max-seq 960 (p99 rounded up to a multiple of 64)
+it would drop 125 examples
+MAX_SEQ = 960
+$ python -m training.check_lengths --data data/train.jsonl --max-seq 960 --drop
+125 of 17,410 exceed max-seq 960 (0.72%)
+dropped 125; 17,285 remain in data/train.jsonl
+$ python -m training.check_lengths --data data/val.jsonl --max-seq 960 --drop
+tokens  n=500  median=276  p90=615  p99=881  max=1357
+2 of 500 exceed max-seq 960 (0.40%)
+dropped 2; 498 remain in data/val.jsonl
+$ python -m training.train --data data --out outputs/run1 --max-seq 960 --batch-size 8 --grad-accum 4 --rank 32 --epochs 1 --save-steps 200 --budget-seconds 21600
+==((====))==  Unsloth 2026.9.7: Fast Qwen3 patching. Transformers: 5.5.0.
+   \\   /|    Tesla T4. Num GPUs = 1. Max memory: 14.562 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.10.0+cu128. CUDA: 7.5. CUDA Toolkit: 12.8. Triton: 3.6.0
+\        /    Bfloat16 = FALSE. FA [Xformers = 0.0.35. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+train 17,285   max_seq 960
+SFTConfig.eos_token = '<|im_end|>' (tokenizer EOS '<|im_end|>', id 151645)
+trl 0.24.0
+SFTConfig class: trl.trainer.sft_config.SFTConfig
+config is an instance of it: True
+config.eos_token = '<|im_end|>'
+🦥 Unsloth: Padding-free auto-enabled, enabling faster training.
+masking verified: 90 tokens masked, 351 trained
+  first trained tokens: "<think>\n\n</think>\n\nOkay, so let's think about the symptoms here. We have a nineteen-year-old girl who's short, has widely spaced nipples, and hasn't started her periods yet. That"
+Unsloth: Will smartly offload gradients to save VRAM!
+Unsloth: Double buffering enabled (parallel H2D + compute) for backward pass.
+{'loss': '2.912', 'grad_norm': '0.6036', 'learning_rate': '0.0001059', 'epoch': '0.01851'}
+{'loss': '2.041', 'grad_norm': '1.173', 'learning_rate': '0.0002', 'epoch': '0.03702'}
+{'loss': '1.92', 'grad_norm': '0.2602', 'learning_rate': '0.0001997', 'epoch': '0.05553'}
+{'loss': '1.835', 'grad_norm': '0.211', 'learning_rate': '0.0001991', 'epoch': '0.07404'}
+probe: 33.16s/step, projected 4.98h for 541 steps
+projection fits the budget; continuing
+{'loss': '1.892', 'grad_norm': '0.2763', 'learning_rate': '0.0001982', 'epoch': '0.09255'}
+{'loss': '1.8', 'grad_norm': '0.2579', 'learning_rate': '0.0001968', 'epoch': '0.1111'}
+{'loss': '1.789', 'grad_norm': '0.2534', 'learning_rate': '0.0001952', 'epoch': '0.1296'}
+{'loss': '1.85', 'grad_norm': '0.2383', 'learning_rate': '0.0001932', 'epoch': '0.1481'}
+{'loss': '1.78', 'grad_norm': '0.2245', 'learning_rate': '0.0001908', 'epoch': '0.1666'}
+{'loss': '1.866', 'grad_norm': '0.2669', 'learning_rate': '0.0001882', 'epoch': '0.1851'}
+{'loss': '1.806', 'grad_norm': '0.1953', 'learning_rate': '0.0001852', 'epoch': '0.2036'}
+{'loss': '1.823', 'grad_norm': '0.2089', 'learning_rate': '0.0001819', 'epoch': '0.2221'}
+{'loss': '1.808', 'grad_norm': '0.2287', 'learning_rate': '0.0001783', 'epoch': '0.2406'}
+{'loss': '1.861', 'grad_norm': '0.2485', 'learning_rate': '0.0001744', 'epoch': '0.2591'}
+{'loss': '1.754', 'grad_norm': '0.3063', 'learning_rate': '0.0001703', 'epoch': '0.2776'}
+{'loss': '1.803', 'grad_norm': '0.4547', 'learning_rate': '0.0001659', 'epoch': '0.2962'}
+{'loss': '1.725', 'grad_norm': '0.2464', 'learning_rate': '0.0001613', 'epoch': '0.3147'}
+{'loss': '1.827', 'grad_norm': '0.2622', 'learning_rate': '0.0001564', 'epoch': '0.3332'}
+{'loss': '1.762', 'grad_norm': '0.2671', 'learning_rate': '0.0001514', 'epoch': '0.3517'}
+{'loss': '1.759', 'grad_norm': '0.2315', 'learning_rate': '0.0001461', 'epoch': '0.3702'}
+{'loss': '1.764', 'grad_norm': '0.2141', 'learning_rate': '0.0001407', 'epoch': '0.3887'}
+{'loss': '1.794', 'grad_norm': '0.2249', 'learning_rate': '0.0001352', 'epoch': '0.4072'}
+{'loss': '1.72', 'grad_norm': '0.2723', 'learning_rate': '0.0001295', 'epoch': '0.4257'}
+{'loss': '1.78', 'grad_norm': '0.2451', 'learning_rate': '0.0001238', 'epoch': '0.4442'}
+{'loss': '1.791', 'grad_norm': '0.3469', 'learning_rate': '0.0001179', 'epoch': '0.4627'}
+{'loss': '1.814', 'grad_norm': '0.2525', 'learning_rate': '0.000112', 'epoch': '0.4813'}
+{'loss': '1.758', 'grad_norm': '0.222', 'learning_rate': '0.000106', 'epoch': '0.4998'}
+{'loss': '1.693', 'grad_norm': '0.2209', 'learning_rate': '0.0001', 'epoch': '0.5183'}
+{'loss': '1.666', 'grad_norm': '0.2292', 'learning_rate': '9.401e-05', 'epoch': '0.5368'}
+{'loss': '1.791', 'grad_norm': '0.2435', 'learning_rate': '8.804e-05', 'epoch': '0.5553'}
+{'loss': '1.697', 'grad_norm': '0.2337', 'learning_rate': '8.211e-05', 'epoch': '0.5738'}
+{'loss': '1.713', 'grad_norm': '0.2712', 'learning_rate': '7.625e-05', 'epoch': '0.5923'}
+{'loss': '1.716', 'grad_norm': '0.2552', 'learning_rate': '7.047e-05', 'epoch': '0.6108'}
+{'loss': '1.717', 'grad_norm': '0.3253', 'learning_rate': '6.48e-05', 'epoch': '0.6293'}
+{'loss': '1.667', 'grad_norm': '0.3291', 'learning_rate': '5.925e-05', 'epoch': '0.6478'}
+{'loss': '1.804', 'grad_norm': '0.2379', 'learning_rate': '5.385e-05', 'epoch': '0.6664'}
+{'loss': '1.748', 'grad_norm': '0.2239', 'learning_rate': '4.862e-05', 'epoch': '0.6849'}
+{'loss': '1.797', 'grad_norm': '0.2546', 'learning_rate': '4.357e-05', 'epoch': '0.7034'}
+{'loss': '1.779', 'grad_norm': '0.2552', 'learning_rate': '3.873e-05', 'epoch': '0.7219'}
+{'loss': '1.768', 'grad_norm': '0.2089', 'learning_rate': '3.41e-05', 'epoch': '0.7404'}
+{'loss': '1.693', 'grad_norm': '0.279', 'learning_rate': '2.971e-05', 'epoch': '0.7589'}
+{'loss': '1.744', 'grad_norm': '0.2431', 'learning_rate': '2.558e-05', 'epoch': '0.7774'}
+{'loss': '1.713', 'grad_norm': '0.2811', 'learning_rate': '2.171e-05', 'epoch': '0.7959'}
+{'loss': '1.767', 'grad_norm': '0.2574', 'learning_rate': '1.812e-05', 'epoch': '0.8144'}
+{'loss': '1.751', 'grad_norm': '0.2997', 'learning_rate': '1.483e-05', 'epoch': '0.8329'}
+{'loss': '1.762', 'grad_norm': '0.3019', 'learning_rate': '1.184e-05', 'epoch': '0.8515'}
+{'loss': '1.779', 'grad_norm': '0.2922', 'learning_rate': '9.173e-06', 'epoch': '0.87'}
+{'loss': '1.772', 'grad_norm': '0.226', 'learning_rate': '6.829e-06', 'epoch': '0.8885'}
+{'loss': '1.703', 'grad_norm': '0.2655', 'learning_rate': '4.821e-06', 'epoch': '0.907'}
+{'loss': '1.77', 'grad_norm': '0.2613', 'learning_rate': '3.154e-06', 'epoch': '0.9255'}
+{'loss': '1.668', 'grad_norm': '0.2991', 'learning_rate': '1.835e-06', 'epoch': '0.944'}
+{'loss': '1.764', 'grad_norm': '0.2686', 'learning_rate': '8.686e-07', 'epoch': '0.9625'}
+{'loss': '1.747', 'grad_norm': '0.404', 'learning_rate': '2.587e-07', 'epoch': '0.981'}
+{'loss': '1.752', 'grad_norm': '0.2795', 'learning_rate': '7.189e-09', 'epoch': '0.9995'}
+{'train_runtime': '1.733e+04', 'train_samples_per_second': '0.997', 'train_steps_per_second': '0.031', 'train_loss': '1.796', 'epoch': '1'}
+saved adapter to outputs/run1
+########## Training stats ##########
+  train_runtime_seconds: 17332.0738
+  train_loss: 1.795876946114348
+  examples: 17285
+  max_seq: 960
+  batch_size: 8
+  grad_accum: 4
+  rank: 32
+Saved to /kaggle/working -- download run1-adapter.zip from the Output panel.

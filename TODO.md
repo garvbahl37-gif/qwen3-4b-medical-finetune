@@ -64,23 +64,49 @@ now guarded in code:
 5. `trl` was imported before `unsloth`, so the EOS token was set on the wrong class
 6. the budget probe aborted a 12-hour run at step 50, as designed
 
-## Plan 2 — evaluation (next)
+## Plan 2 — evaluation (built, launching next)
 
 `docs/superpowers/plans/2026-09-24-evaluation.md`. Drops Unsloth from evaluation so
 the scoring path can run on this Mac before it runs on Kaggle.
 
-- [ ] **Task 1** load models with plain transformers + peft; render prompts with
+- [x] **Task 1** load models with plain transformers + peft; render prompts with
       `enable_thinking=False`. Writing the plan found the scoring prompt left Qwen3
       in thinking mode, while every training example put the answer after an empty
       think block: the fine-tune would have been scored off-format.
-- [ ] **Task 2** batched scoring from one load (base = adapter switched off), left
-      padding, position ids from the mask, and a hard stop on non-finite logits
-- [ ] **Task 3** end-to-end smoke run on Qwen3-0.6B locally: prompt format, batch
-      size changes no answer, the disabled adapter scores the true base
-- [ ] **Task 4** evaluation notebook: a 32-question smoke pass projects the runtime
-      in-session before the full 5,456; adapter uploaded as a Kaggle dataset
+- [x] **Task 2** batched scoring from one load (base = adapter switched off), left
+      padding, position ids from the mask, a hard stop on non-finite logits.
+      The reviewer traced all of it into the installed transformers and peft source.
+- [x] **Task 3** end-to-end smoke run on Qwen3-0.6B locally: batch 1 and batch 4
+      give identical answers with up to 18 tokens of real padding, and the disabled
+      adapter scores exactly like a freshly loaded base
+- [x] **Task 4** evaluation notebook with an in-session smoke pass and a 7.5 h
+      budget gate. Review caught that Kaggle was still serving the old code
+      (`modeling.py` missing entirely) and the upload script could not tell: it now
+      waits for Kaggle's file listing to match, and each notebook checks a content
+      fingerprint of the code it was built for
+- [x] **The real adapter on the real base, locally**: 504 of 504 weights load,
+      252 of 252 LoRA matrices non-zero, and it changes the model's answers
+- [ ] **Final-review fixes before the push**: pin the GPU to a T4 (without it the
+      new kernel would likely get a P100 and stop at cell 1); make the upload wait
+      immune to a CLI version warning; save every per-question prediction so this
+      one GPU session can answer why, not just what
 - [ ] **The one Kaggle start**, then record the result honestly, including if
       fine-tuning does not beat base
+
+**Early signal, not a result:** on 16 MedQA test questions run locally, the base
+model scored 12/16 and the fine-tune 9/16 (3 regressions, 0 wins, p = 0.25). Too few
+questions to conclude anything, and exactly what the full 5,456 will settle.
+
+### What the full evaluation must state, whatever it finds
+
+- The adapter was trained on the 4-bit base and is scored on the full-precision
+  base. If that biases anything, it biases against the fine-tune.
+- Answer-choice scoring asks for the letter immediately. For MedQA that is exactly
+  how it was trained; for MedMCQA training put a rationale first, so it may
+  understate the fine-tune there.
+- MedMCQA answers lean towards A (32%). A model can gain on MedMCQA by guessing A
+  more often, which is not medical knowledge; per-question predictions will show
+  whether that happened. MedQA's answers are balanced, so it is the cleaner test.
 
 ## Plan 3 — serving and frontend
 
