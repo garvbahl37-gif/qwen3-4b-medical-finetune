@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 from training.budget import check, project
+from training.format_v2 import render_training_text
 from training.prompts import build_messages
 from training.records import Record
 
@@ -49,16 +50,49 @@ def pick_kwarg(func, *candidates: str) -> str:
     )
 
 
-def build_dataset(path: Path, tok):
+def should_stop(*, elapsed: float, limit: int) -> bool:
+    return limit > 0 and elapsed >= limit
+
+
+def loss_curve(log_history: list[dict]) -> list[dict]:
+    return [{"step": h.get("step"), "epoch": h.get("epoch"), "loss": h["loss"],
+             "lr": h.get("learning_rate")}
+            for h in log_history if "loss" in h]
+
+
+def require_reasoning_rendered(recs: list[Record], texts: list[str]) -> None:
+    """Stop before step 1 if the chat template drops reasoning_content.
+
+    The template that renders training rows is the one Unsloth's tokenizer
+    carries on Kaggle, which could differ from the one checked locally. A
+    template that ignored the field would train every reasoning row as a
+    bare answer -- run 1's failure again -- with nothing to say so."""
+    for rec, text in zip(recs, texts):
+        if rec.reasoning:
+            probe = rec.reasoning.strip()[:60]
+            if probe not in text:
+                raise SystemExit(
+                    f"\nSTOP. The chat template dropped the reasoning of {rec.id}.\n"
+                    f"Rendered: {text[-300:]!r}\nFIX: check the tokenizer's chat "
+                    "template for reasoning_content handling before training.")
+            return
+
+
+def build_texts(rows: list[dict], tok, fmt: str) -> list[str]:
+    recs = [Record.from_dict(row) for row in rows]
+    if fmt == "v2":
+        texts = [render_training_text(tok, rec) for rec in recs]
+        require_reasoning_rendered(recs, texts)
+        return texts
+    return [tok.apply_chat_template(build_messages(rec, with_answer=True), tokenize=False)
+            for rec in recs]
+
+
+def build_dataset(path: Path, tok, fmt: str = "v1"):
     from datasets import Dataset
 
     rows = [json.loads(line) for line in path.read_text().splitlines() if line]
-    texts = [
-        tok.apply_chat_template(
-            build_messages(Record.from_dict(row), with_answer=True), tokenize=False)
-        for row in rows
-    ]
-    return Dataset.from_dict({"text": texts})
+    return Dataset.from_dict({"text": build_texts(rows, tok, fmt)})
 
 
 def verify_masking(trainer, tok) -> None:
@@ -108,6 +142,14 @@ def main() -> None:
     p.add_argument("--save-steps", type=int, default=200)
     p.add_argument("--budget-seconds", type=int, default=21600)
     p.add_argument("--probe-steps", type=int, default=50)
+    p.add_argument("--format", choices=("v1", "v2"), default="v1",
+                   help="v2: run 2's thinking format (training.format_v2)")
+    p.add_argument("--group-by-length", action="store_true",
+                   help="batch similar lengths together instead of packing")
+    p.add_argument("--stop-after-seconds", type=int, default=0,
+                   help="stop cleanly and save once training has run this long (0: off)")
+    p.add_argument("--probe-abort", action=argparse.BooleanOptionalAction, default=True,
+                   help="abort at --probe-steps when the projection exceeds --budget-seconds")
     args = p.parse_args()
 
     # Unsloth patches trl and transformers at import time and must come first.
@@ -141,7 +183,7 @@ def main() -> None:
     # Evaluation now runs in its own, separate Kaggle notebook, and no
     # eval_strategy is set here, so a val split would be tokenised and never
     # consulted. Only the training set is built.
-    train_ds = build_dataset(args.data / "train.jsonl", tok)
+    train_ds = build_dataset(args.data / "train.jsonl", tok, args.format)
     print(f"train {len(train_ds):,}   max_seq {args.max_seq}")
 
     class Probe(TrainerCallback):
@@ -165,9 +207,37 @@ def main() -> None:
                   f"projected {proj['projected_seconds'] / 3600:.2f}h "
                   f"for {int(state.max_steps):,} steps", flush=True)
             message = check(proj, args.budget_seconds)
-            if message:
+            if message and args.probe_abort:
                 raise SystemExit(message)
-            print("projection fits the budget; continuing\n", flush=True)
+            if message:
+                print(f"probe warning:{message}\nthe --stop-after-seconds guard "
+                      "ends training in time instead", flush=True)
+            else:
+                print("projection fits the budget; continuing\n", flush=True)
+
+    class StopAtBudget(TrainerCallback):
+        """End training cleanly once --stop-after-seconds have passed.
+
+        Run 1's probe aborted a whole session at step 50. This keeps the
+        steps already trained: the adapter is saved and the report says the
+        schedule was cut short."""
+
+        def __init__(self) -> None:
+            self.started = time.time()
+            self.fired = False
+
+        def on_step_end(self, cfg, state, control, **kw):
+            if self.fired or not should_stop(elapsed=time.time() - self.started,
+                                             limit=args.stop_after_seconds):
+                return
+            self.fired = True
+            print(f"\ntime guard: {args.stop_after_seconds / 3600:.2f}h reached at step "
+                  f"{state.global_step} of {state.max_steps}; stopping and saving",
+                  flush=True)
+            control.should_training_stop = True
+            control.should_save = True
+
+    stopper = StopAtBudget()
 
     # Pass eos_token in the constructor, unconditionally, with a fallback for
     # an older TRL that has no such field. Not guarded by signature
@@ -191,6 +261,8 @@ def main() -> None:
         seed=42,
         output_dir=str(args.out),
         report_to="none",
+        # transformers 5 replaced group_by_length with this field.
+        **({"train_sampling_strategy": "group_by_length"} if args.group_by_length else {}),
         **{max_seq_kwarg: args.max_seq},
     )
     try:
@@ -247,7 +319,7 @@ def main() -> None:
         model=model,
         args=config,
         train_dataset=train_ds,
-        callbacks=[Probe()],
+        callbacks=[Probe(), stopper],
         **{tokenizer_kwarg: tok},
     )
 
@@ -264,7 +336,10 @@ def main() -> None:
 
     model.save_pretrained(str(args.out))
     tok.save_pretrained(str(args.out))
+    (args.out / "loss_curve.json").write_text(
+        json.dumps(loss_curve(trainer.state.log_history), indent=2))
     (args.out / "train_stats.json").write_text(json.dumps({
+        "format": args.format,
         "train_runtime_seconds": stats.metrics.get("train_runtime"),
         "train_loss": stats.metrics.get("train_loss"),
         "examples": len(train_ds),
@@ -272,6 +347,11 @@ def main() -> None:
         "batch_size": args.batch_size,
         "grad_accum": args.grad_accum,
         "rank": args.rank,
+        "lr": args.lr,
+        "group_by_length": args.group_by_length,
+        "steps": trainer.state.global_step,
+        "max_steps": trainer.state.max_steps,
+        "stopped_early": stopper.fired,
     }, indent=2))
     print(f"saved adapter to {args.out}")
 
