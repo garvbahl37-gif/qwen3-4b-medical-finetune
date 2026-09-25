@@ -1,0 +1,149 @@
+{
+  "version": "run2",
+  "created": "2026-09-25T13:10:22+00:00",
+  "seed": 42,
+  "tokenizer": "unsloth/Qwen3-4B",
+  "cap": 3072,
+  "scale": 1.25,
+  "max_seq": 2496,
+  "length": {
+    "n": 13617,
+    "median": 670,
+    "p90": 1281,
+    "p99": 2199,
+    "max": 2496
+  },
+  "train_size": 13617,
+  "dropped_over_max_seq": 133,
+  "by_source": {
+    "medical_o1": 1375,
+    "medical_o1_direct": 812,
+    "medmcqa": 1000,
+    "medqa": 688,
+    "medreason": 4125,
+    "pubmedqa_artificial": 938,
+    "r1_distill": 1945,
+    "reasonmed": 672,
+    "ultramedical": 2062
+  },
+  "reasoning_fraction": 0.7475,
+  "mcq_fraction": 0.5956,
+  "sources": {
+    "medreason:mcq": {
+      "target": 2750,
+      "seen": 6354,
+      "unusable": 2326,
+      "other_kind": 1274,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 3,
+      "duplicate": 1,
+      "too_long": 0,
+      "kept": 2750
+    },
+    "medreason:dialogue": {
+      "target": 1375,
+      "seen": 6881,
+      "unusable": 2532,
+      "other_kind": 2974,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 0,
+      "too_long": 0,
+      "kept": 1375
+    },
+    "r1_distill": {
+      "target": 2062,
+      "seen": 3030,
+      "unusable": 531,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 192,
+      "too_long": 245,
+      "kept": 2062
+    },
+    "ultramedical": {
+      "target": 2062,
+      "seen": 2225,
+      "unusable": 34,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 2,
+      "duplicate": 127,
+      "too_long": 0,
+      "kept": 2062
+    },
+    "medical_o1": {
+      "target": 1375,
+      "seen": 1652,
+      "unusable": 0,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 277,
+      "too_long": 0,
+      "kept": 1375
+    },
+    "reasonmed": {
+      "target": 688,
+      "seen": 3726,
+      "unusable": 2818,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 215,
+      "too_long": 5,
+      "kept": 688
+    },
+    "medmcqa": {
+      "target": 1000,
+      "seen": 1984,
+      "unusable": 963,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 21,
+      "too_long": 0,
+      "kept": 1000
+    },
+    "medqa": {
+      "target": 688,
+      "seen": 901,
+      "unusable": 0,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 1,
+      "duplicate": 212,
+      "too_long": 0,
+      "kept": 688
+    },
+    "pubmedqa_artificial": {
+      "target": 938,
+      "seen": 938,
+      "unusable": 0,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 0,
+      "too_long": 0,
+      "kept": 938
+    },
+    "medical_o1_direct": {
+      "target": 812,
+      "seen": 966,
+      "unusable": 0,
+      "other_kind": 0,
+      "contaminated_exact": 0,
+      "contaminated_ngram": 0,
+      "duplicate": 154,
+      "too_long": 0,
+      "kept": 812
+    }
+  },
+  "eval_sizes": {
+    "medqa": 1273,
+    "medmcqa": 4183,
+    "pubmedqa": 1000,
+    "mmlu_medical": 1089
+  }
+}

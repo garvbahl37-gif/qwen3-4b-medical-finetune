@@ -34,6 +34,36 @@ barely moved over the remaining 390 steps. Only evaluation can say whether the
 second half helped, but it is a reason not to assume more of the same data is
 the lever.
 
+## Run 2 — reasoning fine-tune (running on Kaggle)
+
+Spec `docs/superpowers/specs/2026-09-25-run2-reasoning-finetune-design.md`, plan
+`docs/superpowers/plans/2026-09-25-run2-reasoning-finetune.md`.
+
+- [x] Research: Unsloth and Qwen guidance (keep 75% reasoning data; never decode
+      greedily in thinking mode), the huggingface/skills and unsloth-buddy
+      fine-tuning skills, and six new licensed datasets
+- [x] Data built locally and frozen as a Kaggle dataset: 13,617 examples, 75%
+      reasoning in Qwen3's think block, the answer letter always first. Sources:
+      MedReason, R1-Distill (medical rows only), UltraMedical, medical-o1,
+      ReasonMed, MedMCQA, MedQA, PubMedQA; ChatDoctor dropped. Decontaminated
+      against all four benchmarks and deduplicated across sources
+      (`results/run2/data_report.json`)
+- [x] Code: 208 tests; the evaluation rehearsed end to end on Qwen3-0.6B in both
+      the local and the pinned Kaggle stack, and the notebook's own cells
+      rehearsed against a mock Kaggle layout
+- [x] **Launched 2026-09-25 13:27 UTC**: [the run 2 kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-run-2) (private), T4 x2,
+      one 12-hour session, no laptop needed. It trains (time guard at 5.75 h),
+      saves the adapter, runs an evaluation smoke test, then scores base and
+      fine-tune in parallel on MedQA, MedMCQA, PubMedQA and MMLU-medical, by
+      letter choice and by reasoning, until 40 minutes before the limit. The
+      notebook as pushed is `results/run2/kaggle_run2_notebook.ipynb`
+- [ ] The independent final review was still running at launch (the laptop was
+      about to sleep). Apply or record its findings; anything that affects this
+      run's numbers goes in the write-up
+- [ ] Download the output (`run2_eval.json`, predictions, adapter, loss curve)
+      into `results/run2/` and record the result honestly in this file and the
+      README, including if the fine-tune does not beat base
+
 ## Documentation
 
 - [x] `README.md` and three guides, written 2026-09-25 from the code and

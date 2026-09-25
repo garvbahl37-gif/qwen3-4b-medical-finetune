@@ -15,6 +15,7 @@ advice, and the model can give wrong answers.
 | Training | Done. One run on 2026-09-21 produced the LoRA adapter (run 1). |
 | Evaluation | Done on 2026-09-24: 5,456 held-out questions on a Kaggle T4, in 1.2 hours. |
 | Result | A small gain when choosing among the answer letters; worse when writing answers out, mostly from answer length and format. See below. |
+| Run 2 | A reasoning fine-tune on 13,617 examples, training and evaluating on Kaggle since 2026-09-25 13:27 UTC. |
 | Chat frontend | Planned, not built. |
 
 ## Result
