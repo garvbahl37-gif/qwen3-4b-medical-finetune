@@ -39,6 +39,11 @@ the model did learn some medicine; the format undid it.
 - Same base model, Qwen3-4B, so run 1 and run 2 compare.
 - Datasets with an explicit Apache-2.0 or MIT licence only.
   `II-Medical-Reasoning-SFT` and `m23k` are excluded: no licence stated.
+  `OpenMed/Medical-Reasoning-SFT-Trinity-Mini` is excluded: its card names no
+  source splits and no correctness check, so its answers are unverified.
+  ReasonMed's card describes multi-agent verification of every trace, and its
+  questions come from MedQA train and dev, MedMCQA train, PubMedQA's labeled
+  train and val (removed by decontamination here) and MMLU dev and val.
 - At most two agents at a time during implementation.
 
 ## Architecture
@@ -62,23 +67,23 @@ notebook checks. The notebook downloads only the two model checkpoints.
 
 ## Data
 
-About 10,000 examples: 75% reasoning, 25% direct. The count comes from run 1's
+About 11,000 examples: 75% reasoning, 25% direct. The count comes from run 1's
 measured throughput (about 700 padded tokens a second at batch 8) and an average
-of about 1,100 tokens per example, for roughly 5 hours of training inside a
-6-hour cap.
+of about 925 tokens per example (about 1,100 for reasoning rows, 400 for direct
+ones): roughly 4.5 hours of training inside a 5.75-hour cap.
 
 | Source (Hugging Face id) | Licence | Role | Target | Mapping |
 |---|---|---|---:|---|
-| `UCSC-VLAA/MedReason` | Apache-2.0 | reasoning | 2,500 | question + options → user; `reasoning` → think; gold letter → `Answer: X` + first explanation sentence of `answer` |
-| `FreedomIntelligence/Medical-R1-Distill-Data` (`en`) | Apache-2.0 | reasoning | 1,500 | `question` → user; R1 `reasoning` → think; `response` → answer |
-| `TsinghuaC3I/UltraMedical` (`Exam` and `Literature` types, all multiple choice) | MIT | reasoning | 1,500 | question → user; explanation, which ends "So, the answer is X.", → think; `answer` letter → `Answer: X` |
-| `FreedomIntelligence/medical-o1-reasoning-SFT` (`en`) | Apache-2.0 | reasoning | 1,000 | `Complex_CoT` → think; `Response` → answer |
-| `lingshu-medical-mllm/ReasonMed` | Apache-2.0 | reasoning | 500 | instruction → user; output → think + final answer line |
-| `OpenMed/Medical-Reasoning-SFT-Trinity-Mini` | Apache-2.0 | reasoning | 500 | `reasoning_content` → think; `content` → answer |
+| `UCSC-VLAA/MedReason`, `medqa` / `medmcqa` / `MedXpertQA` rows | Apache-2.0 | reasoning | 2,200 | question + options → user; `reasoning` → think; the option the `answer` text names → `Answer: X` + its explanation |
+| `UCSC-VLAA/MedReason`, `huatuo` rows (English free-text) | Apache-2.0 | reasoning | 1,100 | question → user; `reasoning` → think; `answer` → reply |
+| `FreedomIntelligence/Medical-R1-Distill-Data` (`en`) | Apache-2.0 | reasoning | 1,650 | `question` → user; R1 `reasoning` → think; `response` → answer |
+| `TsinghuaC3I/UltraMedical` (`Exam` and `Literature` types, all multiple choice) | MIT | reasoning | 1,650 | question → user; explanation, which ends "So, the answer is X.", → think; `answer` letter → `Answer: X` |
+| `FreedomIntelligence/medical-o1-reasoning-SFT` (`en`) | Apache-2.0 | reasoning | 1,100 | `Complex_CoT` → think; `Response` → answer |
+| `lingshu-medical-mllm/ReasonMed` | Apache-2.0 | reasoning | 550 | instruction → question + options; output → think; the letter the output states, else the one option its conclusion names → `Answer: X` |
 | `openlifescienceai/medmcqa` (train) | Apache-2.0 | direct | 800 | `Answer: X`, then the explanation after it |
-| `GBaker/MedQA-USMLE-4-options` (train) | MIT | direct | 500 | `Answer: X. <option text>` |
-| `qiaojin/PubMedQA` (`pqa_artificial`) | MIT | direct | 600 | abstract + question → user, options A yes / B no / C maybe; `Answer: X` + `long_answer` |
-| `FreedomIntelligence/medical-o1-reasoning-SFT` (`en`), other rows | Apache-2.0 | direct | 600 | `Response` alone, without the reasoning: concise direct answers for chat (replaces ChatDoctor) |
+| `GBaker/MedQA-USMLE-4-options` (train) | MIT | direct | 550 | `Answer: X. <option text>` |
+| `qiaojin/PubMedQA` (`pqa_artificial`) | MIT | direct | 750 | abstract + question → user, options A yes / B no / C maybe; `Answer: X` + `long_answer` |
+| `FreedomIntelligence/medical-o1-reasoning-SFT` (`en`), other rows | Apache-2.0 | direct | 650 | `Response` alone, without the reasoning: concise direct answers for chat (replaces ChatDoctor) |
 
 A row is multiple choice when its gold answer is a single option letter. A
 2026-09-25 sample of 3,000 UltraMedical rows held only `Exam` (66%) and
@@ -95,15 +100,20 @@ Filters, in order:
    or the row is dropped.
 3. **Decontaminated** against every evaluation question below: exact match after
    normalisation (lowercase, alphanumerics, collapsed spaces), plus any shared
-   13-word sequence for questions of 13 words or more. MedReason's `MMLU` rows
-   are dropped whole, since they may come from MMLU's test split. Counts go into
-   the data report per source.
+   13-word sequence for questions of 13 words or more. From MedReason only the
+   `medqa`, `medmcqa`, `MedXpertQA` and `huatuo` rows are used: its `MMLU` rows
+   may come from MMLU's test split, its `pubmedqa` rows are PubMedQA's labeled
+   set (a benchmark here), its other PubMedQA rows lack the abstract the question
+   is about, and `LastHumanity` is Humanity's Last Exam. Counts go into the data
+   report per source.
 4. **Deduplicated** across sources on the normalised question.
 5. **Length.** Tokenised with Qwen3's template; `max_seq` is the measured p99
    rounded up to 64, capped at 3,072; longer rows are dropped, never truncated.
 
-Sampling is seeded and stratified by source. 2% of the mix is held out as a
-validation file for loss only.
+Sampling is seeded and per source; a source that cannot fill its target after
+filtering is reported with its shortfall rather than padded. No validation
+split: training runs no evaluation of its own, and the four benchmarks are the
+evaluation.
 
 ## Format
 
@@ -169,12 +179,14 @@ stops only if peft still cannot wrap a layer. torchao is not removed
 unconditionally, because Unsloth shares this environment. No vLLM: its current engine needs compute 8.0+, and
 LoRA has open compile bugs on T4s.
 
-**Stages and time gate.** A 16-question smoke run measures speed first. Stages
-run in this order: letter choice on everything, then reasoning on MedQA,
-MMLU-medical, PubMedQA and MedMCQA. Before each stage the projection is checked
-against the time left in the 12-hour session, keeping a 30-minute margin; a stage
-that will not fit is skipped and listed. Each stage writes its JSON to
-`/kaggle/working` when it finishes.
+**Stages and deadline.** A smoke run of a few questions per mode checks the
+whole path first. Stages run in this order: letter choice on everything, then
+reasoning on MedQA, MMLU-medical, PubMedQA and MedMCQA. Each model scores batch
+by batch, appends every batch's predictions to disk, and stops when the next
+batch would pass a deadline 40 minutes before the 12-hour limit. Reasoning
+stages use a fixed seeded question order, so a stage the deadline cuts short is
+still a random sample. The report pairs the two models on the questions both
+scored, and states planned against scored for every stage.
 
 **Reported per benchmark and mode.** Accuracy for both models, the change, exact
 McNemar p, a 95% interval for the paired difference, per-subject accuracy, and
