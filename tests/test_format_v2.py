@@ -110,3 +110,13 @@ def test_final_letter_prefers_the_answer_line_and_respects_options():
 def test_forced_suffix_closes_an_open_think_block():
     assert forced_suffix(closed=False) == "\n</think>\n\nAnswer:"
     assert forced_suffix(closed=True) == "\n\nAnswer:"
+
+
+def test_short_explanation_drops_medmcqas_answer_restatement():
+    assert (short_explanation("Ans. is 'c' i.e., Polypectomy. It removes the polyp. Extra.")
+            == "Polypectomy. It removes the polyp.")
+
+
+def test_short_explanation_does_not_split_at_abbreviations():
+    assert short_explanation("See Dr. Shaw p. 373 for this. Then rest. More.") == \
+        "See Dr. Shaw p. 373 for this. Then rest."

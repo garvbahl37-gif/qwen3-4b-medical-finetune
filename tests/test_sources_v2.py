@@ -112,7 +112,8 @@ def test_ultramedical_keeps_rows_whose_explanation_agrees_with_gold():
 
 
 def test_r1_distill_and_medical_o1_map_reasoning_and_reply():
-    r = norm_r1_distill({"question": "Q?", "reasoning (reasoning_content)": "think",
+    r = norm_r1_distill({"question": "Which drug reverses heparin?",
+                         "reasoning (reasoning_content)": "think",
                          "response (content)": "reply"}, 3)
     assert (r.kind, r.reasoning, r.response, r.source) == ("dialogue", "think", "reply", "r1_distill")
     raw = {"Question": "Q?", "Complex_CoT": "cot", "Response": "resp"}
@@ -146,3 +147,12 @@ def test_mmlu_maps_choices_to_letters():
     assert (rec.subject, rec.source, rec.id) == ("anatomy", "mmlu_medical", "mmlu-anatomy-5")
     assert norm_mmlu({"question": "Q?", "subject": "anatomy",
                       "choices": ["a", "b"], "answer": 0}, 5) is None
+
+
+def test_r1_distill_keeps_medical_rows_only():
+    row = {"question": "Calculate the net present value of an investment at 10%.",
+           "reasoning (reasoning_content)": "think", "response (content)": "NPV is 1,372."}
+    assert norm_r1_distill(row, 1) is None
+    clinical = dict(row, question="A patient on warfarin has a raised INR. Next step?",
+                    **{"response (content)": "Hold warfarin and give vitamin K."})
+    assert norm_r1_distill(clinical, 2) is not None

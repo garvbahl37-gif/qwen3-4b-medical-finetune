@@ -11,8 +11,29 @@ SYSTEM_MCQ_V2 = (
     "followed by a brief explanation."
 )
 
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _ANSWER_LINE = re.compile(r"Answer:\s*\(?([A-J])\b")
+# A sentence ends at . ! or ? followed by space and a capital -- unless the
+# word before it is an abbreviation ("Dr.", "p. 373", "i.e.").
+_SENTENCE_BREAK = re.compile(r"[.!?]\s+(?=[A-Z(\[\"'])")
+_ABBREVIATIONS = {"ans", "dr", "vs", "fig", "ref", "etc", "approx", "no", "mr", "mrs",
+                  "st", "p", "pp", "i.e", "e.g", "viz", "cf"}
+# MedMCQA explanations open by restating the answer: "Ans. is 'c' i.e., ...".
+_LEADING_ANSWER = re.compile(
+    r"^\s*ans(?:wer)?\s*[.:]?\s*(?:is\s*)?[-:]?\s*['\"(\[]?[a-e]['\")\]]?\s*"
+    r"(?:i\s*\.?\s*e\s*\.?)?\s*[,:;\-]?\s*", re.IGNORECASE)
+
+
+def _sentences(text: str) -> list[str]:
+    out, start = [], 0
+    for brk in _SENTENCE_BREAK.finditer(text):
+        words = text[start:brk.start()].split()
+        last = words[-1].lower() if words else ""
+        if last in _ABBREVIATIONS or (len(last) == 1 and last.isalpha()):
+            continue
+        out.append(text[start:brk.start() + 1].strip())
+        start = brk.end()
+    out.append(text[start:].strip())
+    return [s for s in out if s]
 
 
 def option_letters(rec: Record) -> list[str]:
@@ -33,9 +54,10 @@ def short_explanation(text: str | None, *, max_sentences: int = 2,
     text = (text or "").strip()
     if text.lower().startswith("explanation:"):
         text = text[len("explanation:"):].strip()
+    text = _LEADING_ANSWER.sub("", text, count=1).strip()
     if not text:
         return ""
-    out = " ".join(_SENTENCE_END.split(text)[:max_sentences]).strip()
+    out = " ".join(_sentences(text)[:max_sentences]).strip()
     if len(out) > max_chars:
         out = out[:max_chars].rsplit(" ", 1)[0].rstrip(",;:") + "..."
     return out

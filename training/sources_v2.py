@@ -35,6 +35,23 @@ def _norm(text: str) -> str:
     return " ".join(_WORD.findall((text or "").lower()))
 
 
+# Medical-R1-Distill mixes in general reasoning (finance, chemistry, logic
+# puzzles): about a third of a 200-row sample named no medical term.
+_MEDICAL = re.compile(
+    r"patient|year-old|diagnos|treat|disease|symptom|clinic|drug|medic|syndrome|"
+    r"infect|cell|blood|pain|therap|dose|dosage|tumou?r|cancer|pregnan|surg|anatom|"
+    r"nerve|muscle|arter|vein|enzyme|gene|chromosom|mutation|bacteri|viru|viral|"
+    r"hormone|organ|tissue|heart|cardi|lung|pulmon|liver|hepat|kidney|renal|brain|"
+    r"neur|skin|derma|bone|fetus|fetal|trisomy|coagul|thromb|immun|antibod|vaccin|"
+    r"lesion|biopsy|pharmac|physiolog|patholog|protein|receptor|plasma|serum|urin|"
+    r"glucose|insulin|diabet|hypert|anemi|fracture|lymph|dna|rna|mg\b",
+    re.IGNORECASE)
+
+
+def looks_medical(text: str) -> bool:
+    return bool(_MEDICAL.search(text or ""))
+
+
 def is_english(text: str, *, min_ascii: float = 0.97) -> bool:
     """A cheap language screen: MedReason's 'huatuo' rows are Chinese-origin."""
     if not text:
@@ -123,6 +140,8 @@ def norm_r1_distill(raw: dict, idx: int) -> Record | None:
     reasoning = _clean(raw.get("reasoning (reasoning_content)"))
     response = _clean(raw.get("response (content)"))
     if not (question and reasoning and response) or not is_english(question + response):
+        return None
+    if not looks_medical(question + " " + response):
         return None
     return Record(id=f"r1_distill-{idx}", source="r1_distill", kind="dialogue",
                   question=question, options=None, answer=None, rationale=None,

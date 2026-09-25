@@ -30,3 +30,6 @@ next-env.d.ts
 
 # os
 .DS_Store
+
+# run 2 data, uploaded to Kaggle by scripts/push_data.sh, never committed
+/data/
