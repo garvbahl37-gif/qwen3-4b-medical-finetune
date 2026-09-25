@@ -13,15 +13,41 @@ advice, and the model can give wrong answers.
 | Stage | State |
 |---|---|
 | Training | Done. One run on 2026-09-21 produced the LoRA adapter (run 1). |
-| Evaluation | Running on Kaggle since 2026-09-24 19:55 UTC, after local tests on a small model and on the trained adapter. |
-| Result | None yet. |
+| Evaluation | Done on 2026-09-24: 5,456 held-out questions on a Kaggle T4, in 1.2 hours. |
+| Result | A small gain when choosing among the answer letters; worse when writing answers out, mostly from answer length and format. See below. |
 | Chat frontend | Planned, not built. |
 
-**No evaluation result exists yet, so nothing here claims that fine-tuning
-helped.** One early signal is recorded in [`TODO.md`](TODO.md): on 16 MedQA test
-questions run locally, the base model scored 12/16 and the fine-tune 9/16
-(3 regressions, 0 wins, exact McNemar p = 0.25). Sixteen questions are too few
-to conclude anything. The full 5,456-question run is what will answer it.
+## Result
+
+The base Qwen3-4B against the fine-tune, on questions training never saw. p is
+an exact McNemar test on the paired answers.
+
+| Benchmark | Scoring | n | Base | Fine-tune | Change | Wins / regressions | p |
+|---|---|---:|---:|---:|---:|---:|---:|
+| MedQA-USMLE test | answer choice | 1,273 | 56.6% | 58.8% | +2.1 | 112 / 85 | 0.064 |
+| MedMCQA validation | answer choice | 4,183 | 53.8% | 55.4% | +1.6 | 399 / 334 | 0.018 |
+| MedQA-USMLE test | written answer | 300 | 68.7% | 62.3% | −6.3 | 19 / 38 | 0.016 |
+| MedMCQA validation | written answer | 300 | 57.7% | 42.7% | −15.0 | 22 / 67 | 0.000002 |
+
+- **Answer-choice scoring**, the headline, shows a small gain on both
+  benchmarks. It is significant on MedMCQA (p = 0.018) and not on MedQA
+  (p = 0.064). The MedMCQA gain does not come from guessing A: the fine-tune
+  picked A 1,176 times against the base model's 1,499, with 1,348 correct As.
+- **Written answers** are worse, and mostly for reasons of format, not
+  knowledge. On MedMCQA, 70 of the fine-tune's 300 answers ran past the
+  512-token cap before stating a letter (the base: 0). On the 230 questions
+  where neither model hit the cap, they score alike: 56.5% and 55.7%. On MedQA
+  the fine-tune answers at once, as it was trained to (median 9 characters),
+  while the base model reasons first (median 884 characters), and reasoning
+  first wins here.
+
+So the fine-tune knows slightly more when asked to pick a letter, and it has
+learned an answer format that costs it when it must write the answer out. The
+full reports, with every question's prediction from both models, are
+[`results/run1/eval_medqa.json`](results/run1/eval_medqa.json) and
+[`results/run1/eval_medmcqa.json`](results/run1/eval_medmcqa.json).
+[`docs/evaluation.md`](docs/evaluation.md) lists the caveats that go with these
+numbers.
 
 ## How it works
 
@@ -34,7 +60,7 @@ flowchart TD
     T --> A["LoRA adapter, rank 32"]
     A --> E["evaluate.py<br/>full-precision Qwen3-4B, base vs fine-tune"]
     H --> E
-    E --> R["eval_medqa.json, eval_medmcqa.json<br/>not produced yet"]
+    E --> R["eval_medqa.json, eval_medmcqa.json<br/>results/run1/"]
 ```
 
 1. `prepare_data.py` samples four datasets, drops rows that cannot teach (for

@@ -8,9 +8,26 @@ Plan 1: `docs/superpowers/plans/2026-09-20-training-and-evaluation.md`
 ## Where it stands
 
 **Training is done.** One clean run on 2026-09-21 produced the adapter, now
-kept at `training/outputs/run1` (264 MB, outside git). **The full evaluation
-is running on Kaggle** (version 2, started 2026-09-24 at 19:55 UTC) and has not
-finished, so there is no claim yet that fine-tuning helped.
+kept at `training/outputs/run1` (264 MB, outside git). **Evaluation is done** (version 2 on Kaggle, 2026-09-24, 1.2 hours on a T4):
+
+| Benchmark | Scoring | n | Base | Fine-tune | Change | Wins / regressions | p |
+|---|---|---:|---:|---:|---:|---:|---:|
+| MedQA-USMLE test | answer choice | 1,273 | 56.6% | 58.8% | +2.1 | 112 / 85 | 0.064 |
+| MedMCQA validation | answer choice | 4,183 | 53.8% | 55.4% | +1.6 | 399 / 334 | 0.018 |
+| MedQA-USMLE test | written answer | 300 | 68.7% | 62.3% | −6.3 | 19 / 38 | 0.016 |
+| MedMCQA validation | written answer | 300 | 57.7% | 42.7% | −15.0 | 22 / 67 | 0.000002 |
+
+- **Answer-choice scoring**, the headline, shows a small gain on both
+  benchmarks. It is significant on MedMCQA (p = 0.018) and not on MedQA
+  (p = 0.064). The MedMCQA gain does not come from guessing A: the fine-tune
+  picked A 1,176 times against the base model's 1,499, with 1,348 correct As.
+- **Written answers** are worse, and mostly for reasons of format, not
+  knowledge. On MedMCQA, 70 of the fine-tune's 300 answers ran past the
+  512-token cap before stating a letter (the base: 0). On the 230 questions
+  where neither model hit the cap, they score alike: 56.5% and 55.7%. On MedQA
+  the fine-tune answers at once, as it was trained to (median 9 characters),
+  while the base model reasons first (median 884 characters), and reasoning
+  first wins here.
 
 Training loss levelled off at about step 150, roughly 4,800 examples in, and
 barely moved over the remaining 390 steps. Only evaluation can say whether the
@@ -23,7 +40,7 @@ the lever.
       `results/run1/`: `docs/training.md` (data, prompt format, QLoRA, the failed
       attempts), `docs/evaluation.md` (method, report JSON, biases) and
       `docs/kaggle.md` (reproducing both runs on your own account)
-- [ ] Add the evaluation result to the README and the guides once it exists
+- [x] Add the evaluation result to the README
 
 ## Plan 1 — training (complete)
 
@@ -78,7 +95,7 @@ guarded in code:
 5. `trl` was imported before `unsloth`, so the EOS token was set on the wrong class
 6. the budget probe aborted a 12-hour run at step 50, as designed
 
-## Plan 2 — evaluation (running on Kaggle)
+## Plan 2 — evaluation (complete)
 
 `docs/superpowers/plans/2026-09-24-evaluation.md`. Drops Unsloth from evaluation so
 the scoring path can run on this Mac before it runs on Kaggle.
@@ -120,12 +137,13 @@ the scoring path can run on this Mac before it runs on Kaggle.
       [the evaluation kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-evaluation) (private). Same reviewed evaluation code
       (fingerprint `487877cf9130fcab`) with the notebook fix; the notebook as
       pushed is kept at `results/run1/kaggle_eval_notebook.ipynb`
-- [ ] Collect `eval_medqa.json` and `eval_medmcqa.json` into `results/run1/` and
-      record the result honestly, including if fine-tuning does not beat base
+- [x] Collected `eval_medqa.json`, `eval_medmcqa.json` and the run's log
+      (`kaggle_eval_output.log`) into `results/run1/`; the result is recorded
+      at the top of this file and in the README
 
-**Early signal, not a result:** on 16 MedQA test questions run locally, the base
-model scored 12/16 and the fine-tune 9/16 (3 regressions, 0 wins, p = 0.25). Too few
-questions to conclude anything, and exactly what the full 5,456 will settle.
+The early local signal (16 MedQA questions, base 12/16, fine-tune 9/16) was
+generative scoring, and the full run agrees with it: the fine-tune is worse at
+written answers on MedQA.
 
 ### What the full evaluation must state, whatever it finds
 
@@ -168,10 +186,12 @@ questions to conclude anything, and exactly what the full 5,456 will settle.
 
 ## Possibly later
 
-- [ ] A second training session continuing from this adapter on a fresh,
-      disjoint slice. Kaggle's 9-hour cap is per session, so more data means
-      more sessions, not a longer one. Worth doing only if evaluation says the
-      first 17k helped.
+- [ ] Before more of the same data, fix the format the fine-tune learned:
+      train MedQA with reasoning before the answer line, as the base model
+      answers when it does best, and keep MedMCQA rationales short enough to
+      finish inside 512 tokens. Evaluation says the first 17k helped only a
+      little, so a second session on more of the same data is not the lever.
+- [ ] Add the result to the Results page of the chat frontend (Plan 3, Task 5)
 
 ## Housekeeping
 
