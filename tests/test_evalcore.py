@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from training.evalcore import accuracy, by_subject, mcnemar_exact, paired_report
+from training.evalcore import (accuracy, by_subject, mcnemar_exact, paired_diff_ci,
+                              paired_report)
 from training.records import Record
 
 
@@ -83,3 +84,22 @@ def test_paired_report_has_everything_the_writeup_quotes():
     assert rep["tuned_accuracy"] == 1.0
     assert rep["mcnemar"]["wins"] == 1
     assert "Anatomy" in rep["by_subject"]
+
+
+
+def test_paired_diff_ci_matches_the_paired_wald_formula():
+    base = [True] * 50 + [False] * 50
+    tuned = [True] * 40 + [False] * 10 + [True] * 30 + [False] * 20
+    ci = paired_diff_ci(base, tuned)
+    assert ci["diff"] == 0.2
+    half = 1.959964 * ((40 - 20 ** 2 / 100) / 100 ** 2) ** 0.5
+    assert abs(ci["low"] - (0.2 - half)) < 1e-6 and abs(ci["high"] - (0.2 + half)) < 1e-6
+
+
+def test_paired_diff_ci_of_nothing_is_zero():
+    assert paired_diff_ci([], []) == {"diff": 0.0, "low": 0.0, "high": 0.0}
+
+
+def test_paired_diff_ci_never_leaves_minus_one_to_one():
+    ci = paired_diff_ci([False] * 4, [True, True, True, False])
+    assert ci["diff"] == 0.75 and ci["high"] == 1.0 and -1.0 <= ci["low"] <= 1.0

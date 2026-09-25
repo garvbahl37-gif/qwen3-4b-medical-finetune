@@ -52,6 +52,25 @@ def by_subject(recs: list[Record], base: list[bool], tuned: list[bool]) -> dict:
     return dict(sorted(buckets.items(), key=lambda kv: -kv[1]["n"]))
 
 
+def paired_diff_ci(base_ok: list[bool], tuned_ok: list[bool], *,
+                   z: float = 1.959964) -> dict:
+    """95% interval for tuned-minus-base accuracy on the same questions.
+
+    The paired Wald form: its variance comes only from the questions the two
+    models disagree on, which is also what McNemar's test counts."""
+    n = len(base_ok)
+    if n == 0:
+        return {"diff": 0.0, "low": 0.0, "high": 0.0}
+    wins = sum((not b) and t for b, t in zip(base_ok, tuned_ok))
+    losses = sum(b and (not t) for b, t in zip(base_ok, tuned_ok))
+    diff = (wins - losses) / n
+    variance = max(0.0, (wins + losses) - (wins - losses) ** 2 / n) / n ** 2
+    half = z * variance ** 0.5
+    # The Wald form can overshoot at small n; a difference in accuracy cannot.
+    return {"diff": round(diff, 6), "low": round(max(-1.0, diff - half), 6),
+            "high": round(min(1.0, diff + half), 6)}
+
+
 def paired_report(recs: list[Record], base_preds: list[str | None],
                   tuned_preds: list[str | None], *, mode: str) -> dict:
     golds = [r.answer or "" for r in recs]
@@ -65,5 +84,6 @@ def paired_report(recs: list[Record], base_preds: list[str | None],
         "base_unparseable": sum(p is None for p in base_preds),
         "tuned_unparseable": sum(p is None for p in tuned_preds),
         "mcnemar": mcnemar_exact(base_ok, tuned_ok),
+        "diff_ci": paired_diff_ci(base_ok, tuned_ok),
         "by_subject": by_subject(recs, base_ok, tuned_ok),
     }
