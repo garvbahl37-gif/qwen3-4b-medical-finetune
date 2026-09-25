@@ -20,6 +20,13 @@ REQUIRED = {"records", "prompts", "sources", "prepare_data",
 EVAL_REQUIRED = {"records", "prompts", "sources", "evalcore", "evaluate",
                  "modeling"}
 
+RUN2_REQUIRED = {"records", "prompts", "sources", "sources_v2", "format_v2",
+                 "evalcore", "evaluate", "modeling", "train", "budget",
+                 "eval_worker", "eval_report", "kaggle_paths"}
+
+DATA_FILES = ("train.jsonl", "eval_medqa.jsonl", "eval_medmcqa.jsonl",
+              "eval_pubmedqa.jsonl", "eval_mmlu_medical.jsonl", "data_report.json")
+
 
 def find_code_dir(root: Path, required: set[str] = REQUIRED) -> Path:
     """Locate the uploaded modules wherever Kaggle mounted them.
@@ -88,4 +95,31 @@ def code_fingerprint(directory: Path) -> str:
     digest = hashlib.sha256()
     for path in sorted(directory.glob("*.py")):
         digest.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+    return digest.hexdigest()[:16]
+
+
+def find_data_dir(root: Path) -> Path:
+    """Locate the uploaded run 2 data by content, like find_code_dir."""
+    if not root.exists():
+        raise SystemExit(
+            "\nSTOP. /kaggle/input does not exist -- no inputs are attached.\n"
+            "FIX: sidebar -> + Add Input -> Datasets -> medical-ft-data.")
+    found = sorted({p.parent for p in root.rglob("train.jsonl")
+                    if all((p.parent / name).exists() for name in DATA_FILES)})
+    if found:
+        return found[0]
+    tree = sorted(str(p.relative_to(root)) for p in root.rglob("*"))[:30]
+    raise SystemExit(
+        f"\nSTOP. No directory under {root} holds all of {list(DATA_FILES)}.\n"
+        f"First entries under /kaggle/input: {tree}\n"
+        "FIX: run scripts/push_data.sh, then attach medical-ft-data in the sidebar.")
+
+
+def data_fingerprint(directory: Path) -> str:
+    """The same idea as code_fingerprint, for the frozen data files."""
+    import hashlib
+
+    digest = hashlib.sha256()
+    for name in DATA_FILES:
+        digest.update(name.encode() + b"\0" + (directory / name).read_bytes() + b"\0")
     return digest.hexdigest()[:16]

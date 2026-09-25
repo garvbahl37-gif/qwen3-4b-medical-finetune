@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from training.kaggle_paths import code_fingerprint
+from training.kaggle_paths import code_fingerprint, data_fingerprint
 
 # The notebook's code-fetch cell cannot `import training.kaggle_paths`: the
 # whole point of find_code_dir is to locate the uploaded code before it has
@@ -413,6 +413,280 @@ twelve raw completions per model for reading by eye."""),
 ]
 
 
+RUN2_DATA = Path("data/v2")
+
+RUN2_INTRO = """# Qwen3-4B medical fine-tune, run 2
+
+One session, no laptop needed. It trains a reasoning fine-tune of Qwen3-4B on
+about 11,000 examples from eight medical sources, then scores it against the
+base model on four benchmarks it never saw -- MedQA, MedMCQA, PubMedQA and
+MMLU-medical -- by letter choice and by reasoning.
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`
+and `medical-ft-data`.
+
+Training stops by itself in time for evaluation. Evaluation stops 40 minutes
+before Kaggle's 12-hour limit and reports whatever both models have scored."""
+
+RUN2_HARDWARE = '''# --- 1. Hardware check, and the session clock ------------------------------
+import subprocess, time
+from pathlib import Path
+
+# Kaggle ends a GPU session at 12 hours. Every later step measures itself
+# against this clock; evaluation stops scoring 40 minutes before the end.
+SESSION_START = time.time()
+DEADLINE = SESSION_START + 12 * 3600 - 40 * 60
+
+import torch
+
+gpus = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total",
+                       "--format=csv,noheader"],
+                      capture_output=True, text=True).stdout.strip().splitlines()
+N_GPUS = torch.cuda.device_count()
+major, minor = torch.cuda.get_device_capability(0)
+for i, gpu in enumerate(gpus):
+    print(f"GPU {i}      : {gpu}")
+print(f"capability : {major}.{minor}")
+print(f"torch      : {torch.__version__}")
+
+if major < 7:
+    raise SystemExit(
+        f"\\nSTOP. Compute capability {major}.{minor} has no kernels in modern "
+        "PyTorch builds.\\nFIX: kernel-metadata.json pins a T4; if a P100 still "
+        "arrived, set sidebar -> Accelerator -> 'GPU T4 x2' and Run All again.")
+plan = ("the fine-tune on GPU 0 and the base model on GPU 1, in parallel"
+        if N_GPUS > 1 else "both models on GPU 0, one after the other")
+print(f"\\n{N_GPUS} GPU(s). Training uses GPU 0; evaluation runs {plan}.")'''
+
+RUN2_INSTALL = '''%%capture
+# The exact stack that trained run 1 on this image: Unsloth 2026.9.7, with the
+# unsloth_zoo current that day, printed "Transformers: 5.5.0" there, alongside
+# trl 0.24.0 and peft 0.19.1. Run 1 got it by installing whatever was newest;
+# pinning it is how run 2 gets the same thing again.
+!pip install -q "unsloth==2026.9.7" "unsloth_zoo==2026.9.6"
+!pip install -q --no-deps "transformers==5.5.0" "trl==0.24.0" "peft==0.19.1"'''
+
+RUN2_VERIFY = '''# --- 2. Verify the install before spending GPU time on it ------------------
+import importlib.metadata as md
+import sys
+
+WANT = {"unsloth": "2026.9.7", "transformers": "5.5.0", "trl": "0.24.0",
+        "peft": "0.19.1"}
+got = {name: md.version(name) for name in WANT}
+print("ok |", " | ".join(f"{k} {v}" for k, v in got.items()),
+      f"| torch {md.version('torch')}")
+wrong = {k: v for k, v in got.items() if v != WANT[k]}
+if wrong:
+    raise SystemExit(
+        f"\\nSTOP. Installed {wrong}, expected {WANT}.\\nFIX: the install cell did "
+        "not take effect. Run > Restart session, then Run All again.")
+
+# peft checks every optional quantization package on the image while it wraps
+# each layer, and some checks raise on an old version instead of skipping it:
+# run 1's first evaluation died on this image's torchao 0.10.0. Wrap one tiny
+# layer in a fresh process, the way training and evaluation will.
+LORA_CHECK = """
+import torch.nn as nn
+from peft import LoraConfig, get_peft_model
+class OneLayer(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.q_proj = nn.Linear(8, 8)
+    def forward(self, x):
+        return self.q_proj(x)
+get_peft_model(OneLayer(), LoraConfig(r=2, target_modules=["q_proj"]))
+"""
+check = subprocess.run([sys.executable, "-c", LORA_CHECK], capture_output=True, text=True)
+if check.returncode != 0 and "torchao" in check.stderr:
+    print("peft rejects this image's torchao; removing it (nothing here uses it)")
+    subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "-q", "torchao"])
+    check = subprocess.run([sys.executable, "-c", LORA_CHECK], capture_output=True, text=True)
+if check.returncode != 0:
+    raise SystemExit(f"\\nSTOP. peft cannot wrap a layer on this image:\\n{check.stderr[-2000:]}")
+print("ok | peft can wrap a layer on this image")
+
+# transformers 5 replaced group_by_length with train_sampling_strategy. Check
+# the class training will really use: Unsloth's patched SFTConfig.
+FIELD_CHECK = """
+import unsloth, dataclasses
+from trl import SFTConfig
+print("train_sampling_strategy" in {f.name for f in dataclasses.fields(SFTConfig)})
+"""
+check = subprocess.run([sys.executable, "-c", FIELD_CHECK], capture_output=True, text=True)
+if check.stdout.strip().splitlines()[-1:] != ["True"]:
+    raise SystemExit("\\nSTOP. SFTConfig has no train_sampling_strategy here:\\n"
+                     f"{check.stdout[-1000:]}{check.stderr[-1500:]}")
+print("ok | SFTConfig accepts train_sampling_strategy")'''
+
+RUN2_TRAIN = '''# --- 4. Train on GPU 0 -------------------------------------------------------
+# Leave the evaluation about 4.25 hours, and never train for more than 5.75.
+STOP_AFTER = int(min(5.75 * 3600, DEADLINE - time.time() - 4.25 * 3600))
+if STOP_AFTER < 2 * 3600:
+    raise SystemExit(f"\\nSTOP. Only {STOP_AFTER / 3600:.1f}h are left for training.\\n"
+                     "FIX: setup was unusually slow; Run All again.")
+print(f"training stops by itself after {STOP_AFTER / 3600:.2f}h at the latest")
+
+step(f"python -m training.train --format v2 --data data/v2 --out outputs/run2 "
+     f"--max-seq {MAX_SEQ} --batch-size 2 --grad-accum 8 --rank 64 --lr 1e-4 "
+     f"--epochs 1 --save-steps 200 --group-by-length --probe-steps 20 "
+     f"--no-probe-abort --stop-after-seconds {STOP_AFTER}",
+     env={"CUDA_VISIBLE_DEVICES": "0"})'''
+
+RUN2_SAVE = '''# --- 5. Save the adapter and the training record to the Output panel -------
+import json, shutil
+
+OUT = Path("/kaggle/working")
+shutil.copytree("outputs/run2", OUT / "run2-adapter", dirs_exist_ok=True,
+                ignore=shutil.ignore_patterns("checkpoint-*"))
+for name in ("train_stats.json", "loss_curve.json"):
+    shutil.copy(Path("outputs/run2") / name, OUT / name)
+shutil.copy(DATA / "data_report.json", OUT / "data_report.json")
+print("########## Training ##########")
+for key, value in json.loads((OUT / "train_stats.json").read_text()).items():
+    print(f"  {key}: {value}")'''
+
+RUN2_EVAL_SMOKE = '''# --- 6. Evaluation smoke run: every stage, four questions, both models -----
+def worker(role: str, gpu: int, out_dir: str, extra: str):
+    cmd = (f"python -m training.eval_worker --role {role} --eval-dir data/v2 "
+           f"--out-dir {out_dir} --device cuda "
+           + ("--adapter outputs/run2 " if role == "tuned" else "") + extra)
+    log = open(f"{out_dir}-{role}.log", "w")
+    proc = subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,
+                            env={**os.environ, "CUDA_VISIBLE_DEVICES": str(gpu)})
+    return proc, log
+
+def run_pair(out_dir: str, extra_tuned: str, extra_base: str, poll: int) -> dict:
+    """Both models: in parallel on two GPUs, one after the other on one."""
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    if N_GPUS > 1:
+        procs = {"tuned": worker("tuned", 0, out_dir, extra_tuned),
+                 "base": worker("base", 1, out_dir, extra_base)}
+        while any(p.poll() is None for p, _ in procs.values()):
+            time.sleep(poll)
+            written = {role: sum(1 for f in Path(out_dir, role).glob("*.jsonl")
+                                 for _ in open(f)) for role in procs}
+            print(time.strftime("%H:%M"), "answers written:", written, flush=True)
+        codes = {role: p.returncode for role, (p, _) in procs.items()}
+    else:
+        codes = {}
+        for role, extra in (("tuned", extra_tuned), ("base", extra_base)):
+            proc, _ = worker(role, 0, out_dir, extra)
+            codes[role] = proc.wait()
+    for role in ("tuned", "base"):
+        print(f"--- {role} log tail ---")
+        print("".join(open(f"{out_dir}-{role}.log").readlines()[-15:]))
+    return codes
+
+SMOKE = "--limit 4 --think-budget 128 --batch-size 4"
+codes = run_pair("outputs/eval_smoke", SMOKE, SMOKE, poll=15)
+if any(codes.values()):
+    raise SystemExit(f"\\nSTOP. The evaluation smoke run failed: {codes}. The adapter "
+                     "is already in the Output panel; the log tails above say why.")
+step("python -m training.eval_report --eval-dir outputs/eval_smoke --bench-dir data/v2 "
+     "--out outputs/eval_smoke/report.json")'''
+
+RUN2_EVAL_FULL = '''# --- 7. Full evaluation, until the deadline ---------------------------------
+SETTINGS = "--think-budget 1536 --batch-size 16 --seed 1234"
+if N_GPUS > 1:
+    codes = run_pair("outputs/eval", f"--deadline {DEADLINE:.0f} {SETTINGS}",
+                     f"--deadline {DEADLINE:.0f} {SETTINGS}", poll=600)
+else:
+    half = time.time() + (DEADLINE - time.time()) / 2
+    codes = run_pair("outputs/eval", f"--deadline {half:.0f} {SETTINGS}",
+                     f"--deadline {DEADLINE:.0f} {SETTINGS}", poll=600)
+print("worker exit codes:", codes)
+step("python -m training.eval_report --eval-dir outputs/eval --bench-dir data/v2 "
+     "--out /kaggle/working/run2_eval.json")
+shutil.copytree("outputs/eval", "/kaggle/working/run2_eval_predictions",
+                dirs_exist_ok=True)
+print("Saved run2_eval.json and every prediction to the Output panel.")'''
+
+RUN2_DONE = """## Done
+
+In the **Output** panel: `run2-adapter/`, `train_stats.json`, `loss_curve.json`,
+`data_report.json`, `run2_eval.json` (every stage and the pooled results, with
+McNemar p and a 95% interval for each change) and `run2_eval_predictions/`
+(every question's answer from both models, with the reasoning text)."""
+
+
+def run2_fetch_cell(data_fp: str) -> str:
+    return ('''# --- 3. Get the code and the data from the attached datasets --------------
+import json, os, shlex, shutil, subprocess, sys
+from pathlib import Path
+
+INPUT = Path("/kaggle/input")
+WORK  = Path("/kaggle/working/ft")
+PKG   = WORK / "training"
+DATA  = WORK / "data" / "v2"
+PKG.mkdir(parents=True, exist_ok=True)
+DATA.mkdir(parents=True, exist_ok=True)
+
+''' + FIND_CODE_DIR_SRC + '''
+
+SRC = find_code_dir(INPUT, RUN2_REQUIRED)
+''' + CHECK_FINGERPRINT_SRC + '''
+DATA_SRC = find_data_dir(INPUT)
+EXPECTED_DATA_FINGERPRINT = "''' + data_fp + '''"
+if data_fingerprint(DATA_SRC) != EXPECTED_DATA_FINGERPRINT:
+    raise SystemExit(
+        f"\\nSTOP. The attached data ({data_fingerprint(DATA_SRC)}) is not the data "
+        f"this notebook was built for ({EXPECTED_DATA_FINGERPRINT}).\\n"
+        "FIX: wait a minute and re-run; if it persists, run scripts/push_data.sh again.")
+print("code:", SRC)
+print("data:", DATA_SRC)
+
+for src_file in sorted(SRC.glob("*.py")):
+    shutil.copy(src_file, PKG / src_file.name)
+(PKG / "__init__.py").touch()
+for name in DATA_FILES:
+    shutil.copy(DATA_SRC / name, DATA / name)
+
+os.chdir(WORK)
+sys.path.insert(0, str(WORK))
+Path("outputs").mkdir(exist_ok=True)
+
+REPORT = json.loads((DATA / "data_report.json").read_text())
+MAX_SEQ = REPORT["max_seq"]
+print(f"train {REPORT['train_size']:,} examples | max_seq {MAX_SEQ} | reasoning "
+      f"{REPORT['reasoning_fraction']:.0%} | multiple choice {REPORT['mcq_fraction']:.0%}")
+for label, stats in REPORT["sources"].items():
+    print(f"  {label:<24} kept {stats['kept']:>6,} of target {stats['target']:>6,}")
+
+# No shell: every command here is built from constants, so it splits into a
+# plain list. "python" becomes this kernel's own interpreter -- the one the
+# install cell installed Unsloth into -- rather than whatever PATH finds.
+def argv(cmd: str) -> list[str]:
+    args = shlex.split(cmd)
+    return [sys.executable] + args[1:] if args[0] == "python" else args
+
+# A failing command returns non-zero without raising in Jupyter.
+def step(cmd: str, env: dict | None = None):
+    print(f"$ {cmd}\\n", flush=True)
+    p = subprocess.run(argv(cmd), env={**os.environ, **(env or {})})
+    if p.returncode != 0:
+        raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
+    print("\\nok\\n", flush=True)''')
+
+
+def run2_cells(data_fp: str) -> list[tuple[str, str]]:
+    return [
+        ("markdown", RUN2_INTRO),
+        ("code", RUN2_HARDWARE),
+        ("code", RUN2_INSTALL),
+        ("code", RUN2_VERIFY),
+        ("code", run2_fetch_cell(data_fp)),
+        ("markdown", "## 4. Train\n\nThe thinking format on GPU 0, with a time guard "
+                     "that saves the adapter instead of overrunning the session."),
+        ("code", RUN2_TRAIN),
+        ("code", RUN2_SAVE),
+        ("markdown", "## 6. Evaluate\n\nA smoke run of every stage first, then the full "
+                     "run: letter choice on all 7,545 questions, then reasoning, until "
+                     "the deadline."),
+        ("code", RUN2_EVAL_SMOKE),
+        ("code", RUN2_EVAL_FULL),
+        ("markdown", RUN2_DONE),
+    ]
+
 def write_notebook(cells: list[tuple[str, str]], path: Path) -> None:
     nb = {
         "cells": [
@@ -438,3 +712,7 @@ def write_notebook(cells: list[tuple[str, str]], path: Path) -> None:
 
 write_notebook(CELLS, Path("training/kaggle_medical.ipynb"))
 write_notebook(EVAL_CELLS, Path("evaluation/kaggle_eval.ipynb"))
+if (RUN2_DATA / "data_report.json").exists():
+    write_notebook(run2_cells(data_fingerprint(RUN2_DATA)), Path("run2/kaggle_run2.ipynb"))
+else:
+    print("skipped run2/kaggle_run2.ipynb: no data/v2 (run training.prepare_data_v2)")

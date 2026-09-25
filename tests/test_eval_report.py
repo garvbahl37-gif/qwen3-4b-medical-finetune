@@ -41,3 +41,20 @@ def test_build_report_pairs_only_questions_both_models_scored(tmp_path):
     assert set(report["pooled"]) == {"letter", "reasoning"}
     assert "letter:medmcqa" not in report["stages"]
     assert "letter:medqa" in format_table(report)
+
+
+def test_a_stage_only_one_model_reached_is_listed_not_scored(tmp_path):
+    recs = [Record(id=f"q{i}", source="medqa", kind="mcq", question=f"Q{i}",
+                   options={"A": "a", "B": "b"}, answer="A", rationale=None,
+                   response=None, subject="s") for i in range(3)]
+    write(tmp_path / "bench" / "eval_medqa.jsonl", [r.to_dict() for r in recs])
+    ev = tmp_path / "eval"
+    for role in ("base", "tuned"):
+        (ev / role).mkdir(parents=True)
+        (ev / role / "meta.json").write_text(json.dumps({"seed": 1, "limit": 0}))
+    write(ev / "base" / "reasoning__medqa.jsonl", [{"id": "q0", "letter": "A"}])
+    write(ev / "tuned" / "reasoning__medqa.jsonl", [])
+    report = build_report(ev, tmp_path / "bench")
+    assert "reasoning:medqa" not in report["stages"]
+    assert report["unpaired"] == ["reasoning:medqa"]
+    assert report["pooled"] == {}

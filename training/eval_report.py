@@ -42,6 +42,7 @@ def build_report(eval_dir: Path, bench_dir: Path) -> dict:
     limit = metas["tuned"].get("limit") or metas["base"].get("limit") or 0
     benches: dict[str, list[Record]] = {}
     stages: dict[str, dict] = {}
+    unpaired: list[str] = []
     pooled_in: dict[str, tuple[list, list, list]] = {"letter": ([], [], []),
                                                      "reasoning": ([], [], [])}
     for mode, bench in STAGES:
@@ -56,6 +57,12 @@ def build_report(eval_dir: Path, bench_dir: Path) -> dict:
         if limit:
             planned = planned[:limit]
         kept, base_letters, tuned_letters = pair(planned, base_rows, tuned_rows)
+        if not kept:
+            # One model reached this stage before the deadline and the other
+            # did not: there is nothing to compare, and "0.0% vs 0.0%" would
+            # read like a result.
+            unpaired.append(f"{mode}:{bench}")
+            continue
         rep = paired_report(kept, base_letters, tuned_letters, mode=mode)
         rep.update({"benchmark": bench, "planned": len(planned), "scored": len(kept)})
         if mode == "reasoning":
@@ -70,7 +77,7 @@ def build_report(eval_dir: Path, bench_dir: Path) -> dict:
             rep = paired_report(kept, base_letters, tuned_letters, mode=mode)
             rep.pop("by_subject", None)
             pooled[mode] = rep
-    return {"stages": stages, "pooled": pooled, "models": metas}
+    return {"stages": stages, "pooled": pooled, "unpaired": unpaired, "models": metas}
 
 
 def format_table(report: dict) -> str:
@@ -99,6 +106,8 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2))
     print(format_table(report))
+    if report["unpaired"]:
+        print("reached by one model only, not compared:", ", ".join(report["unpaired"]))
     for role, meta in report["models"].items():
         print(f"{role}: {meta.get('status', 'missing')}", meta.get("error", ""))
     print(f"\nwrote {args.out}")
