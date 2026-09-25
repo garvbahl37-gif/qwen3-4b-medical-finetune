@@ -1,0 +1,106 @@
+from __future__ import annotations
+
+import re
+
+from training.prompts import SYSTEM_CHAT, extract_letter
+from training.records import Record
+
+SYSTEM_MCQ_V2 = (
+    "You are a medical education assistant. Work through the question, then "
+    "give your choice first, on its own line, in the exact form 'Answer: X', "
+    "followed by a brief explanation."
+)
+
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_ANSWER_LINE = re.compile(r"Answer:\s*\(?([A-J])\b")
+
+
+def option_letters(rec: Record) -> list[str]:
+    return sorted(rec.options) if rec.options else []
+
+
+def format_question_v2(rec: Record) -> str:
+    if rec.kind != "mcq" or not rec.options:
+        return rec.question
+    lines = [rec.question, ""]
+    lines += [f"{letter}. {rec.options[letter]}" for letter in option_letters(rec)]
+    return "\n".join(lines)
+
+
+def short_explanation(text: str | None, *, max_sentences: int = 2,
+                      max_chars: int = 400) -> str:
+    """The first sentences of an explanation, to follow the answer line."""
+    text = (text or "").strip()
+    if text.lower().startswith("explanation:"):
+        text = text[len("explanation:"):].strip()
+    if not text:
+        return ""
+    out = " ".join(_SENTENCE_END.split(text)[:max_sentences]).strip()
+    if len(out) > max_chars:
+        out = out[:max_chars].rsplit(" ", 1)[0].rstrip(",;:") + "..."
+    return out
+
+
+def answer_text(rec: Record) -> str:
+    """What follows the think block. The letter always comes first, so no
+    token cap can cut it off -- run 1's rationale-first answers lost 70 of 300
+    MedMCQA letters that way."""
+    if rec.kind != "mcq":
+        return (rec.response or "").strip()
+    head = f"Answer: {rec.answer}"
+    explanation = short_explanation(rec.rationale)
+    if explanation:
+        return f"{head}\n\n{explanation}"
+    option = (rec.options or {}).get(rec.answer or "")
+    return f"{head}. {option}" if option else head
+
+
+def v2_messages(rec: Record, *, with_answer: bool) -> list[dict]:
+    system = SYSTEM_MCQ_V2 if rec.kind == "mcq" else SYSTEM_CHAT
+    msgs = [{"role": "system", "content": system},
+            {"role": "user", "content": format_question_v2(rec)}]
+    if with_answer:
+        reply = {"role": "assistant", "content": answer_text(rec)}
+        if rec.reasoning:
+            reply["reasoning_content"] = rec.reasoning.strip()
+        msgs.append(reply)
+    return msgs
+
+
+def render_training_text(tok, rec: Record) -> str:
+    """Qwen3's template puts reasoning_content in <think>...</think>; a row
+    without reasoning gets the empty block, exactly as run 1 trained."""
+    return tok.apply_chat_template(v2_messages(rec, with_answer=True),
+                                   tokenize=False,
+                                   enable_thinking=bool(rec.reasoning))
+
+
+def render_letter_prompt(tok, rec: Record) -> str:
+    """Thinking off, then 'Answer:' -- the next token is the choice."""
+    return tok.apply_chat_template(v2_messages(rec, with_answer=False),
+                                   tokenize=False, add_generation_prompt=True,
+                                   enable_thinking=False) + "Answer:"
+
+
+def render_reasoning_prompt(tok, rec: Record) -> str:
+    """Thinking on: the prompt ends at the assistant turn and the model opens
+    its own <think> block."""
+    return tok.apply_chat_template(v2_messages(rec, with_answer=False),
+                                   tokenize=False, add_generation_prompt=True,
+                                   enable_thinking=True)
+
+
+def final_letter(final_text: str, letters: list[str]) -> str | None:
+    """The letter stated after the think block, if it is one of the options."""
+    found = _ANSWER_LINE.search(final_text or "")
+    if found and found.group(1) in letters:
+        return found.group(1)
+    fallback = extract_letter(final_text or "")
+    return fallback if fallback in letters else None
+
+
+def forced_suffix(closed: bool) -> str:
+    """Text that makes the very next token the answer letter (budget forcing).
+
+    An unfinished think block is closed first, in the layout training used."""
+    return "\n\nAnswer:" if closed else "\n</think>\n\nAnswer:"

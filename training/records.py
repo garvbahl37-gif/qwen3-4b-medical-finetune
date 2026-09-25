@@ -5,7 +5,11 @@ from dataclasses import asdict, dataclass
 
 @dataclass(frozen=True)
 class Record:
-    """One training or evaluation example, normalised across all four sources."""
+    """One training or evaluation example, normalised across all sources.
+
+    `reasoning` is the thinking a run 2 training example teaches, rendered
+    inside Qwen3's <think> block; None renders an empty block, as run 1 did.
+    """
 
     id: str
     source: str
@@ -16,6 +20,7 @@ class Record:
     rationale: str | None
     response: str | None
     subject: str | None
+    reasoning: str | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
