@@ -1,0 +1,19 @@
+{
+  "id": "gb1105/qwen3-4b-medical-fine-tune-run-3",
+  "title": "Qwen3-4B Medical Fine-tune Run 3",
+  "code_file": "kaggle_run3.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "gb1105/medical-ft-code",
+    "gb1105/medical-ft-data"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

@@ -552,7 +552,9 @@ def worker(role: str, gpu: int, out_dir: str, extra: str):
            + ("--adapter outputs/run2 " if role == "tuned" else "") + extra)
     log = open(f"{out_dir}-{role}.log", "w")
     proc = subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,
-                            env={**os.environ, "CUDA_VISIBLE_DEVICES": str(gpu)})
+                            env={**os.environ, "CUDA_VISIBLE_DEVICES": str(gpu),
+                                 # hours of variable-length batches fragment memory
+                                 "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
     return proc, log
 
 def run_pair(out_dir: str, extra_tuned: str, extra_base: str, poll: int) -> dict:
@@ -712,7 +714,16 @@ def write_notebook(cells: list[tuple[str, str]], path: Path) -> None:
 
 write_notebook(CELLS, Path("training/kaggle_medical.ipynb"))
 write_notebook(EVAL_CELLS, Path("evaluation/kaggle_eval.ipynb"))
+def run3_cells(data_fp: str) -> list[tuple[str, str]]:
+    """Run 3 is run 2's notebook with its own names. run2/kaggle_run2.ipynb
+    stays as it ran; run 3's change is in the code it uploads (every prompt
+    states /think or /no_think, and the budget-forcing pass no longer runs a
+    T4 out of memory)."""
+    return [(kind, src.replace("run2", "run3").replace("run 2", "run 3"))
+            for kind, src in run2_cells(data_fp)]
+
+
 if (RUN2_DATA / "data_report.json").exists():
-    write_notebook(run2_cells(data_fingerprint(RUN2_DATA)), Path("run2/kaggle_run2.ipynb"))
+    write_notebook(run3_cells(data_fingerprint(RUN2_DATA)), Path("run3/kaggle_run3.ipynb"))
 else:
-    print("skipped run2/kaggle_run2.ipynb: no data/v2 (run training.prepare_data_v2)")
+    print("skipped run3/kaggle_run3.ipynb: no data/v2 (run training.prepare_data_v2)")

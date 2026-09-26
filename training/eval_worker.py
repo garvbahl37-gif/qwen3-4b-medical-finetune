@@ -29,6 +29,8 @@ SAMPLING = {"do_sample": True, "temperature": 0.6, "top_p": 0.95, "top_k": 20}
 ALL_LETTERS = tuple("ABCDEFGHIJ")
 # Seconds per batch before the first one is measured.
 FIRST_GUESS = {"letter": 15.0, "reasoning": 150.0}
+# Forced-answer prompts scored per forward pass.
+FORCE_BATCH = 2
 
 
 def parse_stages(text: str) -> list[tuple[str, str]]:
@@ -128,29 +130,49 @@ def reason_batch(model, tok, recs, *, ids, think_id, stop_ids, budget, seed) -> 
                      "forced": letter is None, "new_tokens": len(new), "text": text})
         if letter is None:
             to_force.append(i)
-    if to_force:
-        forced = letters_for_prompts(
-            model, tok,
-            [prompts[i] + rows[i]["text"] + forced_suffix(rows[i]["closed"]) for i in to_force],
-            [option_letters(recs[i]) for i in to_force], ids)
-        for i, letter in zip(to_force, forced):
+    # Forced prompts carry the whole thinking trace, up to ~2,500 tokens, and
+    # a no-cache forward pass over sixteen of them ran a T4 out of memory in
+    # run 2. Two at a time is cheap next to the generation itself.
+    for group in chunks(to_force, FORCE_BATCH):
+        forced = _split_on_oom(
+            lambda g: letters_for_prompts(
+                model, tok,
+                [prompts[i] + rows[i]["text"] + forced_suffix(rows[i]["closed"]) for i in g],
+                [option_letters(recs[i]) for i in g], ids),
+            group)
+        for i, letter in zip(group, forced):
             rows[i]["letter"] = letter
     return rows
 
 
+def chunks(items: list, size: int):
+    for i in range(0, len(items), size):
+        yield items[i:i + size]
+
+
 def _split_on_oom(fn, group):
     """A long evaluation can fragment GPU memory; halve the batch and retry
-    rather than lose the stage."""
+    rather than lose the stage.
+
+    The retry happens outside the except block. Inside it, the traceback
+    still holds the failed attempt's tensors, so the memory it should free is
+    not free -- which is how run 2's base worker failed at every smaller size
+    down to one."""
+    import gc
+
     import torch
 
     try:
         return fn(group)
-    except torch.cuda.OutOfMemoryError:
+    except torch.cuda.OutOfMemoryError as exc:
+        message = str(exc)
+    gc.collect()
+    if torch.cuda.is_available():
         torch.cuda.empty_cache()
-        if len(group) == 1:
-            raise
-        mid = len(group) // 2
-        return _split_on_oom(fn, group[:mid]) + _split_on_oom(fn, group[mid:])
+    if len(group) == 1:
+        raise torch.cuda.OutOfMemoryError(message)
+    mid = len(group) // 2
+    return _split_on_oom(fn, group[:mid]) + _split_on_oom(fn, group[mid:])
 
 
 def run_stage(model, tok, mode, recs, out_path: Path, *, batch_size, budget, seed,

@@ -77,10 +77,21 @@ def answer_text(rec: Record) -> str:
     return f"{head}. {option}" if option else head
 
 
-def v2_messages(rec: Record, *, with_answer: bool) -> list[dict]:
+def v2_messages(rec: Record, *, with_answer: bool, think: bool | None = None) -> list[dict]:
+    """The conversation, with the mode stated in the user turn.
+
+    Every prompt ends with Qwen3's own switch, /think or /no_think -- the
+    control the Qwen3 report trained its hybrid model with. Run 2 left the
+    switch out, and the model learned to guess the mode from the question's
+    style: it skipped thinking on 971 of 1,273 MedQA questions. A training
+    row thinks when it has reasoning; a prompt says what it asks for.
+    """
+    if think is None:
+        think = bool(rec.reasoning)
     system = SYSTEM_MCQ_V2 if rec.kind == "mcq" else SYSTEM_CHAT
+    switch = "/think" if think else "/no_think"
     msgs = [{"role": "system", "content": system},
-            {"role": "user", "content": format_question_v2(rec)}]
+            {"role": "user", "content": f"{format_question_v2(rec)}\n\n{switch}"}]
     if with_answer:
         reply = {"role": "assistant", "content": answer_text(rec)}
         if rec.reasoning:
@@ -99,7 +110,7 @@ def render_training_text(tok, rec: Record) -> str:
 
 def render_letter_prompt(tok, rec: Record) -> str:
     """Thinking off, then 'Answer:' -- the next token is the choice."""
-    return tok.apply_chat_template(v2_messages(rec, with_answer=False),
+    return tok.apply_chat_template(v2_messages(rec, with_answer=False, think=False),
                                    tokenize=False, add_generation_prompt=True,
                                    enable_thinking=False) + "Answer:"
 
@@ -107,7 +118,7 @@ def render_letter_prompt(tok, rec: Record) -> str:
 def render_reasoning_prompt(tok, rec: Record) -> str:
     """Thinking on: the prompt ends at the assistant turn and the model opens
     its own <think> block."""
-    return tok.apply_chat_template(v2_messages(rec, with_answer=False),
+    return tok.apply_chat_template(v2_messages(rec, with_answer=False, think=True),
                                    tokenize=False, add_generation_prompt=True,
                                    enable_thinking=True)
 

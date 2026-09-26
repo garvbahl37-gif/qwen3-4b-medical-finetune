@@ -120,3 +120,12 @@ def test_short_explanation_drops_medmcqas_answer_restatement():
 def test_short_explanation_does_not_split_at_abbreviations():
     assert short_explanation("See Dr. Shaw p. 373 for this. Then rest. More.") == \
         "See Dr. Shaw p. 373 for this. Then rest."
+
+
+def test_every_prompt_states_its_mode_the_way_qwen3_was_trained():
+    thinking = v2_messages(mcq(reasoning="r"), with_answer=True)[1]["content"]
+    direct = v2_messages(mcq(), with_answer=True)[1]["content"]
+    assert thinking.endswith("\n\n/think") and direct.endswith("\n\n/no_think")
+    tok = FakeTok()
+    assert "/no_think" in render_letter_prompt(tok, mcq(reasoning="r"))
+    assert "/think" in render_reasoning_prompt(tok, mcq()) and "/no_think" not in render_reasoning_prompt(tok, mcq())

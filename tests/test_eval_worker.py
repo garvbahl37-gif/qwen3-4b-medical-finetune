@@ -43,3 +43,27 @@ def test_pick_letter_restricts_to_the_questions_options_and_breaks_ties_early():
     assert pick_letter(row, ids, ["A", "B", "C", "D"]) == "D"
     with pytest.raises(FloatingPointError):
         pick_letter({10: float("nan"), 11: 0.0}, ids, ["A", "B"])
+
+
+def test_split_on_oom_retries_halves_after_the_failure_is_released():
+    import torch
+
+    from training.eval_worker import _split_on_oom
+
+    calls = []
+
+    def fn(group):
+        calls.append(len(group))
+        if len(group) > 2:
+            raise torch.cuda.OutOfMemoryError("too big")
+        return [x * 10 for x in group]
+
+    assert _split_on_oom(fn, [1, 2, 3, 4, 5, 6, 7, 8]) == [10, 20, 30, 40, 50, 60, 70, 80]
+    assert calls == [8, 4, 2, 2, 4, 2, 2]
+
+
+def test_chunks_splits_forced_prompts_into_small_groups():
+    from training.eval_worker import FORCE_BATCH, chunks
+
+    assert FORCE_BATCH == 2
+    assert list(chunks([1, 2, 3, 4, 5], 2)) == [[1, 2], [3, 4], [5]]
