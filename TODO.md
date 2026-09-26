@@ -91,13 +91,25 @@ fine-tune 57.8% (p = 0.004). Two things went wrong there:
 Letter choice elsewhere is flat, and no better than run 1's fine-tune. The
 reasoning goal was not met, for a cause that is now identified and fixable.
 
-- [ ] Run 3 (not started; needs the owner's go and ~11 GPU-hours): mark direct
-      rows with `/no_think` in the user turn so thinking is switched by the
-      prompt, not guessed from the question's style; make the budget-forcing pass
-      score forced prompts in small batches and free the failed attempt's memory
-      before retrying; run the base model's reasoning at batch 8
-- [ ] The independent final review never finished (stopped with the laptop); rerun
-      it on the run 3 changes instead
+- [x] Run 3 launched (see below)
+
+## Run 3 — the mode switch (running on Kaggle)
+
+- [x] Research: the Qwen3 technical report trains its hybrid model with /think and
+      /no_think in the user prompt; run 2 gave no signal, so its model guessed the
+      mode from question style
+- [x] Every prompt now ends with /think or /no_think, in training and evaluation.
+      Same data as run 2 (13,617 rows, unchanged on Kaggle), same settings
+- [x] Evaluation memory: forced answers are read two at a time, an out-of-memory
+      retry runs after the failed attempt is released, and the workers use
+      expandable CUDA memory segments. 214 tests; local smoke run passed
+- [x] **Launched 2026-09-26 17:34 UTC**: [the run 3 kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-run-3) (private), one
+      12-hour session, nothing needed from the laptop. Notebook as pushed:
+      `results/run3/kaggle_run3_notebook.ipynb`
+- [ ] Target the owner set: 65-66%. The comparable number is reasoning-mode MedQA,
+      where run 2's base scored 68.2% (192 questions) and its fine-tune 56.8%
+      because it skipped thinking. Download the output into `results/run3/` and
+      record the result honestly
 
 ## Documentation
 

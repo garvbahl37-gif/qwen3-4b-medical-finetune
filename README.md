@@ -16,6 +16,7 @@ advice, and the model can give wrong answers.
 | Evaluation | Done on 2026-09-24: 5,456 held-out questions on a Kaggle T4, in 1.2 hours. |
 | Result | A small gain when choosing among the answer letters; worse when writing answers out, mostly from answer length and format. See below. |
 | Run 2 | Done 2026-09-26: a reasoning fine-tune on 13,617 examples. Letter choice +0.8 pooled (PubMedQA +3.1, significant); the fine-tune learned to skip thinking. See below. |
+| Run 3 | Running on Kaggle since 2026-09-26 17:34 UTC: run 2's data with /think and /no_think in every prompt. |
 | Chat frontend | Planned, not built. |
 
 ## Result
