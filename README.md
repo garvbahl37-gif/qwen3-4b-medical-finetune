@@ -15,7 +15,7 @@ advice, and the model can give wrong answers.
 | Training | Done. One run on 2026-09-21 produced the LoRA adapter (run 1). |
 | Evaluation | Done on 2026-09-24: 5,456 held-out questions on a Kaggle T4, in 1.2 hours. |
 | Result | A small gain when choosing among the answer letters; worse when writing answers out, mostly from answer length and format. See below. |
-| Run 2 | A reasoning fine-tune on 13,617 examples, training and evaluating on Kaggle since 2026-09-25 13:27 UTC. |
+| Run 2 | Done 2026-09-26: a reasoning fine-tune on 13,617 examples. Letter choice +0.8 pooled (PubMedQA +3.1, significant); the fine-tune learned to skip thinking. See below. |
 | Chat frontend | Planned, not built. |
 
 ## Result
@@ -113,6 +113,40 @@ by git. [`docs/training.md`](docs/training.md) explains each row.
 
 Each dataset and model has its own terms of use. Read its card before you
 reuse it.
+
+## Run 2 result
+
+Run 2 trained in Qwen3's thinking format on 13,617 examples from eight sources
+and was scored in the same Kaggle session. Base against fine-tune, exact
+McNemar p:
+
+| Benchmark (letter choice, all questions) | n | Base | Fine-tune | Change | p |
+|---|---:|---:|---:|---:|---:|
+| MedQA-USMLE test | 1,273 | 57.4% | 58.1% | +0.6 | 0.61 |
+| MedMCQA validation | 4,183 | 55.0% | 55.3% | +0.3 | 0.66 |
+| PubMedQA labeled | 1,000 | 72.0% | 75.1% | +3.1 | 0.008 |
+| MMLU medical | 1,089 | 73.3% | 74.1% | +0.8 | 0.45 |
+| All four, pooled | 7,545 | 60.3% | 61.1% | +0.8 | 0.067 |
+
+Reasoning mode could be compared on only 192 MedQA questions: base 68.2%,
+fine-tune 57.8% (p = 0.004). Two things went wrong there:
+
+- **The fine-tune mostly stopped thinking.** It wrote a real reasoning trace on
+  302 of 1,273 MedQA questions (median 15 new tokens) and otherwise answered at
+  once, so its reasoning-mode score (56.8%) equals its letter-choice score. The
+  cause is the data format: the 25% of direct-answer rows carried their empty
+  think block inside the trained answer, under the same system prompt as the
+  reasoning rows, so the model learned to choose "no thinking" itself for
+  exam-style questions. Qwen3's intended signal is `/no_think` in the prompt.
+- **The base model's evaluation worker ran out of GPU memory** after 192
+  questions: it thinks at length (median 1,025 tokens), and the budget-forcing
+  pass re-read 16 prompts of up to ~2,500 tokens at once on a 15 GB T4. The
+  fine-tune's worker finished; its reasoning-mode scores without a base to
+  compare against are MedQA 56.8% (1,273), MMLU-medical 71.2% (1,089),
+  PubMedQA 74.6% (500) and MedMCQA 51.6% (304).
+
+Full numbers: [`results/run2/run2_eval.json`](results/run2/run2_eval.json);
+every answer from both models: [`results/run2/predictions/`](results/run2/predictions/).
 
 ## Evaluation
 

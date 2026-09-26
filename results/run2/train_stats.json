@@ -1,0 +1,15 @@
+{
+  "format": "v2",
+  "train_runtime_seconds": 20453.476,
+  "train_loss": 0.9770993328010532,
+  "examples": 13617,
+  "max_seq": 2496,
+  "batch_size": 2,
+  "grad_accum": 8,
+  "rank": 64,
+  "lr": 0.0001,
+  "group_by_length": true,
+  "steps": 852,
+  "max_steps": 852,
+  "stopped_early": false
+}

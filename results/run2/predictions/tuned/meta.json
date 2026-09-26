@@ -1,0 +1,73 @@
+{
+  "role": "tuned",
+  "base": "unsloth/Qwen3-4B",
+  "adapter": "outputs/run2",
+  "seed": 1234,
+  "think_budget": 1536,
+  "batch_size": 16,
+  "deadline": 1790383672.0,
+  "limit": 0,
+  "started": 1790363689.8281424,
+  "status": "deadline",
+  "stages": {
+    "letter:medqa": {
+      "planned": 1273,
+      "scored": 1273,
+      "status": "done",
+      "seconds": 441.4
+    },
+    "letter:medmcqa": {
+      "planned": 4183,
+      "scored": 4183,
+      "status": "done",
+      "seconds": 505.6
+    },
+    "letter:pubmedqa": {
+      "planned": 1000,
+      "scored": 1000,
+      "status": "done",
+      "seconds": 447.9
+    },
+    "letter:mmlu_medical": {
+      "planned": 1089,
+      "scored": 1089,
+      "status": "done",
+      "seconds": 237.4
+    },
+    "reasoning:medqa": {
+      "planned": 1273,
+      "scored": 1273,
+      "status": "done",
+      "seconds": 8586.6
+    },
+    "reasoning:mmlu_medical": {
+      "planned": 1089,
+      "scored": 1089,
+      "status": "done",
+      "seconds": 6861.2
+    },
+    "reasoning:pubmedqa": {
+      "planned": 500,
+      "scored": 500,
+      "status": "done",
+      "seconds": 1255.5
+    },
+    "reasoning:medmcqa": {
+      "planned": 1000,
+      "scored": 304,
+      "status": "deadline",
+      "seconds": 1600.0
+    }
+  },
+  "load_seconds": 16.6,
+  "environment": {
+    "torch": "2.10.0+cu128",
+    "transformers": "5.5.0",
+    "peft": "0.19.1",
+    "device": "cuda",
+    "dtype": "float16",
+    "device_name": "Tesla T4"
+  },
+  "adapter_sha256": "310111def8455c4db7d715e6cddd5d75bc40da4f2dcf63eb025fef8b32774c05",
+  "finished": 1790383643.574831
+}

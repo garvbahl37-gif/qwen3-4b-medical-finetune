@@ -34,7 +34,7 @@ barely moved over the remaining 390 steps. Only evaluation can say whether the
 second half helped, but it is a reason not to assume more of the same data is
 the lever.
 
-## Run 2 — reasoning fine-tune (running on Kaggle)
+## Run 2 — reasoning fine-tune (complete; primary goal not met)
 
 Spec `docs/superpowers/specs/2026-09-25-run2-reasoning-finetune-design.md`, plan
 `docs/superpowers/plans/2026-09-25-run2-reasoning-finetune.md`.
@@ -57,12 +57,47 @@ Spec `docs/superpowers/specs/2026-09-25-run2-reasoning-finetune-design.md`, plan
       fine-tune in parallel on MedQA, MedMCQA, PubMedQA and MMLU-medical, by
       letter choice and by reasoning, until 40 minutes before the limit. The
       notebook as pushed is `results/run2/kaggle_run2_notebook.ipynb`
-- [ ] The independent final review was still running at launch (the laptop was
-      about to sleep). Apply or record its findings; anything that affects this
-      run's numbers goes in the write-up
-- [ ] Download the output (`run2_eval.json`, predictions, adapter, loss curve)
-      into `results/run2/` and record the result honestly in this file and the
-      README, including if the fine-tune does not beat base
+- [x] **Completed 2026-09-26.** Training ran its full schedule: 852 steps, 5.68 h,
+      mean loss 0.977, no early stop. Evaluation ran until the deadline. Results,
+      every prediction and the Kaggle log are in `results/run2/`; the adapter is in
+      `training/outputs/run2` (515 MB, outside git)
+
+| Benchmark (letter choice, all questions) | n | Base | Fine-tune | Change | p |
+|---|---:|---:|---:|---:|---:|
+| MedQA-USMLE test | 1,273 | 57.4% | 58.1% | +0.6 | 0.61 |
+| MedMCQA validation | 4,183 | 55.0% | 55.3% | +0.3 | 0.66 |
+| PubMedQA labeled | 1,000 | 72.0% | 75.1% | +3.1 | 0.008 |
+| MMLU medical | 1,089 | 73.3% | 74.1% | +0.8 | 0.45 |
+| All four, pooled | 7,545 | 60.3% | 61.1% | +0.8 | 0.067 |
+
+Reasoning mode could be compared on only 192 MedQA questions: base 68.2%,
+fine-tune 57.8% (p = 0.004). Two things went wrong there:
+
+- **The fine-tune mostly stopped thinking.** It wrote a real reasoning trace on
+  302 of 1,273 MedQA questions (median 15 new tokens) and otherwise answered at
+  once, so its reasoning-mode score (56.8%) equals its letter-choice score. The
+  cause is the data format: the 25% of direct-answer rows carried their empty
+  think block inside the trained answer, under the same system prompt as the
+  reasoning rows, so the model learned to choose "no thinking" itself for
+  exam-style questions. Qwen3's intended signal is `/no_think` in the prompt.
+- **The base model's evaluation worker ran out of GPU memory** after 192
+  questions: it thinks at length (median 1,025 tokens), and the budget-forcing
+  pass re-read 16 prompts of up to ~2,500 tokens at once on a 15 GB T4. The
+  fine-tune's worker finished; its reasoning-mode scores without a base to
+  compare against are MedQA 56.8% (1,273), MMLU-medical 71.2% (1,089),
+  PubMedQA 74.6% (500) and MedMCQA 51.6% (304).
+
+**Verdict:** the one significant gain is PubMedQA letter choice (+3.1 points).
+Letter choice elsewhere is flat, and no better than run 1's fine-tune. The
+reasoning goal was not met, for a cause that is now identified and fixable.
+
+- [ ] Run 3 (not started; needs the owner's go and ~11 GPU-hours): mark direct
+      rows with `/no_think` in the user turn so thinking is switched by the
+      prompt, not guessed from the question's style; make the budget-forcing pass
+      score forced prompts in small batches and free the failed attempt's memory
+      before retrying; run the base model's reasoning at batch 8
+- [ ] The independent final review never finished (stopped with the laptop); rerun
+      it on the run 3 changes instead
 
 ## Documentation
 

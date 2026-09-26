@@ -1,0 +1,477 @@
+{
+  "stages": {
+    "letter:medqa": {
+      "mode": "letter",
+      "n": 1273,
+      "base_accuracy": 0.5742340926944226,
+      "tuned_accuracy": 0.5805184603299293,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 96,
+        "regressions": 88,
+        "both_correct": 643,
+        "both_wrong": 446,
+        "discordant": 184,
+        "p_value": 0.605943
+      },
+      "diff_ci": {
+        "diff": 0.006284,
+        "low": -0.014597,
+        "high": 0.027166
+      },
+      "by_subject": {
+        "step1": {
+          "n": 679,
+          "base": 0.5832106038291606,
+          "tuned": 0.5787923416789397
+        },
+        "step2&3": {
+          "n": 594,
+          "base": 0.563973063973064,
+          "tuned": 0.5824915824915825
+        }
+      },
+      "benchmark": "medqa",
+      "planned": 1273,
+      "scored": 1273
+    },
+    "letter:medmcqa": {
+      "mode": "letter",
+      "n": 4183,
+      "base_accuracy": 0.5498446091322018,
+      "tuned_accuracy": 0.5527133636146306,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 311,
+        "regressions": 299,
+        "both_correct": 2001,
+        "both_wrong": 1572,
+        "discordant": 610,
+        "p_value": 0.656083
+      },
+      "diff_ci": {
+        "diff": 0.002869,
+        "low": -0.008703,
+        "high": 0.014441
+      },
+      "by_subject": {
+        "Dental": {
+          "n": 1318,
+          "base": 0.49165402124430957,
+          "tuned": 0.49241274658573597
+        },
+        "Surgery": {
+          "n": 369,
+          "base": 0.5284552845528455,
+          "tuned": 0.5474254742547425
+        },
+        "Pathology": {
+          "n": 337,
+          "base": 0.6201780415430267,
+          "tuned": 0.6350148367952523
+        },
+        "Medicine": {
+          "n": 295,
+          "base": 0.6203389830508474,
+          "tuned": 0.6033898305084746
+        },
+        "Pharmacology": {
+          "n": 243,
+          "base": 0.6666666666666666,
+          "tuned": 0.6995884773662552
+        },
+        "Anatomy": {
+          "n": 234,
+          "base": 0.5341880341880342,
+          "tuned": 0.5170940170940171
+        },
+        "Pediatrics": {
+          "n": 234,
+          "base": 0.5341880341880342,
+          "tuned": 0.5555555555555556
+        },
+        "Gynaecology & Obstetrics": {
+          "n": 224,
+          "base": 0.53125,
+          "tuned": 0.49107142857142855
+        },
+        "Biochemistry": {
+          "n": 171,
+          "base": 0.6374269005847953,
+          "tuned": 0.6666666666666666
+        },
+        "Physiology": {
+          "n": 171,
+          "base": 0.6666666666666666,
+          "tuned": 0.6666666666666666
+        },
+        "Social & Preventive Medicine": {
+          "n": 129,
+          "base": 0.5658914728682171,
+          "tuned": 0.5426356589147286
+        },
+        "Microbiology": {
+          "n": 122,
+          "base": 0.5655737704918032,
+          "tuned": 0.5901639344262295
+        },
+        "Radiology": {
+          "n": 69,
+          "base": 0.5797101449275363,
+          "tuned": 0.6666666666666666
+        },
+        "Forensic Medicine": {
+          "n": 67,
+          "base": 0.47761194029850745,
+          "tuned": 0.4925373134328358
+        },
+        "Ophthalmology": {
+          "n": 58,
+          "base": 0.5,
+          "tuned": 0.46551724137931033
+        },
+        "ENT": {
+          "n": 53,
+          "base": 0.5471698113207547,
+          "tuned": 0.5094339622641509
+        },
+        "Anaesthesia": {
+          "n": 34,
+          "base": 0.38235294117647056,
+          "tuned": 0.3235294117647059
+        },
+        "Orthopaedics": {
+          "n": 20,
+          "base": 0.55,
+          "tuned": 0.45
+        },
+        "Skin": {
+          "n": 17,
+          "base": 0.35294117647058826,
+          "tuned": 0.47058823529411764
+        },
+        "Psychiatry": {
+          "n": 16,
+          "base": 0.5,
+          "tuned": 0.4375
+        },
+        "Unknown": {
+          "n": 2,
+          "base": 0.5,
+          "tuned": 0.0
+        }
+      },
+      "benchmark": "medmcqa",
+      "planned": 4183,
+      "scored": 4183
+    },
+    "letter:pubmedqa": {
+      "mode": "letter",
+      "n": 1000,
+      "base_accuracy": 0.72,
+      "tuned_accuracy": 0.751,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 80,
+        "regressions": 49,
+        "both_correct": 671,
+        "both_wrong": 200,
+        "discordant": 129,
+        "p_value": 0.008008
+      },
+      "diff_ci": {
+        "diff": 0.031,
+        "low": 0.008822,
+        "high": 0.053178
+      },
+      "by_subject": {
+        "unknown": {
+          "n": 1000,
+          "base": 0.72,
+          "tuned": 0.751
+        }
+      },
+      "benchmark": "pubmedqa",
+      "planned": 1000,
+      "scored": 1000
+    },
+    "letter:mmlu_medical": {
+      "mode": "letter",
+      "n": 1089,
+      "base_accuracy": 0.7327823691460055,
+      "tuned_accuracy": 0.7410468319559229,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 60,
+        "regressions": 51,
+        "both_correct": 747,
+        "both_wrong": 231,
+        "discordant": 111,
+        "p_value": 0.447806
+      },
+      "diff_ci": {
+        "diff": 0.008264,
+        "low": -0.010691,
+        "high": 0.02722
+      },
+      "by_subject": {
+        "professional_medicine": {
+          "n": 272,
+          "base": 0.7279411764705882,
+          "tuned": 0.7683823529411765
+        },
+        "clinical_knowledge": {
+          "n": 265,
+          "base": 0.7396226415094339,
+          "tuned": 0.7396226415094339
+        },
+        "college_medicine": {
+          "n": 173,
+          "base": 0.7514450867052023,
+          "tuned": 0.7167630057803468
+        },
+        "college_biology": {
+          "n": 144,
+          "base": 0.8333333333333334,
+          "tuned": 0.8125
+        },
+        "anatomy": {
+          "n": 135,
+          "base": 0.5925925925925926,
+          "tuned": 0.6222222222222222
+        },
+        "medical_genetics": {
+          "n": 100,
+          "base": 0.74,
+          "tuned": 0.77
+        }
+      },
+      "benchmark": "mmlu_medical",
+      "planned": 1089,
+      "scored": 1089
+    },
+    "reasoning:medqa": {
+      "mode": "reasoning",
+      "n": 192,
+      "base_accuracy": 0.6822916666666666,
+      "tuned_accuracy": 0.578125,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 12,
+        "regressions": 32,
+        "both_correct": 99,
+        "both_wrong": 49,
+        "discordant": 44,
+        "p_value": 0.003658
+      },
+      "diff_ci": {
+        "diff": -0.104167,
+        "low": -0.170257,
+        "high": -0.038076
+      },
+      "by_subject": {
+        "step1": {
+          "n": 104,
+          "base": 0.7211538461538461,
+          "tuned": 0.5961538461538461
+        },
+        "step2&3": {
+          "n": 88,
+          "base": 0.6363636363636364,
+          "tuned": 0.5568181818181818
+        }
+      },
+      "benchmark": "medqa",
+      "planned": 1273,
+      "scored": 192,
+      "base_counts": {
+        "forced": 53,
+        "closed": 140,
+        "median_new_tokens": 1025.5
+      },
+      "tuned_counts": {
+        "forced": 0,
+        "closed": 192,
+        "median_new_tokens": 15.0
+      }
+    }
+  },
+  "pooled": {
+    "letter": {
+      "mode": "letter",
+      "n": 7545,
+      "base_accuracy": 0.6029158383035123,
+      "tuned_accuracy": 0.6108681245858184,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 547,
+        "regressions": 487,
+        "both_correct": 4062,
+        "both_wrong": 2449,
+        "discordant": 1034,
+        "p_value": 0.066482
+      },
+      "diff_ci": {
+        "diff": 0.007952,
+        "low": -0.000399,
+        "high": 0.016303
+      }
+    },
+    "reasoning": {
+      "mode": "reasoning",
+      "n": 192,
+      "base_accuracy": 0.6822916666666666,
+      "tuned_accuracy": 0.578125,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 12,
+        "regressions": 32,
+        "both_correct": 99,
+        "both_wrong": 49,
+        "discordant": 44,
+        "p_value": 0.003658
+      },
+      "diff_ci": {
+        "diff": -0.104167,
+        "low": -0.170257,
+        "high": -0.038076
+      }
+    }
+  },
+  "unpaired": [
+    "reasoning:mmlu_medical",
+    "reasoning:pubmedqa",
+    "reasoning:medmcqa"
+  ],
+  "models": {
+    "base": {
+      "role": "base",
+      "base": "unsloth/Qwen3-4B",
+      "adapter": null,
+      "seed": 1234,
+      "think_budget": 1536,
+      "batch_size": 16,
+      "deadline": 1790383672.0,
+      "limit": 0,
+      "started": 1790363689.8280957,
+      "status": "error",
+      "stages": {
+        "letter:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 276.3
+        },
+        "letter:medmcqa": {
+          "planned": 4183,
+          "scored": 4183,
+          "status": "done",
+          "seconds": 337.8
+        },
+        "letter:pubmedqa": {
+          "planned": 1000,
+          "scored": 1000,
+          "status": "done",
+          "seconds": 307.4
+        },
+        "letter:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 159.7
+        }
+      },
+      "load_seconds": 13.4,
+      "environment": {
+        "torch": "2.10.0+cu128",
+        "transformers": "5.5.0",
+        "peft": "0.19.1",
+        "device": "cuda",
+        "dtype": "float16",
+        "device_name": "Tesla T4"
+      },
+      "error": "OutOfMemoryError: CUDA out of memory. Tried to allocate 614.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 88.81 MiB is free. Including non-PyTorch memory, this process has 14.47 GiB memory in use. Of the allocated memory 12.79 GiB is allocated by PyTorch, and 1.55 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+      "finished": 1790370055.275095
+    },
+    "tuned": {
+      "role": "tuned",
+      "base": "unsloth/Qwen3-4B",
+      "adapter": "outputs/run2",
+      "seed": 1234,
+      "think_budget": 1536,
+      "batch_size": 16,
+      "deadline": 1790383672.0,
+      "limit": 0,
+      "started": 1790363689.8281424,
+      "status": "deadline",
+      "stages": {
+        "letter:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 441.4
+        },
+        "letter:medmcqa": {
+          "planned": 4183,
+          "scored": 4183,
+          "status": "done",
+          "seconds": 505.6
+        },
+        "letter:pubmedqa": {
+          "planned": 1000,
+          "scored": 1000,
+          "status": "done",
+          "seconds": 447.9
+        },
+        "letter:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 237.4
+        },
+        "reasoning:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 8586.6
+        },
+        "reasoning:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 6861.2
+        },
+        "reasoning:pubmedqa": {
+          "planned": 500,
+          "scored": 500,
+          "status": "done",
+          "seconds": 1255.5
+        },
+        "reasoning:medmcqa": {
+          "planned": 1000,
+          "scored": 304,
+          "status": "deadline",
+          "seconds": 1600.0
+        }
+      },
+      "load_seconds": 16.6,
+      "environment": {
+        "torch": "2.10.0+cu128",
+        "transformers": "5.5.0",
+        "peft": "0.19.1",
+        "device": "cuda",
+        "dtype": "float16",
+        "device_name": "Tesla T4"
+      },
+      "adapter_sha256": "310111def8455c4db7d715e6cddd5d75bc40da4f2dcf63eb025fef8b32774c05",
+      "finished": 1790383643.574831
+    }
+  }
+}

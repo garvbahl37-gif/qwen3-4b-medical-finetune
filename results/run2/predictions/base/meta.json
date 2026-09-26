@@ -1,0 +1,49 @@
+{
+  "role": "base",
+  "base": "unsloth/Qwen3-4B",
+  "adapter": null,
+  "seed": 1234,
+  "think_budget": 1536,
+  "batch_size": 16,
+  "deadline": 1790383672.0,
+  "limit": 0,
+  "started": 1790363689.8280957,
+  "status": "error",
+  "stages": {
+    "letter:medqa": {
+      "planned": 1273,
+      "scored": 1273,
+      "status": "done",
+      "seconds": 276.3
+    },
+    "letter:medmcqa": {
+      "planned": 4183,
+      "scored": 4183,
+      "status": "done",
+      "seconds": 337.8
+    },
+    "letter:pubmedqa": {
+      "planned": 1000,
+      "scored": 1000,
+      "status": "done",
+      "seconds": 307.4
+    },
+    "letter:mmlu_medical": {
+      "planned": 1089,
+      "scored": 1089,
+      "status": "done",
+      "seconds": 159.7
+    }
+  },
+  "load_seconds": 13.4,
+  "environment": {
+    "torch": "2.10.0+cu128",
+    "transformers": "5.5.0",
+    "peft": "0.19.1",
+    "device": "cuda",
+    "dtype": "float16",
+    "device_name": "Tesla T4"
+  },
+  "error": "OutOfMemoryError: CUDA out of memory. Tried to allocate 614.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 88.81 MiB is free. Including non-PyTorch memory, this process has 14.47 GiB memory in use. Of the allocated memory 12.79 GiB is allocated by PyTorch, and 1.55 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+  "finished": 1790370055.275095
+}
