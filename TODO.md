@@ -93,7 +93,7 @@ reasoning goal was not met, for a cause that is now identified and fixable.
 
 - [x] Run 3 launched (see below)
 
-## Run 3 — the mode switch (running on Kaggle)
+## Run 3 — the mode switch (trained; evaluating on Kaggle)
 
 - [x] Research: the Qwen3 technical report trains its hybrid model with /think and
       /no_think in the user prompt; run 2 gave no signal, so its model guessed the
@@ -106,6 +106,18 @@ reasoning goal was not met, for a cause that is now identified and fixable.
 - [x] **Launched 2026-09-26 17:34 UTC**: [the run 3 kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-run-3) (private), one
       12-hour session, nothing needed from the laptop. Notebook as pushed:
       `results/run3/kaggle_run3_notebook.ipynb`
+- [x] Training finished: all 852 steps in 5.0 h, mean loss 0.974
+      (`results/run3/train_stats.json`, `loss_curve.json`, the Kaggle log)
+- [x] The session then ended with ERROR in the evaluation smoke run: both
+      workers downloaded the 8GB base model at the same moment and the
+      fine-tune's worker failed to load its tokenizer (`OSError: Can't load
+      tokenizer for 'unsloth/Qwen3-4B'`). Nothing was wrong with the model
+- [x] **Evaluation relaunched 2026-10-01 05:53 UTC** without retraining:
+      [the run 3 evaluation kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-fine-tune-run-3-evaluation). The adapter went up as
+      `medical-ft-adapter-run3` and is checked by checksum; the base model is
+      downloaded once, with retries, before the workers start, and they run
+      offline. Evaluation gets the whole 12-hour session. Rehearsed on a mock
+      Kaggle first; 217 tests
 - [ ] Target the owner set: 65-66%. The comparable number is reasoning-mode MedQA,
       where run 2's base scored 68.2% (192 questions) and its fine-tune 56.8%
       because it skipped thinking. Download the output into `results/run3/` and
