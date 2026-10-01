@@ -1,0 +1,260 @@
+[{"stream_name":"stderr","time":6.837776493,"data":"/usr/local/lib/python3.12/dist-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":6.837843404,"data":"  validate(nb)\n"}
+,{"stream_name":"stderr","time":7.757265629,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.757306303,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.757312887,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.757317457,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.361242863,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.36127271,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.361278041,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.36128226,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":15.237279616,"data":"GPU 0      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":15.237350501,"data":"GPU 1      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":15.237355201,"data":"capability : 7.5\n"}
+,{"stream_name":"stdout","time":15.237358381,"data":"torch      : 2.10.0+cu128\n"}
+,{"stream_name":"stdout","time":15.237361552,"data":"\n"}
+,{"stream_name":"stdout","time":15.23736459,"data":"2 GPU(s). Training uses GPU 0; evaluation runs the fine-tune on GPU 0 and the base model on GPU 1, in parallel.\n"}
+,{"stream_name":"stdout","time":45.242946512,"data":"ok | unsloth 2026.9.7 | transformers 5.5.0 | trl 0.24.0 | peft 0.19.1 | torch 2.10.0+cu128\n"}
+,{"stream_name":"stdout","time":78.360002152,"data":"ok | peft can wrap a layer on this image\n"}
+,{"stream_name":"stdout","time":102.85224614,"data":"ok | SFTConfig accepts train_sampling_strategy\n"}
+,{"stream_name":"stdout","time":104.31379816,"data":"code: /kaggle/input/datasets/gb1105/medical-ft-code\n"}
+,{"stream_name":"stdout","time":104.313835815,"data":"data: /kaggle/input/datasets/gb1105/medical-ft-data\n"}
+,{"stream_name":"stdout","time":104.313840781,"data":"train 13,617 examples | max_seq 2496 | reasoning 75% | multiple choice 60%\n"}
+,{"stream_name":"stdout","time":104.313844647,"data":"  medreason:mcq            kept  2,750 of target  2,750\n"}
+,{"stream_name":"stdout","time":104.313848757,"data":"  medreason:dialogue       kept  1,375 of target  1,375\n"}
+,{"stream_name":"stdout","time":104.313852351,"data":"  r1_distill               kept  2,062 of target  2,062\n"}
+,{"stream_name":"stdout","time":104.313855824,"data":"  ultramedical             kept  2,062 of target  2,062\n"}
+,{"stream_name":"stdout","time":104.313859281,"data":"  medical_o1               kept  1,375 of target  1,375\n"}
+,{"stream_name":"stdout","time":104.313862712,"data":"  reasonmed                kept    688 of target    688\n"}
+,{"stream_name":"stdout","time":104.31386621,"data":"  medmcqa                  kept  1,000 of target  1,000\n"}
+,{"stream_name":"stdout","time":104.313869725,"data":"  medqa                    kept    688 of target    688\n"}
+,{"stream_name":"stdout","time":104.313886209,"data":"  pubmedqa_artificial      kept    938 of target    938\n"}
+,{"stream_name":"stdout","time":104.313889284,"data":"  medical_o1_direct        kept    812 of target    812\n"}
+,{"stream_name":"stdout","time":110.80748439,"data":"adapter: /kaggle/input/datasets/gb1105/medical-ft-adapter-run3 -\u003e outputs/run3\n"}
+,{"stream_name":"stderr","time":111.490856262,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":111.490905521,"data":"\n"}
+,{"stream_name":"stderr","time":111.490911719,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":149.50573576,"data":"base model at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B/snapshots/64033659d5caf1b8ed7f929b29de705e93a4d468\n"}
+,{"stream_name":"stdout","time":164.548802137,"data":"05:56 answers written: {'tuned': 0, 'base': 0}\n"}
+,{"stream_name":"stdout","time":179.556237711,"data":"05:56 answers written: {'tuned': 0, 'base': 0}\n"}
+,{"stream_name":"stdout","time":194.552885697,"data":"05:57 answers written: {'tuned': 4, 'base': 16}\n"}
+,{"stream_name":"stdout","time":209.554964048,"data":"05:57 answers written: {'tuned': 16, 'base': 24}\n"}
+,{"stream_name":"stdout","time":224.562248236,"data":"05:57 answers written: {'tuned': 20, 'base': 32}\n"}
+,{"stream_name":"stdout","time":239.558882576,"data":"05:57 answers written: {'tuned': 24, 'base': 32}\n"}
+,{"stream_name":"stdout","time":254.56116656,"data":"05:58 answers written: {'tuned': 28, 'base': 32}\n"}
+,{"stream_name":"stdout","time":269.566200045,"data":"05:58 answers written: {'tuned': 32, 'base': 32}\n"}
+,{"stream_name":"stdout","time":269.568606144,"data":"--- tuned log tail ---\n"}
+,{"stream_name":"stdout","time":269.568627642,"data":"Loading weights:  95%|█████████▍| 377/398 [00:16\u003c00:01, 13.74it/s]\n"}
+,{"stream_name":"stdout","time":269.568653561,"data":"Loading weights:  97%|█████████▋| 388/398 [00:16\u003c00:00, 13.24it/s]\n"}
+,{"stream_name":"stdout","time":269.568659371,"data":"Loading weights: 100%|██████████| 398/398 [00:17\u003c00:00, 23.40it/s]\n"}
+,{"stream_name":"stdout","time":269.56866470800003,"data":"tuned letter:medqa: 4/4 done in 1s\n"}
+,{"stream_name":"stdout","time":269.568669434,"data":"tuned letter:medmcqa: 4/4 done in 0s\n"}
+,{"stream_name":"stdout","time":269.568674029,"data":"tuned letter:pubmedqa: 4/4 done in 1s\n"}
+,{"stream_name":"stdout","time":269.568678744,"data":"tuned letter:mmlu_medical: 4/4 done in 0s\n"}
+,{"stream_name":"stdout","time":269.568683783,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568690674,"data":"tuned reasoning:medqa: 4/4 done in 15s\n"}
+,{"stream_name":"stdout","time":269.568695558,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568700795,"data":"tuned reasoning:mmlu_medical: 4/4 done in 14s\n"}
+,{"stream_name":"stdout","time":269.568705905,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568722004,"data":"tuned reasoning:pubmedqa: 4/4 done in 16s\n"}
+,{"stream_name":"stdout","time":269.568725951,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568730468,"data":"tuned reasoning:medmcqa: 4/4 done in 14s\n"}
+,{"stream_name":"stdout","time":269.568734066,"data":"\n"}
+,{"stream_name":"stdout","time":269.568737894,"data":"--- base log tail ---\n"}
+,{"stream_name":"stdout","time":269.568741732,"data":"Loading weights:  95%|█████████▍| 377/398 [00:16\u003c00:01, 13.66it/s]\n"}
+,{"stream_name":"stdout","time":269.568745693,"data":"Loading weights:  97%|█████████▋| 388/398 [00:16\u003c00:00, 13.18it/s]\n"}
+,{"stream_name":"stdout","time":269.568749659,"data":"Loading weights: 100%|██████████| 398/398 [00:16\u003c00:00, 23.44it/s]\n"}
+,{"stream_name":"stdout","time":269.568753522,"data":"base letter:medqa: 4/4 done in 2s\n"}
+,{"stream_name":"stdout","time":269.568757113,"data":"base letter:medmcqa: 4/4 done in 0s\n"}
+,{"stream_name":"stdout","time":269.56876067,"data":"base letter:pubmedqa: 4/4 done in 1s\n"}
+,{"stream_name":"stdout","time":269.568764257,"data":"base letter:mmlu_medical: 4/4 done in 0s\n"}
+,{"stream_name":"stdout","time":269.568769033,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568773319,"data":"base reasoning:medqa: 4/4 done in 10s\n"}
+,{"stream_name":"stdout","time":269.56877695,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568781583,"data":"base reasoning:mmlu_medical: 4/4 done in 8s\n"}
+,{"stream_name":"stdout","time":269.568785336,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568789481,"data":"base reasoning:pubmedqa: 4/4 done in 10s\n"}
+,{"stream_name":"stdout","time":269.568793384,"data":"Both `max_new_tokens` (=128) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":269.568797684,"data":"base reasoning:medmcqa: 4/4 done in 8s\n"}
+,{"stream_name":"stdout","time":269.568801333,"data":"\n"}
+,{"stream_name":"stdout","time":269.568804914,"data":"$ python -m training.eval_report --eval-dir outputs/eval_smoke --bench-dir data/v2 --out outputs/eval_smoke/report.json\n"}
+,{"stream_name":"stdout","time":269.56880922,"data":"\n"}
+,{"stream_name":"stdout","time":270.073226045,"data":"stage                          scored    base   tuned  change         p  95% CI of the change\n"}
+,{"stream_name":"stdout","time":270.073257131,"data":"letter:medqa                      4/4   75.0%   75.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.073272685,"data":"letter:medmcqa                    4/4   25.0%   75.0%   +50.0    0.5000  [+1.0, +99.0]\n"}
+,{"stream_name":"stdout","time":270.073276417,"data":"letter:pubmedqa                   4/4   75.0%   50.0%   -25.0    1.0000  [-67.4, +17.4]\n"}
+,{"stream_name":"stdout","time":270.073280268,"data":"letter:mmlu_medical               4/4   50.0%   50.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.07328376,"data":"reasoning:medqa                   4/4   25.0%   75.0%   +50.0    0.5000  [+1.0, +99.0]\n"}
+,{"stream_name":"stdout","time":270.073287136,"data":"reasoning:mmlu_medical            4/4   75.0%   75.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.073290558,"data":"reasoning:pubmedqa                4/4  100.0%  100.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.073293976,"data":"reasoning:medmcqa                 4/4   75.0%  100.0%   +25.0    1.0000  [-17.4, +67.4]\n"}
+,{"stream_name":"stdout","time":270.073297446,"data":"pooled letter                   16/16   56.2%   62.5%    +6.2    1.0000  [-14.7, +27.2]\n"}
+,{"stream_name":"stdout","time":270.0733045,"data":"pooled reasoning                16/16   68.8%   87.5%   +18.8    0.2500  [-0.4, +37.9]\n"}
+,{"stream_name":"stdout","time":270.07330748,"data":"base: finished \n"}
+,{"stream_name":"stdout","time":270.07330995,"data":"tuned: finished \n"}
+,{"stream_name":"stdout","time":270.073312253,"data":"\n"}
+,{"stream_name":"stdout","time":270.073314492,"data":"wrote outputs/eval_smoke/report.json\n"}
+,{"stream_name":"stdout","time":270.090112629,"data":"stage                          scored    base   tuned  change         p  95% CI of the change\n"}
+,{"stream_name":"stdout","time":270.090138026,"data":"letter:medqa                      4/4   75.0%   75.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.090143375,"data":"letter:medmcqa                    4/4   25.0%   75.0%   +50.0    0.5000  [+1.0, +99.0]\n"}
+,{"stream_name":"stdout","time":270.090147009,"data":"letter:pubmedqa                   4/4   75.0%   50.0%   -25.0    1.0000  [-67.4, +17.4]\n"}
+,{"stream_name":"stdout","time":270.090150443,"data":"letter:mmlu_medical               4/4   50.0%   50.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.090153617,"data":"reasoning:medqa                   4/4   25.0%   75.0%   +50.0    0.5000  [+1.0, +99.0]\n"}
+,{"stream_name":"stdout","time":270.090157121,"data":"reasoning:mmlu_medical            4/4   75.0%   75.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.090160473,"data":"reasoning:pubmedqa                4/4  100.0%  100.0%    +0.0    1.0000  [+0.0, +0.0]\n"}
+,{"stream_name":"stdout","time":270.090163767,"data":"reasoning:medmcqa                 4/4   75.0%  100.0%   +25.0    1.0000  [-17.4, +67.4]\n"}
+,{"stream_name":"stdout","time":270.090167326,"data":"pooled letter                   16/16   56.2%   62.5%    +6.2    1.0000  [-14.7, +27.2]\n"}
+,{"stream_name":"stdout","time":270.090171539,"data":"pooled reasoning                16/16   68.8%   87.5%   +18.8    0.2500  [-0.4, +37.9]\n"}
+,{"stream_name":"stdout","time":270.09017553,"data":"base: finished \n"}
+,{"stream_name":"stdout","time":270.090179512,"data":"tuned: finished \n"}
+,{"stream_name":"stdout","time":270.090182707,"data":"\n"}
+,{"stream_name":"stdout","time":270.090185908,"data":"wrote outputs/eval_smoke/report.json\n"}
+,{"stream_name":"stdout","time":270.090189459,"data":"\n"}
+,{"stream_name":"stdout","time":270.090192356,"data":"ok\n"}
+,{"stream_name":"stdout","time":270.090195471,"data":"\n"}
+,{"stream_name":"stdout","time":870.119994971,"data":"06:08 answers written: {'tuned': 2825, 'base': 5113}\n"}
+,{"stream_name":"stdout","time":1470.121776805,"data":"06:18 answers written: {'tuned': 6224, 'base': 7545}\n"}
+,{"stream_name":"stdout","time":2070.126558115,"data":"06:28 answers written: {'tuned': 7561, 'base': 7577}\n"}
+,{"stream_name":"stdout","time":2670.131849818,"data":"06:38 answers written: {'tuned': 7641, 'base': 7593}\n"}
+,{"stream_name":"stdout","time":3270.14027378,"data":"06:48 answers written: {'tuned': 7705, 'base': 7625}\n"}
+,{"stream_name":"stdout","time":3870.144585792,"data":"06:58 answers written: {'tuned': 7769, 'base': 7657}\n"}
+,{"stream_name":"stdout","time":4470.151367474,"data":"07:08 answers written: {'tuned': 7833, 'base': 7673}\n"}
+,{"stream_name":"stdout","time":5070.159475252,"data":"07:18 answers written: {'tuned': 7897, 'base': 7705}\n"}
+,{"stream_name":"stdout","time":5670.168504745,"data":"07:28 answers written: {'tuned': 7977, 'base': 7737}\n"}
+,{"stream_name":"stdout","time":6270.177276703,"data":"07:38 answers written: {'tuned': 8041, 'base': 7753}\n"}
+,{"stream_name":"stdout","time":6870.182748182,"data":"07:48 answers written: {'tuned': 8105, 'base': 7785}\n"}
+,{"stream_name":"stdout","time":7470.19071228,"data":"07:58 answers written: {'tuned': 8169, 'base': 7801}\n"}
+,{"stream_name":"stdout","time":8070.200861216,"data":"08:08 answers written: {'tuned': 8249, 'base': 7833}\n"}
+,{"stream_name":"stdout","time":8670.207382765,"data":"08:18 answers written: {'tuned': 8297, 'base': 7865}\n"}
+,{"stream_name":"stdout","time":9270.219655385,"data":"08:28 answers written: {'tuned': 8377, 'base': 7881}\n"}
+,{"stream_name":"stdout","time":9870.230781341,"data":"08:38 answers written: {'tuned': 8441, 'base': 7913}\n"}
+,{"stream_name":"stdout","time":10470.24429058,"data":"08:48 answers written: {'tuned': 8505, 'base': 7945}\n"}
+,{"stream_name":"stdout","time":11070.249881331,"data":"08:58 answers written: {'tuned': 8569, 'base': 7961}\n"}
+,{"stream_name":"stdout","time":11670.263926621,"data":"09:08 answers written: {'tuned': 8633, 'base': 7993}\n"}
+,{"stream_name":"stdout","time":12270.274055488,"data":"09:18 answers written: {'tuned': 8697, 'base': 8009}\n"}
+,{"stream_name":"stdout","time":12870.284763762,"data":"09:28 answers written: {'tuned': 8761, 'base': 8041}\n"}
+,{"stream_name":"stdout","time":13470.296605684,"data":"09:38 answers written: {'tuned': 8850, 'base': 8073}\n"}
+,{"stream_name":"stdout","time":14070.304876021,"data":"09:48 answers written: {'tuned': 8914, 'base': 8089}\n"}
+,{"stream_name":"stdout","time":14670.31740709,"data":"09:58 answers written: {'tuned': 8994, 'base': 8121}\n"}
+,{"stream_name":"stdout","time":15270.331991311,"data":"10:08 answers written: {'tuned': 9074, 'base': 8137}\n"}
+,{"stream_name":"stdout","time":15870.340887751,"data":"10:18 answers written: {'tuned': 9154, 'base': 8169}\n"}
+,{"stream_name":"stdout","time":16470.35330185,"data":"10:28 answers written: {'tuned': 9250, 'base': 8185}\n"}
+,{"stream_name":"stdout","time":17070.36816668,"data":"10:38 answers written: {'tuned': 9330, 'base': 8217}\n"}
+,{"stream_name":"stdout","time":17670.380568051,"data":"10:48 answers written: {'tuned': 9394, 'base': 8249}\n"}
+,{"stream_name":"stdout","time":18270.395944704,"data":"10:58 answers written: {'tuned': 9474, 'base': 8265}\n"}
+,{"stream_name":"stdout","time":18870.410206077,"data":"11:08 answers written: {'tuned': 9522, 'base': 8297}\n"}
+,{"stream_name":"stdout","time":19470.425757058,"data":"11:18 answers written: {'tuned': 9602, 'base': 8329}\n"}
+,{"stream_name":"stdout","time":20070.441996489,"data":"11:28 answers written: {'tuned': 9666, 'base': 8345}\n"}
+,{"stream_name":"stdout","time":20670.453015992,"data":"11:38 answers written: {'tuned': 9762, 'base': 8377}\n"}
+,{"stream_name":"stdout","time":21270.465769511,"data":"11:48 answers written: {'tuned': 9858, 'base': 8409}\n"}
+,{"stream_name":"stdout","time":21870.484301527,"data":"11:58 answers written: {'tuned': 9874, 'base': 8425}\n"}
+,{"stream_name":"stdout","time":22470.498913012,"data":"12:08 answers written: {'tuned': 9987, 'base': 8457}\n"}
+,{"stream_name":"stdout","time":23070.513933571,"data":"12:18 answers written: {'tuned': 10115, 'base': 8489}\n"}
+,{"stream_name":"stdout","time":23670.535880272,"data":"12:28 answers written: {'tuned': 10243, 'base': 8505}\n"}
+,{"stream_name":"stdout","time":24270.55380218,"data":"12:38 answers written: {'tuned': 10371, 'base': 8537}\n"}
+,{"stream_name":"stdout","time":24870.569153348,"data":"12:48 answers written: {'tuned': 10455, 'base': 8569}\n"}
+,{"stream_name":"stdout","time":25470.583913831,"data":"12:58 answers written: {'tuned': 10519, 'base': 8585}\n"}
+,{"stream_name":"stdout","time":26070.601658039,"data":"13:08 answers written: {'tuned': 10599, 'base': 8617}\n"}
+,{"stream_name":"stdout","time":26670.618112187,"data":"13:18 answers written: {'tuned': 10711, 'base': 8649}\n"}
+,{"stream_name":"stdout","time":27270.640733975,"data":"13:28 answers written: {'tuned': 10791, 'base': 8665}\n"}
+,{"stream_name":"stdout","time":27870.657071122,"data":"13:38 answers written: {'tuned': 10887, 'base': 8697}\n"}
+,{"stream_name":"stdout","time":28470.678610232,"data":"13:48 answers written: {'tuned': 10967, 'base': 8713}\n"}
+,{"stream_name":"stdout","time":29070.698878943,"data":"13:58 answers written: {'tuned': 11031, 'base': 8745}\n"}
+,{"stream_name":"stdout","time":29670.717446615,"data":"14:08 answers written: {'tuned': 11127, 'base': 8777}\n"}
+,{"stream_name":"stdout","time":30270.740818605,"data":"14:18 answers written: {'tuned': 11223, 'base': 8793}\n"}
+,{"stream_name":"stdout","time":30870.759525572,"data":"14:28 answers written: {'tuned': 11335, 'base': 8834}\n"}
+,{"stream_name":"stdout","time":31470.772017634,"data":"14:38 answers written: {'tuned': 11407, 'base': 8866}\n"}
+,{"stream_name":"stdout","time":32070.788109412,"data":"14:48 answers written: {'tuned': 11407, 'base': 8898}\n"}
+,{"stream_name":"stdout","time":32670.800301956,"data":"14:58 answers written: {'tuned': 11407, 'base': 8930}\n"}
+,{"stream_name":"stdout","time":33270.812105292,"data":"15:08 answers written: {'tuned': 11407, 'base': 8946}\n"}
+,{"stream_name":"stdout","time":33870.827855831,"data":"15:18 answers written: {'tuned': 11407, 'base': 8978}\n"}
+,{"stream_name":"stdout","time":34470.845171703,"data":"15:28 answers written: {'tuned': 11407, 'base': 8994}\n"}
+,{"stream_name":"stdout","time":35070.852459833,"data":"15:38 answers written: {'tuned': 11407, 'base': 9026}\n"}
+,{"stream_name":"stdout","time":35670.872811266,"data":"15:48 answers written: {'tuned': 11407, 'base': 9058}\n"}
+,{"stream_name":"stdout","time":36270.881083282,"data":"15:58 answers written: {'tuned': 11407, 'base': 9074}\n"}
+,{"stream_name":"stdout","time":36870.902850859,"data":"16:08 answers written: {'tuned': 11407, 'base': 9106}\n"}
+,{"stream_name":"stdout","time":37470.918385744,"data":"16:18 answers written: {'tuned': 11407, 'base': 9138}\n"}
+,{"stream_name":"stdout","time":38070.934968728,"data":"16:28 answers written: {'tuned': 11407, 'base': 9170}\n"}
+,{"stream_name":"stdout","time":38670.947336614,"data":"16:38 answers written: {'tuned': 11407, 'base': 9202}\n"}
+,{"stream_name":"stdout","time":39270.958177077,"data":"16:48 answers written: {'tuned': 11407, 'base': 9234}\n"}
+,{"stream_name":"stdout","time":39870.979721125,"data":"16:58 answers written: {'tuned': 11407, 'base': 9250}\n"}
+,{"stream_name":"stdout","time":40470.989037023,"data":"17:08 answers written: {'tuned': 11407, 'base': 9282}\n"}
+,{"stream_name":"stdout","time":41071.005372496,"data":"17:18 answers written: {'tuned': 11407, 'base': 9298}\n"}
+,{"stream_name":"stdout","time":41071.006448784,"data":"--- tuned log tail ---\n"}
+,{"stream_name":"stdout","time":41071.006486153,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006494103,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006500436,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006506048,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006511505,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006521933,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006526801,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006530706,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006535689,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006539498,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006543079,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006546673,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006558573,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006561543,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006564332,"data":"tuned reasoning:medmcqa: 1,000/1,000 done in 6921s\n"}
+,{"stream_name":"stdout","time":41071.00656683,"data":"\n"}
+,{"stream_name":"stdout","time":41071.006569301,"data":"--- base log tail ---\n"}
+,{"stream_name":"stdout","time":41071.006571755,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006574823,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006577635,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006580553,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006583303,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006586058,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006588919,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006591749,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006594507,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006597463,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006602897,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006605877,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006608669,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006611449,"data":"Both `max_new_tokens` (=1536) and `max_length`(=40960) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)\n"}
+,{"stream_name":"stdout","time":41071.006614269,"data":"base reasoning:mmlu_medical: 480/1,089 deadline in 10058s\n"}
+,{"stream_name":"stdout","time":41071.006616757,"data":"\n"}
+,{"stream_name":"stdout","time":41071.006619057,"data":"worker exit codes: {'tuned': 0, 'base': 0}\n"}
+,{"stream_name":"stdout","time":41071.006621527,"data":"$ python -m training.eval_report --eval-dir outputs/eval --bench-dir data/v2 --out /kaggle/working/run3_eval.json\n"}
+,{"stream_name":"stdout","time":41071.006624129,"data":"\n"}
+,{"stream_name":"stdout","time":41071.580001005,"data":"stage                          scored    base   tuned  change         p  95% CI of the change\n"}
+,{"stream_name":"stdout","time":41071.580026895,"data":"letter:medqa              1,273/1,273   57.0%   58.4%    +1.5    0.1783  [-0.6, +3.6]\n"}
+,{"stream_name":"stdout","time":41071.58003167,"data":"letter:medmcqa            4,183/4,183   54.7%   55.2%    +0.5    0.4196  [-0.6, +1.6]\n"}
+,{"stream_name":"stdout","time":41071.580035038,"data":"letter:pubmedqa           1,000/1,000   72.9%   75.2%    +2.3    0.0433  [+0.2, +4.4]\n"}
+,{"stream_name":"stdout","time":41071.580038597,"data":"letter:mmlu_medical       1,089/1,089   73.4%   73.5%    +0.1    1.0000  [-1.7, +1.9]\n"}
+,{"stream_name":"stdout","time":41071.580041958,"data":"reasoning:medqa           1,273/1,273   69.7%   60.2%    -9.5    0.0000  [-12.1, -6.9]\n"}
+,{"stream_name":"stdout","time":41071.580045345,"data":"reasoning:mmlu_medical      480/1,089   82.3%   69.8%   -12.5    0.0000  [-16.4, -8.6]\n"}
+,{"stream_name":"stdout","time":41071.58004861,"data":"pooled letter             7,545/7,545   60.2%   61.0%    +0.8    0.0443  [+0.0, +1.6]\n"}
+,{"stream_name":"stdout","time":41071.580051927,"data":"pooled reasoning          1,753/1,753   73.1%   62.8%   -10.3    0.0000  [-12.5, -8.1]\n"}
+,{"stream_name":"stdout","time":41071.580055222,"data":"reached by one model only, not compared: reasoning:pubmedqa, reasoning:medmcqa\n"}
+,{"stream_name":"stdout","time":41071.580058501,"data":"base: deadline \n"}
+,{"stream_name":"stdout","time":41071.58006166,"data":"tuned: finished \n"}
+,{"stream_name":"stdout","time":41071.580065409,"data":"\n"}
+,{"stream_name":"stdout","time":41071.580068647,"data":"wrote /kaggle/working/run3_eval.json\n"}
+,{"stream_name":"stdout","time":41071.599975253,"data":"stage                          scored    base   tuned  change         p  95% CI of the change\n"}
+,{"stream_name":"stdout","time":41071.600005307,"data":"letter:medqa              1,273/1,273   57.0%   58.4%    +1.5    0.1783  [-0.6, +3.6]\n"}
+,{"stream_name":"stdout","time":41071.600010866,"data":"letter:medmcqa            4,183/4,183   54.7%   55.2%    +0.5    0.4196  [-0.6, +1.6]\n"}
+,{"stream_name":"stdout","time":41071.600015345,"data":"letter:pubmedqa           1,000/1,000   72.9%   75.2%    +2.3    0.0433  [+0.2, +4.4]\n"}
+,{"stream_name":"stdout","time":41071.600019029,"data":"letter:mmlu_medical       1,089/1,089   73.4%   73.5%    +0.1    1.0000  [-1.7, +1.9]\n"}
+,{"stream_name":"stdout","time":41071.600022966,"data":"reasoning:medqa           1,273/1,273   69.7%   60.2%    -9.5    0.0000  [-12.1, -6.9]\n"}
+,{"stream_name":"stdout","time":41071.600027051,"data":"reasoning:mmlu_medical      480/1,089   82.3%   69.8%   -12.5    0.0000  [-16.4, -8.6]\n"}
+,{"stream_name":"stdout","time":41071.600031139,"data":"pooled letter             7,545/7,545   60.2%   61.0%    +0.8    0.0443  [+0.0, +1.6]\n"}
+,{"stream_name":"stdout","time":41071.600035177,"data":"pooled reasoning          1,753/1,753   73.1%   62.8%   -10.3    0.0000  [-12.5, -8.1]\n"}
+,{"stream_name":"stdout","time":41071.600039702,"data":"reached by one model only, not compared: reasoning:pubmedqa, reasoning:medmcqa\n"}
+,{"stream_name":"stdout","time":41071.600043815,"data":"base: deadline \n"}
+,{"stream_name":"stdout","time":41071.600047777,"data":"tuned: finished \n"}
+,{"stream_name":"stdout","time":41071.60005192,"data":"\n"}
+,{"stream_name":"stdout","time":41071.600055772,"data":"wrote /kaggle/working/run3_eval.json\n"}
+,{"stream_name":"stdout","time":41071.600059498,"data":"\n"}
+,{"stream_name":"stdout","time":41071.60006328,"data":"ok\n"}
+,{"stream_name":"stdout","time":41071.600066954,"data":"\n"}
+,{"stream_name":"stdout","time":41071.612693527,"data":"Saved run3_eval.json and every prediction to the Output panel.\n"}
+,{"stream_name":"stderr","time":41075.688246596,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":41075.688270573,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":41076.019086031,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":41076.019112865,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":41076.80753197,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":41077.121295607,"data":"[NbConvertApp] Writing 72331 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":41079.517881293,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":41080.763762426,"data":"[NbConvertApp] Writing 392157 bytes to __results__.html\n"}
+]

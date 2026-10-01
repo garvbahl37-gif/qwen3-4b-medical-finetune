@@ -1,0 +1,553 @@
+{
+  "stages": {
+    "letter:medqa": {
+      "mode": "letter",
+      "n": 1273,
+      "base_accuracy": 0.5695208169677927,
+      "tuned_accuracy": 0.584446190102121,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 99,
+        "regressions": 80,
+        "both_correct": 645,
+        "both_wrong": 449,
+        "discordant": 179,
+        "p_value": 0.178339
+      },
+      "diff_ci": {
+        "diff": 0.014925,
+        "low": -0.005657,
+        "high": 0.035508
+      },
+      "by_subject": {
+        "step1": {
+          "n": 679,
+          "base": 0.5773195876288659,
+          "tuned": 0.5773195876288659
+        },
+        "step2&3": {
+          "n": 594,
+          "base": 0.5606060606060606,
+          "tuned": 0.5925925925925926
+        }
+      },
+      "benchmark": "medqa",
+      "planned": 1273,
+      "scored": 1273
+    },
+    "letter:medmcqa": {
+      "mode": "letter",
+      "n": 4183,
+      "base_accuracy": 0.5467367917762371,
+      "tuned_accuracy": 0.5515180492469519,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 287,
+        "regressions": 267,
+        "both_correct": 2020,
+        "both_wrong": 1609,
+        "discordant": 554,
+        "p_value": 0.419557
+      },
+      "diff_ci": {
+        "diff": 0.004781,
+        "low": -0.006246,
+        "high": 0.015809
+      },
+      "by_subject": {
+        "Dental": {
+          "n": 1318,
+          "base": 0.48482549317147194,
+          "tuned": 0.4931714719271624
+        },
+        "Surgery": {
+          "n": 369,
+          "base": 0.5203252032520326,
+          "tuned": 0.5447154471544715
+        },
+        "Pathology": {
+          "n": 337,
+          "base": 0.6261127596439169,
+          "tuned": 0.6350148367952523
+        },
+        "Medicine": {
+          "n": 295,
+          "base": 0.5966101694915255,
+          "tuned": 0.6101694915254238
+        },
+        "Pharmacology": {
+          "n": 243,
+          "base": 0.6748971193415638,
+          "tuned": 0.6872427983539094
+        },
+        "Anatomy": {
+          "n": 234,
+          "base": 0.5427350427350427,
+          "tuned": 0.5
+        },
+        "Pediatrics": {
+          "n": 234,
+          "base": 0.5341880341880342,
+          "tuned": 0.5598290598290598
+        },
+        "Gynaecology & Obstetrics": {
+          "n": 224,
+          "base": 0.5401785714285714,
+          "tuned": 0.48214285714285715
+        },
+        "Biochemistry": {
+          "n": 171,
+          "base": 0.6432748538011696,
+          "tuned": 0.6608187134502924
+        },
+        "Physiology": {
+          "n": 171,
+          "base": 0.6549707602339181,
+          "tuned": 0.672514619883041
+        },
+        "Social & Preventive Medicine": {
+          "n": 129,
+          "base": 0.5581395348837209,
+          "tuned": 0.5658914728682171
+        },
+        "Microbiology": {
+          "n": 122,
+          "base": 0.5737704918032787,
+          "tuned": 0.6065573770491803
+        },
+        "Radiology": {
+          "n": 69,
+          "base": 0.5942028985507246,
+          "tuned": 0.5942028985507246
+        },
+        "Forensic Medicine": {
+          "n": 67,
+          "base": 0.4626865671641791,
+          "tuned": 0.4925373134328358
+        },
+        "Ophthalmology": {
+          "n": 58,
+          "base": 0.5,
+          "tuned": 0.46551724137931033
+        },
+        "ENT": {
+          "n": 53,
+          "base": 0.5471698113207547,
+          "tuned": 0.5471698113207547
+        },
+        "Anaesthesia": {
+          "n": 34,
+          "base": 0.38235294117647056,
+          "tuned": 0.29411764705882354
+        },
+        "Orthopaedics": {
+          "n": 20,
+          "base": 0.45,
+          "tuned": 0.45
+        },
+        "Skin": {
+          "n": 17,
+          "base": 0.4117647058823529,
+          "tuned": 0.47058823529411764
+        },
+        "Psychiatry": {
+          "n": 16,
+          "base": 0.5,
+          "tuned": 0.4375
+        },
+        "Unknown": {
+          "n": 2,
+          "base": 0.5,
+          "tuned": 0.0
+        }
+      },
+      "benchmark": "medmcqa",
+      "planned": 4183,
+      "scored": 4183
+    },
+    "letter:pubmedqa": {
+      "mode": "letter",
+      "n": 1000,
+      "base_accuracy": 0.729,
+      "tuned_accuracy": 0.752,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 71,
+        "regressions": 48,
+        "both_correct": 681,
+        "both_wrong": 200,
+        "discordant": 119,
+        "p_value": 0.043268
+      },
+      "diff_ci": {
+        "diff": 0.023,
+        "low": 0.001667,
+        "high": 0.044333
+      },
+      "by_subject": {
+        "unknown": {
+          "n": 1000,
+          "base": 0.729,
+          "tuned": 0.752
+        }
+      },
+      "benchmark": "pubmedqa",
+      "planned": 1000,
+      "scored": 1000
+    },
+    "letter:mmlu_medical": {
+      "mode": "letter",
+      "n": 1089,
+      "base_accuracy": 0.7337006427915519,
+      "tuned_accuracy": 0.7346189164370982,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 50,
+        "regressions": 49,
+        "both_correct": 750,
+        "both_wrong": 240,
+        "discordant": 99,
+        "p_value": 1.0
+      },
+      "diff_ci": {
+        "diff": 0.000918,
+        "low": -0.016989,
+        "high": 0.018826
+      },
+      "by_subject": {
+        "professional_medicine": {
+          "n": 272,
+          "base": 0.7279411764705882,
+          "tuned": 0.7536764705882353
+        },
+        "clinical_knowledge": {
+          "n": 265,
+          "base": 0.7433962264150943,
+          "tuned": 0.7433962264150943
+        },
+        "college_medicine": {
+          "n": 173,
+          "base": 0.7514450867052023,
+          "tuned": 0.7109826589595376
+        },
+        "college_biology": {
+          "n": 144,
+          "base": 0.8263888888888888,
+          "tuned": 0.8055555555555556
+        },
+        "anatomy": {
+          "n": 135,
+          "base": 0.5925925925925926,
+          "tuned": 0.6
+        },
+        "medical_genetics": {
+          "n": 100,
+          "base": 0.75,
+          "tuned": 0.78
+        }
+      },
+      "benchmark": "mmlu_medical",
+      "planned": 1089,
+      "scored": 1089
+    },
+    "reasoning:medqa": {
+      "mode": "reasoning",
+      "n": 1273,
+      "base_accuracy": 0.6967792615868028,
+      "tuned_accuracy": 0.6017282010997643,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 91,
+        "regressions": 212,
+        "both_correct": 675,
+        "both_wrong": 295,
+        "discordant": 303,
+        "p_value": 0.0
+      },
+      "diff_ci": {
+        "diff": -0.095051,
+        "low": -0.121338,
+        "high": -0.068764
+      },
+      "by_subject": {
+        "step1": {
+          "n": 679,
+          "base": 0.7245949926362297,
+          "tuned": 0.6038291605301914
+        },
+        "step2&3": {
+          "n": 594,
+          "base": 0.664983164983165,
+          "tuned": 0.5993265993265994
+        }
+      },
+      "benchmark": "medqa",
+      "planned": 1273,
+      "scored": 1273,
+      "base_counts": {
+        "forced": 284,
+        "closed": 989,
+        "median_new_tokens": 1036
+      },
+      "tuned_counts": {
+        "forced": 2,
+        "closed": 1273,
+        "median_new_tokens": 403
+      }
+    },
+    "reasoning:mmlu_medical": {
+      "mode": "reasoning",
+      "n": 480,
+      "base_accuracy": 0.8229166666666666,
+      "tuned_accuracy": 0.6979166666666666,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 20,
+        "regressions": 80,
+        "both_correct": 315,
+        "both_wrong": 65,
+        "discordant": 100,
+        "p_value": 0.0
+      },
+      "diff_ci": {
+        "diff": -0.125,
+        "low": -0.164272,
+        "high": -0.085728
+      },
+      "by_subject": {
+        "professional_medicine": {
+          "n": 128,
+          "base": 0.796875,
+          "tuned": 0.734375
+        },
+        "clinical_knowledge": {
+          "n": 108,
+          "base": 0.8055555555555556,
+          "tuned": 0.7037037037037037
+        },
+        "college_medicine": {
+          "n": 83,
+          "base": 0.8554216867469879,
+          "tuned": 0.6506024096385542
+        },
+        "anatomy": {
+          "n": 67,
+          "base": 0.7164179104477612,
+          "tuned": 0.582089552238806
+        },
+        "college_biology": {
+          "n": 54,
+          "base": 0.9259259259259259,
+          "tuned": 0.7962962962962963
+        },
+        "medical_genetics": {
+          "n": 40,
+          "base": 0.925,
+          "tuned": 0.725
+        }
+      },
+      "benchmark": "mmlu_medical",
+      "planned": 1089,
+      "scored": 480,
+      "base_counts": {
+        "forced": 49,
+        "closed": 431,
+        "median_new_tokens": 626.0
+      },
+      "tuned_counts": {
+        "forced": 0,
+        "closed": 480,
+        "median_new_tokens": 403.0
+      }
+    }
+  },
+  "pooled": {
+    "letter": {
+      "mode": "letter",
+      "n": 7545,
+      "base_accuracy": 0.6017229953611664,
+      "tuned_accuracy": 0.6100728959575878,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 507,
+        "regressions": 444,
+        "both_correct": 4096,
+        "both_wrong": 2498,
+        "discordant": 951,
+        "p_value": 0.044323
+      },
+      "diff_ci": {
+        "diff": 0.00835,
+        "low": 0.000341,
+        "high": 0.016359
+      }
+    },
+    "reasoning": {
+      "mode": "reasoning",
+      "n": 1753,
+      "base_accuracy": 0.7313177410154021,
+      "tuned_accuracy": 0.6280661722760981,
+      "base_unparseable": 0,
+      "tuned_unparseable": 0,
+      "mcnemar": {
+        "wins": 111,
+        "regressions": 292,
+        "both_correct": 990,
+        "both_wrong": 360,
+        "discordant": 403,
+        "p_value": 0.0
+      },
+      "diff_ci": {
+        "diff": -0.103252,
+        "low": -0.12517,
+        "high": -0.081333
+      }
+    }
+  },
+  "unpaired": [
+    "reasoning:pubmedqa",
+    "reasoning:medmcqa"
+  ],
+  "models": {
+    "base": {
+      "role": "base",
+      "base": "unsloth/Qwen3-4B",
+      "adapter": null,
+      "seed": 1234,
+      "think_budget": 1536,
+      "batch_size": 16,
+      "deadline": 1790874848.0,
+      "limit": 0,
+      "started": 1790834332.3141005,
+      "status": "deadline",
+      "stages": {
+        "letter:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 266.2
+        },
+        "letter:medmcqa": {
+          "planned": 4183,
+          "scored": 4183,
+          "status": "done",
+          "seconds": 324.0
+        },
+        "letter:pubmedqa": {
+          "planned": 1000,
+          "scored": 1000,
+          "status": "done",
+          "seconds": 291.8
+        },
+        "letter:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 153.8
+        },
+        "reasoning:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 29177.9
+        },
+        "reasoning:mmlu_medical": {
+          "planned": 1089,
+          "scored": 480,
+          "status": "deadline",
+          "seconds": 10058.5
+        }
+      },
+      "load_seconds": 11.6,
+      "environment": {
+        "torch": "2.10.0+cu128",
+        "transformers": "5.5.0",
+        "peft": "0.19.1",
+        "device": "cuda",
+        "dtype": "float16",
+        "device_name": "Tesla T4"
+      },
+      "finished": 1790874616.1414883
+    },
+    "tuned": {
+      "role": "tuned",
+      "base": "unsloth/Qwen3-4B",
+      "adapter": "outputs/run3",
+      "seed": 1234,
+      "think_budget": 1536,
+      "batch_size": 16,
+      "deadline": 1790874848.0,
+      "limit": 0,
+      "started": 1790834332.3140526,
+      "status": "finished",
+      "stages": {
+        "letter:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 386.5
+        },
+        "letter:medmcqa": {
+          "planned": 4183,
+          "scored": 4183,
+          "status": "done",
+          "seconds": 455.0
+        },
+        "letter:pubmedqa": {
+          "planned": 1000,
+          "scored": 1000,
+          "status": "done",
+          "seconds": 406.6
+        },
+        "letter:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 214.4
+        },
+        "reasoning:medqa": {
+          "planned": 1273,
+          "scored": 1273,
+          "status": "done",
+          "seconds": 11467.0
+        },
+        "reasoning:mmlu_medical": {
+          "planned": 1089,
+          "scored": 1089,
+          "status": "done",
+          "seconds": 8922.1
+        },
+        "reasoning:pubmedqa": {
+          "planned": 500,
+          "scored": 500,
+          "status": "done",
+          "seconds": 2338.7
+        },
+        "reasoning:medmcqa": {
+          "planned": 1000,
+          "scored": 1000,
+          "status": "done",
+          "seconds": 6921.3
+        }
+      },
+      "load_seconds": 15.8,
+      "environment": {
+        "torch": "2.10.0+cu128",
+        "transformers": "5.5.0",
+        "peft": "0.19.1",
+        "device": "cuda",
+        "dtype": "float16",
+        "device_name": "Tesla T4"
+      },
+      "adapter_sha256": "8240aa382a18d8b9c3fadc1d00f879575e5eb909f91bf6b9a728a9c1390fbef7",
+      "finished": 1790865461.2694623
+    }
+  }
+}

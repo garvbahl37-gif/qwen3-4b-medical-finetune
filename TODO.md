@@ -93,7 +93,7 @@ reasoning goal was not met, for a cause that is now identified and fixable.
 
 - [x] Run 3 launched (see below)
 
-## Run 3 — the mode switch (trained; evaluating on Kaggle)
+## Run 3 — the mode switch (complete; target not met)
 
 - [x] Research: the Qwen3 technical report trains its hybrid model with /think and
       /no_think in the user prompt; run 2 gave no signal, so its model guessed the
@@ -118,10 +118,39 @@ reasoning goal was not met, for a cause that is now identified and fixable.
       downloaded once, with retries, before the workers start, and they run
       offline. Evaluation gets the whole 12-hour session. Rehearsed on a mock
       Kaggle first; 217 tests
-- [ ] Target the owner set: 65-66%. The comparable number is reasoning-mode MedQA,
-      where run 2's base scored 68.2% (192 questions) and its fine-tune 56.8%
-      because it skipped thinking. Download the output into `results/run3/` and
-      record the result honestly
+- [x] **Evaluated 2026-10-01** (`results/run3/`, every prediction included):
+
+| Benchmark | Mode | n | Base | Fine-tune | Change | p |
+|---|---|---:|---:|---:|---:|---:|
+| MedQA | letter choice | 1,273 | 57.0% | 58.4% | +1.5 | 0.18 |
+| MedMCQA | letter choice | 4,183 | 54.7% | 55.2% | +0.5 | 0.42 |
+| PubMedQA | letter choice | 1,000 | 72.9% | 75.2% | +2.3 | 0.043 |
+| MMLU medical | letter choice | 1,089 | 73.4% | 73.5% | +0.1 | 1.00 |
+| All four | letter choice | 7,545 | 60.2% | 61.0% | +0.8 | 0.044 |
+| MedQA | reasoning | 1,273 | **69.7%** | 60.2% | −9.5 | <0.001 |
+| MMLU medical | reasoning | 480 | 82.3% | 69.8% | −12.5 | <0.001 |
+
+- **The /think fix worked:** the fine-tune now writes real reasoning on every
+  question (1,273 of 1,273 MedQA; run 2: 302).
+- **But its reasoning is shorter and worse than the base model's own.** Median
+  thinking: fine-tune 403 tokens, base 1,036. The base was trained by Qwen with
+  reinforcement learning to reason; supervised fine-tuning on shorter traces
+  distilled from other models replaced that with a weaker habit. This is a known
+  risk of SFT on an RL-trained reasoner, and run 3 measured it.
+- **The 65-66% target:** the fine-tune reaches 60.2% on MedQA by reasoning.
+  The base model, thinking natively, already reaches 69.7%.
+- Fine-tune alone in reasoning mode: PubMedQA 75.4% (500), MedMCQA 49.9% (1,000).
+  The base worker reached its deadline before those two stages (it thinks 2.5x
+  longer), so they are not compared.
+
+**Verdict:** a small, significant letter-choice gain (+0.8 pooled, p = 0.044;
+PubMedQA +2.3), and a clear loss in reasoning. Supervised fine-tuning on
+distilled traces does not beat Qwen3-4B's own reasoning.
+
+- [ ] Next, if wanted (owner's decision): keep the base model's reasoning and
+      train with reinforcement learning on verifiable answers (GRPO) from the base,
+      as HuatuoGPT-o1 and II-Medical did, or distil from traces at least as long
+      and strong as Qwen3's own. Either needs a new plan and more GPU time
 
 ## Documentation
 
