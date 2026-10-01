@@ -14,7 +14,8 @@ def slugify(title: str) -> str:
 @pytest.mark.parametrize("path", ["training/kernel-metadata.json",
                                   "evaluation/kernel-metadata.json",
                                   "run2/kernel-metadata.json",
-                                  "run3/kernel-metadata.json"])
+                                  "run3/kernel-metadata.json",
+                                  "eval3/kernel-metadata.json"])
 def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
     # Kaggle names a kernel by slugifying its title and ignores a mismatched
     # id. The first push then lands somewhere else and the second 409s.
@@ -26,7 +27,8 @@ def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
 @pytest.mark.parametrize("path", ["training/kernel-metadata.json",
                                   "evaluation/kernel-metadata.json",
                                   "run2/kernel-metadata.json",
-                                  "run3/kernel-metadata.json"])
+                                  "run3/kernel-metadata.json",
+                                  "eval3/kernel-metadata.json"])
 def test_kernel_is_pinned_to_a_t4(path):
     # Without machine_shape a push most likely lands on a P100, which the
     # hardware-check cell then stops on at cell 1.
@@ -56,3 +58,11 @@ def test_the_run3_kernel_attaches_code_and_data_on_a_private_gpu():
     assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data"]
     assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
     assert meta["code_file"] == "kaggle_run3.ipynb"
+
+
+def test_the_run3_evaluation_kernel_attaches_code_data_and_adapter():
+    meta = json.loads(Path("eval3/kernel-metadata.json").read_text())
+    assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data",
+                                       "gb1105/medical-ft-adapter-run3"]
+    assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
+    assert meta["code_file"] == "kaggle_eval3.ipynb"

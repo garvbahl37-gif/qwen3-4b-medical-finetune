@@ -727,3 +727,79 @@ if (RUN2_DATA / "data_report.json").exists():
     write_notebook(run3_cells(data_fingerprint(RUN2_DATA)), Path("run3/kaggle_run3.ipynb"))
 else:
     print("skipped run3/kaggle_run3.ipynb: no data/v2 (run training.prepare_data_v2)")
+
+
+# --- Run 3 evaluation only ----------------------------------------------
+# Run 3 trained to completion and then lost its evaluation to a download race:
+# both workers fetched the 8GB base model at once and one failed to load its
+# tokenizer. This notebook scores that adapter without retraining, downloads
+# the base model once before either worker starts, and gives the evaluation
+# the whole session.
+RUN3_ADAPTER = Path("training/outputs/run3")
+
+EVAL3_INTRO = """# Qwen3-4B medical fine-tune, run 3 evaluation
+
+Scores run 3's adapter -- trained to completion in the run 3 session -- against
+the base model on MedQA, MedMCQA, PubMedQA and MMLU-medical, by letter choice
+and by reasoning, with the whole 12-hour session for evaluation.
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`,
+`medical-ft-data` and `medical-ft-adapter-run3`."""
+
+
+def eval3_adapter_cell(adapter_sha: str) -> str:
+    return '''# --- 3b. Run 3's adapter, checked against the one trained -----------------
+import hashlib
+
+ADAPTER_SRC = find_adapter_dir(INPUT)
+digest = hashlib.sha256()
+with open(ADAPTER_SRC / "adapter_model.safetensors", "rb") as fh:
+    for block in iter(lambda: fh.read(1 << 20), b""):
+        digest.update(block)
+if not digest.hexdigest().startswith("''' + adapter_sha + '''"):
+    raise SystemExit(f"\\nSTOP. The attached adapter ({digest.hexdigest()[:16]}) is not "
+                     "run 3's (''' + adapter_sha + ''').\\nFIX: attach medical-ft-adapter-run3.")
+shutil.copytree(ADAPTER_SRC, "outputs/run3", dirs_exist_ok=True)
+print("adapter:", ADAPTER_SRC, "-> outputs/run3")'''
+
+
+EVAL3_DOWNLOAD = '''# --- 4. Download the base model once, before the two workers start ---------
+# Run 3's two workers fetched the same 8GB model at the same moment and one of
+# them failed to load the tokenizer. One download, retried, then the workers
+# read the local copy only.
+from huggingface_hub import snapshot_download
+
+for attempt in range(1, 5):
+    try:
+        print("base model at", snapshot_download("unsloth/Qwen3-4B"))
+        break
+    except Exception as exc:
+        print(f"download attempt {attempt} failed: {type(exc).__name__}: {exc}")
+        time.sleep(60)
+else:
+    raise SystemExit("\\nSTOP. unsloth/Qwen3-4B could not be downloaded from the Hub.")
+os.environ["HF_HUB_OFFLINE"] = "1"'''
+
+
+def eval3_cells(data_fp: str, adapter_sha: str) -> list[tuple[str, str]]:
+    cells = dict(enumerate(run3_cells(data_fp)))
+    return [
+        ("markdown", EVAL3_INTRO),
+        cells[1], cells[2], cells[3], cells[4],
+        ("code", eval3_adapter_cell(adapter_sha)),
+        ("code", EVAL3_DOWNLOAD),
+        cells[8], cells[9], cells[10], cells[11],
+    ]
+
+
+if (RUN2_DATA / "data_report.json").exists() and (RUN3_ADAPTER / "adapter_model.safetensors").exists():
+    import hashlib
+
+    _digest = hashlib.sha256()
+    with open(RUN3_ADAPTER / "adapter_model.safetensors", "rb") as _fh:
+        for _block in iter(lambda: _fh.read(1 << 20), b""):
+            _digest.update(_block)
+    write_notebook(eval3_cells(data_fingerprint(RUN2_DATA), _digest.hexdigest()[:16]),
+                   Path("eval3/kaggle_eval3.ipynb"))
+else:
+    print("skipped eval3/kaggle_eval3.ipynb: needs data/v2 and training/outputs/run3")
