@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from training.modeling import DEFAULT_BASE, choose_device
+from training.modeling import DEFAULT_BASE, TRAINING_BASE_4BIT, choose_device, four_bit_problem
 
 
 def test_cuda_is_preferred_and_runs_in_float16():
@@ -40,3 +40,11 @@ def test_the_default_base_is_full_precision_qwen3_4b():
     # the unquantised weights unchanged, and those are what gets served.
     assert DEFAULT_BASE == "unsloth/Qwen3-4B"
     assert "bnb" not in DEFAULT_BASE
+
+
+def test_four_bit_needs_cuda_and_a_prequantized_checkpoint():
+    bnb = {"quant_method": "bitsandbytes", "load_in_4bit": True}
+    assert four_bit_problem("cuda", bnb) is None
+    assert "CUDA" in four_bit_problem("mps", bnb)
+    assert TRAINING_BASE_4BIT in four_bit_problem("cuda", None)
+    assert TRAINING_BASE_4BIT in four_bit_problem("cuda", {"quant_method": "gptq"})

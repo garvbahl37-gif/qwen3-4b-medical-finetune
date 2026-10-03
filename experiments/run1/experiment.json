@@ -1,0 +1,32 @@
+{
+  "experiment_id": "run1",
+  "status": "complete",
+  "git_commit": "199d710",
+  "git_commits": {"train_code": "199d710", "eval_code": "2d78bd0", "results": "6c4ab9e"},
+  "dataset_version": "v1: 17,410 rows, medical_o1 / chatdoctor / medmcqa / medqa (results/run1/data_report.json)",
+  "training": {
+    "base_model": "unsloth/Qwen3-4B-unsloth-bnb-4bit",
+    "quantization": "QLoRA 4-bit (Unsloth nf4)",
+    "lora_rank": 32, "lora_alpha": 32, "lora_dropout": 0.0,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    "learning_rate": 2e-4, "epochs": 1, "batch_size": 8, "gradient_accumulation": 4,
+    "max_seq_length": 960, "warmup_ratio": 0.03, "weight_decay": 0.01,
+    "scheduler": "cosine", "optimizer": "adamw_8bit", "seed": 42
+  },
+  "artifacts": {
+    "train_stats": "results/run1/train_stats.json",
+    "loss_curve": "results/run1/loss_curve.json",
+    "adapter_sha256": "645aec54305d1bb5e60a625eb3aa07d305b7b9dd5d5f6465f8255aa6d2c4603c"
+  },
+  "evaluation": {
+    "format": "v1_eval_json",
+    "protocol": "v1: letter choice by logits after the run 1 prompt (no /no_think switch); MedQA and MedMCQA only; no thinking-mode evaluation",
+    "models": {
+      "base": {"label": "Qwen3-4B (base)", "dir": "results/run1", "role": "base",
+               "quantization": "fp16"},
+      "run1": {"label": "Qwen3-4B + run1 adapter (fp16 base)", "dir": "results/run1",
+               "role": "tuned", "trained": true}
+    }
+  },
+  "notes": "Letter scores use run 1's prompt format, not the v2 format of later runs: compare within run 1 only."
+}

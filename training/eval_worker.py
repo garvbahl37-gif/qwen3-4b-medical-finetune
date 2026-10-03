@@ -4,13 +4,14 @@ import argparse
 import json
 import math
 import random
+import re
 import time
 from pathlib import Path
 
 from training.evaluate import resolve_eos_ids, sha256_of_file
 from training.format_v2 import (final_letter, forced_suffix, option_letters,
                                 render_letter_prompt, render_reasoning_prompt)
-from training.modeling import DEFAULT_BASE, load_model
+from training.modeling import DEFAULT_BASE, TRAINING_BASE_4BIT, load_model
 from training.records import Record
 from training.sources_v2 import EVAL_SIZES
 
@@ -31,6 +32,11 @@ ALL_LETTERS = tuple("ABCDEFGHIJ")
 FIRST_GUESS = {"letter": 15.0, "reasoning": 150.0}
 # Forced-answer prompts scored per forward pass.
 FORCE_BATCH = 2
+# Sample k of a reasoning stage seeds its batches k * SAMPLE_STRIDE apart, more
+# than any stage's length, so no two batches of a stage share a seed. Sample 0
+# keeps the seeds run 2 and run 3 used.
+SAMPLE_STRIDE = 100_003
+_ROLE = re.compile(r"^[a-z0-9_]+$")
 
 
 def parse_stages(text: str) -> list[tuple[str, str]]:
@@ -46,16 +52,50 @@ def parse_stages(text: str) -> list[tuple[str, str]]:
     return out
 
 
-def stage_order(recs: list[Record], mode: str, bench: str, seed: int) -> list[Record]:
+def stage_order(recs: list[Record], mode: str, bench: str, seed: int,
+                sizes: dict[str, int] | None = None) -> list[Record]:
     """The questions a stage scores, in scoring order. Reasoning stages use a
     fixed seeded shuffle, so a prefix cut by the deadline is a random sample,
-    and both models see the same questions in the same order."""
+    and every model sees the same questions in the same order. `sizes`
+    overrides REASONING_SIZES (0: every question)."""
     if mode == "letter":
         return list(recs)
     order = list(recs)
     random.Random(f"{seed}-{bench}").shuffle(order)
-    size = REASONING_SIZES.get(bench, 0)
+    size = (REASONING_SIZES if sizes is None else {**REASONING_SIZES, **sizes}).get(bench, 0)
     return order[:size] if size else order
+
+
+def parse_counts(text: str, *, minimum: int) -> dict[str, int]:
+    """'medqa=200,pubmedqa=150' -> {'medqa': 200, 'pubmedqa': 150}."""
+    out = {}
+    for item in filter(None, (x.strip() for x in (text or "").split(","))):
+        bench, _, value = item.partition("=")
+        if bench not in EVAL_SIZES or not value.isdigit() or int(value) < minimum:
+            raise SystemExit(f"\nSTOP. Bad entry {item!r}: expected benchmark=N with N >= "
+                             f"{minimum}, benchmark one of {sorted(EVAL_SIZES)}.")
+        out[bench] = int(value)
+    return out
+
+
+def check_role(role: str, adapter: str | None) -> str | None:
+    """The adapter a worker loads. 'base' never loads one; any other role
+    is a fine-tune and must name its adapter."""
+    if not _ROLE.match(role):
+        raise SystemExit(f"\nSTOP. --role {role!r}: use lower-case letters, digits and _.")
+    if role == "base":
+        return None
+    if not adapter:
+        raise SystemExit(f"\nSTOP. --role {role} needs --adapter.")
+    return adapter
+
+
+def think_length(new: list[int], think_id: int) -> int:
+    """Tokens of thinking: everything before the last </think>, or the whole
+    completion when the budget ran out first."""
+    if think_id not in new:
+        return len(new)
+    return len(new) - new[::-1].index(think_id) - 1
 
 
 def fits_before(deadline: float, now: float, est_seconds: float) -> bool:
@@ -127,7 +167,9 @@ def reason_batch(model, tok, recs, *, ids, think_id, stop_ids, budget, seed) -> 
                                   option_letters(rec))
         text = tok.decode(new, skip_special_tokens=False)
         rows.append({"id": rec.id, "letter": letter, "closed": closed,
-                     "forced": letter is None, "new_tokens": len(new), "text": text})
+                     "forced": letter is None, "new_tokens": len(new),
+                     "think_tokens": think_length(new, think_id), "seed": seed,
+                     "text": text})
         if letter is None:
             to_force.append(i)
     # Forced prompts carry the whole thinking trace, up to ~2,500 tokens, and
@@ -175,46 +217,65 @@ def _split_on_oom(fn, group):
     return _split_on_oom(fn, group[:mid]) + _split_on_oom(fn, group[mid:])
 
 
+def batch_seed(seed: int, start: int, sample: int) -> int:
+    return seed * 1_000_003 + start + sample * SAMPLE_STRIDE
+
+
 def run_stage(model, tok, mode, recs, out_path: Path, *, batch_size, budget, seed,
-              deadline, rates, ids, think_id, stop_ids) -> tuple[str, int]:
+              deadline, rates, ids, think_id, stop_ids, samples: int = 1) -> tuple[str, int]:
+    """Score a stage. Reasoning with several samples runs the whole stage for
+    sample 0, then again for sample 1, ...: a deadline leaves complete
+    first-sample coverage rather than two samples of fewer questions."""
     written = 0
+    passes = samples if mode == "reasoning" else 1
     with out_path.open("w") as fh:
-        for start in range(0, len(recs), batch_size):
-            group = recs[start:start + batch_size]
-            if not fits_before(deadline, time.time(), rates.get(mode, FIRST_GUESS[mode])):
-                return "deadline", written
-            began = time.time()
-            if mode == "letter":
-                def fn(g):
-                    letters = letters_for_prompts(
-                        model, tok, [render_letter_prompt(tok, r) for r in g],
-                        [option_letters(r) for r in g], ids)
-                    return [{"id": r.id, "letter": L} for r, L in zip(g, letters)]
-            else:
-                def fn(g, _start=start):
-                    return reason_batch(model, tok, g, ids=ids, think_id=think_id,
-                                        stop_ids=stop_ids, budget=budget,
-                                        seed=seed * 1_000_003 + _start)
-            rows = _split_on_oom(fn, group)
-            for row in rows:
-                fh.write(json.dumps(row) + "\n")
-            fh.flush()
-            written += len(rows)
-            took = time.time() - began
-            rates[mode] = took if mode not in rates else 0.8 * rates[mode] + 0.2 * took
+        for sample in range(passes):
+            for start in range(0, len(recs), batch_size):
+                group = recs[start:start + batch_size]
+                if not fits_before(deadline, time.time(), rates.get(mode, FIRST_GUESS[mode])):
+                    return "deadline", written
+                began = time.time()
+                if mode == "letter":
+                    def fn(g):
+                        letters = letters_for_prompts(
+                            model, tok, [render_letter_prompt(tok, r) for r in g],
+                            [option_letters(r) for r in g], ids)
+                        return [{"id": r.id, "letter": L} for r, L in zip(g, letters)]
+                else:
+                    def fn(g, _start=start, _sample=sample):
+                        rows = reason_batch(model, tok, g, ids=ids, think_id=think_id,
+                                            stop_ids=stop_ids, budget=budget,
+                                            seed=batch_seed(seed, _start, _sample))
+                        return [{**row, "sample": _sample} for row in rows]
+                rows = _split_on_oom(fn, group)
+                for row in rows:
+                    fh.write(json.dumps(row) + "\n")
+                fh.flush()
+                written += len(rows)
+                took = time.time() - began
+                rates[mode] = took if mode not in rates else 0.8 * rates[mode] + 0.2 * took
     return "done", written
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Score one model, stage by stage, until a deadline.")
-    p.add_argument("--role", choices=("base", "tuned"), required=True)
+    p.add_argument("--role", required=True,
+                   help="'base' (no adapter) or a name for the fine-tune, e.g. tuned, run3")
     p.add_argument("--adapter", default=None)
     p.add_argument("--base", default=DEFAULT_BASE)
+    p.add_argument("--load-in-4bit", action="store_true",
+                   help=f"load a pre-quantized base, e.g. {TRAINING_BASE_4BIT}")
     p.add_argument("--eval-dir", type=Path, required=True)
     p.add_argument("--out-dir", type=Path, required=True)
     p.add_argument("--deadline", type=float, default=0.0, help="epoch seconds; 0: none")
     p.add_argument("--think-budget", type=int, default=1536)
     p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--reasoning-batch-size", type=int, default=0,
+                   help="batch size for reasoning stages; 0: --batch-size")
+    p.add_argument("--sizes", default="", help="reasoning questions per benchmark, "
+                   "e.g. medqa=200,pubmedqa=150 (0: all); others keep REASONING_SIZES")
+    p.add_argument("--samples", default="", help="reasoning samples per question, "
+                   "e.g. medqa=2; others take 1")
     p.add_argument("--seed", type=int, default=1234)
     p.add_argument("--stages", default="")
     p.add_argument("--limit", type=int, default=0, help="questions per stage (smoke runs)")
@@ -226,25 +287,29 @@ def main() -> None:
     import torch
     import transformers
 
-    if args.role == "tuned" and not args.adapter:
-        raise SystemExit("\nSTOP. --role tuned needs --adapter.")
-    adapter = args.adapter if args.role == "tuned" else None
+    adapter = check_role(args.role, args.adapter)
+    sizes = parse_counts(args.sizes, minimum=0)
+    samples = parse_counts(args.samples, minimum=1)
+    reasoning_batch = args.reasoning_batch_size or args.batch_size
     stages = parse_stages(args.stages)
     deadline = args.deadline if args.deadline > 0 else float("inf")
     out_dir = args.out_dir / args.role
     out_dir.mkdir(parents=True, exist_ok=True)
     meta = {"role": args.role, "base": args.base, "adapter": adapter,
             "seed": args.seed, "think_budget": args.think_budget,
-            "batch_size": args.batch_size, "deadline": args.deadline,
-            "limit": args.limit, "started": time.time(), "status": "running",
-            "stages": {}}
+            "batch_size": args.batch_size, "reasoning_batch_size": reasoning_batch,
+            "load_in_4bit": args.load_in_4bit, "sampling": SAMPLING,
+            "sizes": {**REASONING_SIZES, **sizes}, "samples": samples,
+            "deadline": args.deadline, "limit": args.limit, "started": time.time(),
+            "status": "running", "stages": {}}
 
     def save_meta() -> None:
         (out_dir / "meta.json").write_text(json.dumps(meta, indent=2))
 
     save_meta()
     began = time.time()
-    model, tok, choice = load_model(args.base, adapter, device=args.device)
+    model, tok, choice = load_model(args.base, adapter, device=args.device,
+                                    load_in_4bit=args.load_in_4bit)
     meta["load_seconds"] = round(time.time() - began, 1)
     meta["environment"] = {
         "torch": torch.__version__, "transformers": transformers.__version__,
@@ -268,21 +333,24 @@ def main() -> None:
             if bench not in benches:
                 benches[bench] = load_benchmark(args.eval_dir / f"eval_{bench}.jsonl", bench,
                                                 check_size=not args.no_size_check)
-            recs = stage_order(benches[bench], mode, bench, args.seed)
+            recs = stage_order(benches[bench], mode, bench, args.seed, sizes)
             if args.limit:
                 recs = recs[: args.limit]
             key = f"{mode}:{bench}"
+            n_samples = samples.get(bench, 1) if mode == "reasoning" else 1
             began = time.time()
             status, written = run_stage(
                 model, tok, mode, recs, out_dir / f"{mode}__{bench}.jsonl",
-                batch_size=args.batch_size, budget=args.think_budget, seed=args.seed,
+                batch_size=reasoning_batch if mode == "reasoning" else args.batch_size,
+                budget=args.think_budget, seed=args.seed,
                 deadline=deadline, rates=rates, ids=ids, think_id=think_id,
-                stop_ids=stop_ids)
-            meta["stages"][key] = {"planned": len(recs), "scored": written,
+                stop_ids=stop_ids, samples=n_samples)
+            meta["stages"][key] = {"planned": len(recs) * n_samples, "questions": len(recs),
+                                   "samples": n_samples, "scored": written,
                                    "status": status,
                                    "seconds": round(time.time() - began, 1)}
             save_meta()
-            print(f"{args.role} {key}: {written:,}/{len(recs):,} {status} "
+            print(f"{args.role} {key}: {written:,}/{len(recs) * n_samples:,} {status} "
                   f"in {time.time() - began:.0f}s", flush=True)
             if status == "deadline":
                 meta["status"] = "deadline"

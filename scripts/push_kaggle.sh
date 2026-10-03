@@ -3,6 +3,7 @@
 #
 #   bash scripts/push_kaggle.sh              # the training notebook
 #   bash scripts/push_kaggle.sh evaluation   # the evaluation notebook
+#   bash scripts/push_kaggle.sh e0s1         # E0, session 1 (then e0s2)
 #
 # The evaluation notebook also needs the adapter: run scripts/push_adapter.sh
 # first. Credentials come from ~/.kaggle/kaggle.json.
@@ -14,10 +15,11 @@ KAGGLE="${KAGGLE_BIN:-$HOME/.local/bin/kaggle}"
 [ -f "$KERNEL_DIR/kernel-metadata.json" ] || {
   echo "no kernel-metadata.json in $KERNEL_DIR"; exit 1; }
 
-# Rebuild both notebooks so each one's baked-in EXPECTED_FINGERPRINT matches
-# the training/*.py bytes this run is about to upload, not whatever was on
-# disk the last time someone ran build_notebook.py by hand.
-"${PYTHON:-.venv/bin/python}" scripts/build_notebook.py
+# Rebuild this notebook so its baked-in EXPECTED_FINGERPRINT matches the
+# training/*.py bytes this run is about to upload, not whatever was on disk
+# the last time someone ran build_notebook.py by hand. Only this one: the
+# notebooks of runs that already happened keep the fingerprint they ran with.
+"${PYTHON:-.venv/bin/python}" scripts/build_notebook.py "$KERNEL_DIR"
 
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT

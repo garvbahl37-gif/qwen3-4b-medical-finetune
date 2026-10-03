@@ -1,0 +1,206 @@
+{
+  "config": {
+    "experiment_id": "E0",
+    "purpose": "Baseline: base Qwen3-4B against run 3's adapter (fp16 and on its 4-bit training base), letter choice and thinking mode, same settings for all.",
+    "seed": 1234,
+    "think_budget": 3072,
+    "batch_size": 16,
+    "reasoning_batch_size": 8,
+    "sizes": {
+      "medqa": 200,
+      "mmlu_medical": 150,
+      "pubmedqa": 150,
+      "medmcqa": 150
+    },
+    "samples": {
+      "medqa": 2
+    },
+    "sampling": {
+      "do_sample": true,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "models": {
+      "base": {
+        "label": "A",
+        "base": "unsloth/Qwen3-4B",
+        "adapter": null,
+        "load_in_4bit": false
+      },
+      "run3": {
+        "label": "B",
+        "base": "unsloth/Qwen3-4B",
+        "adapter": "run3",
+        "load_in_4bit": false
+      },
+      "run3_4bit": {
+        "label": "C",
+        "base": "unsloth/Qwen3-4B-unsloth-bnb-4bit",
+        "adapter": "run3",
+        "load_in_4bit": true,
+        "samples": {
+          "medqa": 1
+        }
+      }
+    },
+    "sessions": {
+      "s1": {
+        "0": [
+          [
+            "base",
+            [
+              "reasoning:medqa"
+            ]
+          ]
+        ],
+        "1": [
+          [
+            "base",
+            [
+              "letter:medqa",
+              "letter:medmcqa",
+              "letter:pubmedqa",
+              "letter:mmlu_medical"
+            ]
+          ],
+          [
+            "run3",
+            [
+              "letter:medqa",
+              "letter:medmcqa",
+              "letter:pubmedqa",
+              "letter:mmlu_medical",
+              "reasoning:medqa",
+              "reasoning:mmlu_medical",
+              "reasoning:pubmedqa",
+              "reasoning:medmcqa"
+            ]
+          ]
+        ]
+      },
+      "s2": {
+        "0": [
+          [
+            "base",
+            [
+              "reasoning:mmlu_medical",
+              "reasoning:pubmedqa"
+            ]
+          ]
+        ],
+        "1": [
+          [
+            "run3_4bit",
+            [
+              "letter:medqa",
+              "letter:medmcqa",
+              "letter:pubmedqa",
+              "letter:mmlu_medical",
+              "reasoning:medqa"
+            ]
+          ],
+          [
+            "base",
+            [
+              "reasoning:medmcqa"
+            ]
+          ]
+        ]
+      }
+    },
+    "kaggle": {
+      "s1": "gb1105/qwen3-4b-medical-e0-baseline-session-1",
+      "s2": "gb1105/qwen3-4b-medical-e0-baseline-session-2"
+    }
+  },
+  "plan": {
+    "s1/gpu0": {
+      "queue": [
+        {
+          "model": "base",
+          "stages": [
+            "reasoning:medqa"
+          ]
+        }
+      ],
+      "estimate_hours": {
+        "pessimistic": 10.2,
+        "optimistic": 6.1
+      },
+      "session_hours": 10.8
+    },
+    "s1/gpu1": {
+      "queue": [
+        {
+          "model": "base",
+          "stages": [
+            "letter:medqa",
+            "letter:medmcqa",
+            "letter:pubmedqa",
+            "letter:mmlu_medical"
+          ]
+        },
+        {
+          "model": "run3",
+          "stages": [
+            "letter:medqa",
+            "letter:medmcqa",
+            "letter:pubmedqa",
+            "letter:mmlu_medical",
+            "reasoning:medqa",
+            "reasoning:mmlu_medical",
+            "reasoning:pubmedqa",
+            "reasoning:medmcqa"
+          ]
+        }
+      ],
+      "estimate_hours": {
+        "pessimistic": 8.0,
+        "optimistic": 5.1
+      },
+      "session_hours": 10.8
+    },
+    "s2/gpu0": {
+      "queue": [
+        {
+          "model": "base",
+          "stages": [
+            "reasoning:mmlu_medical",
+            "reasoning:pubmedqa"
+          ]
+        }
+      ],
+      "estimate_hours": {
+        "pessimistic": 7.3,
+        "optimistic": 4.4
+      },
+      "session_hours": 10.8
+    },
+    "s2/gpu1": {
+      "queue": [
+        {
+          "model": "run3_4bit",
+          "stages": [
+            "letter:medqa",
+            "letter:medmcqa",
+            "letter:pubmedqa",
+            "letter:mmlu_medical",
+            "reasoning:medqa"
+          ]
+        },
+        {
+          "model": "base",
+          "stages": [
+            "reasoning:medmcqa"
+          ]
+        }
+      ],
+      "estimate_hours": {
+        "pessimistic": 7.4,
+        "optimistic": 4.7
+      },
+      "session_hours": 10.8
+    }
+  }
+}

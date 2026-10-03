@@ -15,7 +15,9 @@ def slugify(title: str) -> str:
                                   "evaluation/kernel-metadata.json",
                                   "run2/kernel-metadata.json",
                                   "run3/kernel-metadata.json",
-                                  "eval3/kernel-metadata.json"])
+                                  "eval3/kernel-metadata.json",
+                                  "e0s1/kernel-metadata.json",
+                                  "e0s2/kernel-metadata.json"])
 def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
     # Kaggle names a kernel by slugifying its title and ignores a mismatched
     # id. The first push then lands somewhere else and the second 409s.
@@ -28,7 +30,9 @@ def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
                                   "evaluation/kernel-metadata.json",
                                   "run2/kernel-metadata.json",
                                   "run3/kernel-metadata.json",
-                                  "eval3/kernel-metadata.json"])
+                                  "eval3/kernel-metadata.json",
+                                  "e0s1/kernel-metadata.json",
+                                  "e0s2/kernel-metadata.json"])
 def test_kernel_is_pinned_to_a_t4(path):
     # Without machine_shape a push most likely lands on a P100, which the
     # hardware-check cell then stops on at cell 1.
@@ -66,3 +70,13 @@ def test_the_run3_evaluation_kernel_attaches_code_data_and_adapter():
                                        "gb1105/medical-ft-adapter-run3"]
     assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
     assert meta["code_file"] == "kaggle_eval3.ipynb"
+
+
+@pytest.mark.parametrize("session", ["1", "2"])
+def test_the_e0_kernels_attach_code_data_and_run_3s_adapter(session):
+    meta = json.loads(Path(f"e0s{session}/kernel-metadata.json").read_text())
+    assert meta["id"] == f"gb1105/qwen3-4b-medical-e0-baseline-session-{session}"
+    assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data",
+                                       "gb1105/medical-ft-adapter-run3"]
+    assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
+    assert meta["code_file"] == f"kaggle_e0s{session}.ipynb"

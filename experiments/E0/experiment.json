@@ -1,0 +1,25 @@
+{
+  "experiment_id": "E0",
+  "status": "planned: not run",
+  "git_commit": "",
+  "dataset_version": "v2 benchmarks (data/v2/eval_*.jsonl, data fingerprint ee31015e2db1fe73); no training",
+  "config": "training/experiments_config.py (E0); plan and estimates in experiments/E0/plan.json",
+  "artifacts": {"predictions": ["results/e0/s1/e0_s1_predictions", "results/e0/s2/e0_s2_predictions"]},
+  "evaluation": {
+    "format": "v2_predictions",
+    "protocol": "E0: thinking budget 3,072, reasoning batch 8, letter batch 16, seed 1234, temperature 0.6 / top-p 0.95 / top-k 20; reasoning subsets medqa 200 (2 samples; C 1), mmlu_medical 150, pubmedqa 150, medmcqa 150; letter choice on all 7,545",
+    "models": {
+      "base": {"label": "A: Qwen3-4B (base)", "quantization": "fp16",
+               "dirs": ["results/e0/s1/e0_s1_predictions/gpu0/base",
+                        "results/e0/s1/e0_s1_predictions/gpu1/base",
+                        "results/e0/s2/e0_s2_predictions/gpu0/base",
+                        "results/e0/s2/e0_s2_predictions/gpu1/base"]},
+      "run3": {"label": "B: Qwen3-4B + run3 adapter (fp16 base)", "quantization": "fp16",
+               "dirs": ["results/e0/s1/e0_s1_predictions/gpu1/run3"]},
+      "run3_4bit": {"label": "C: Qwen3-4B + run3 adapter (4-bit training base)",
+                    "quantization": "bnb nf4 (unsloth/Qwen3-4B-unsloth-bnb-4bit), fp16 compute",
+                    "dirs": ["results/e0/s2/e0_s2_predictions/gpu1/run3_4bit"]}
+    }
+  },
+  "notes": "Evaluation only; training columns stay empty. Rows fill in once both sessions' outputs are downloaded to results/e0/."
+}

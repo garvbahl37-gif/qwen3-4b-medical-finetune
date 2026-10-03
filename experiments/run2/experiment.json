@@ -1,0 +1,34 @@
+{
+  "experiment_id": "run2",
+  "status": "complete",
+  "git_commit": "7a98452",
+  "git_commits": {"train_and_eval_code": "7a98452", "launch": "5b9650f", "results": "8fbf7a4"},
+  "dataset_version": "v2: 13,617 rows, nine sources, data fingerprint ee31015e2db1fe73 (data/v2/data_report.json)",
+  "training": {
+    "base_model": "unsloth/Qwen3-4B-unsloth-bnb-4bit",
+    "quantization": "QLoRA 4-bit (Unsloth nf4)",
+    "lora_rank": 64, "lora_alpha": 64, "lora_dropout": 0.0,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    "learning_rate": 1e-4, "epochs": 1, "batch_size": 2, "gradient_accumulation": 8,
+    "max_seq_length": 2496, "warmup_ratio": 0.03, "weight_decay": 0.01,
+    "scheduler": "cosine", "optimizer": "adamw_8bit", "seed": 42, "group_by_length": true
+  },
+  "artifacts": {
+    "train_stats": "results/run2/train_stats.json",
+    "loss_curve": "results/run2/loss_curve.json",
+    "eval_report": "results/run2/run2_eval.json",
+    "adapter_sha256_prefix": "310111def8455c4d"
+  },
+  "evaluation": {
+    "format": "v2_predictions",
+    "protocol": "v2 without mode switch: thinking budget 1,536, batch 16, seed 1234, temperature 0.6 / top-p 0.95 / top-k 20, one sample",
+    "models": {
+      "base": {"label": "Qwen3-4B (base)", "dirs": ["results/run2/predictions/base"],
+               "quantization": "fp16",
+               "notes": "The base worker ran out of memory during reasoning:medqa; only what it wrote is scored."},
+      "run2": {"label": "Qwen3-4B + run2 adapter (fp16 base)",
+               "dirs": ["results/run2/predictions/tuned"], "trained": true}
+    }
+  },
+  "notes": "No /think or /no_think switch in prompts: the fine-tune skipped thinking on 971 of 1,273 MedQA questions."
+}

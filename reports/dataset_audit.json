@@ -1,0 +1,489 @@
+{
+  "rows": 13617,
+  "max_seq": 2496,
+  "sources": {
+    "medical_o1": {
+      "rows": 1375,
+      "reasoning_rows": 1375,
+      "mcq_rows": 0,
+      "generator": "GPT-4o",
+      "publisher_verification": "yes, by a 'medical verifier' (card)",
+      "answer_agreement": {
+        "n/a": 1375
+      },
+      "answer_verified": 0,
+      "suspected_bad": 0,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 24,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 1375,
+        "min": 388,
+        "median": 665,
+        "mean": 685.7,
+        "p90": 877,
+        "p95": 944,
+        "p99": 1082,
+        "max": 1259
+      },
+      "reasoning_tokens": {
+        "n": 1375,
+        "min": 242,
+        "median": 407,
+        "mean": 419.8,
+        "p90": 534,
+        "p95": 576,
+        "p99": 654,
+        "max": 878
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {},
+      "suspicious": {},
+      "style": {
+        "first_person_open": 0.954,
+        "markdown": 0.0,
+        "kg_template": 0.0,
+        "self_checks_per_1k_words": 4.29
+      }
+    },
+    "medical_o1_direct": {
+      "rows": 812,
+      "reasoning_rows": 0,
+      "mcq_rows": 0,
+      "generator": "GPT-4o (answer only)",
+      "publisher_verification": "yes, by a 'medical verifier' (card)",
+      "answer_agreement": {
+        "n/a": 812
+      },
+      "answer_verified": 0,
+      "suspected_bad": 0,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 11,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 812,
+        "min": 109,
+        "median": 246,
+        "mean": 265.0,
+        "p90": 378,
+        "p95": 443,
+        "p99": 560,
+        "max": 687
+      },
+      "reasoning_tokens": {
+        "n": 0
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {},
+      "suspicious": {},
+      "style": {
+        "first_person_open": null,
+        "markdown": null,
+        "kg_template": null,
+        "self_checks_per_1k_words": null
+      }
+    },
+    "medmcqa": {
+      "rows": 1000,
+      "reasoning_rows": 0,
+      "mcq_rows": 1000,
+      "generator": "human-written exam explanations",
+      "publisher_verification": "gold letter from the exam",
+      "answer_agreement": {
+        "n/a": 1000
+      },
+      "answer_verified": 1000,
+      "suspected_bad": 4,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 2,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 1000,
+        "min": 97,
+        "median": 176,
+        "mean": 177.8,
+        "p90": 220,
+        "p95": 235,
+        "p99": 267,
+        "max": 316
+      },
+      "reasoning_tokens": {
+        "n": 0
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {
+        "duplicate option text": 4
+      },
+      "suspicious": {},
+      "style": {
+        "first_person_open": null,
+        "markdown": null,
+        "kg_template": null,
+        "self_checks_per_1k_words": null
+      }
+    },
+    "medqa": {
+      "rows": 688,
+      "reasoning_rows": 0,
+      "mcq_rows": 688,
+      "generator": "none: answer letter and option text only",
+      "publisher_verification": "gold letter from the exam",
+      "answer_agreement": {
+        "n/a": 688
+      },
+      "answer_verified": 688,
+      "suspected_bad": 1,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 20,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 688,
+        "min": 123,
+        "median": 262,
+        "mean": 275.3,
+        "p90": 375,
+        "p95": 430,
+        "p99": 580,
+        "max": 956
+      },
+      "reasoning_tokens": {
+        "n": 0
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 3,
+      "malformed": {
+        "duplicate option text": 1
+      },
+      "suspicious": {},
+      "style": {
+        "first_person_open": null,
+        "markdown": null,
+        "kg_template": null,
+        "self_checks_per_1k_words": null
+      }
+    },
+    "medreason:dialogue": {
+      "rows": 1375,
+      "reasoning_rows": 1375,
+      "mcq_rows": 0,
+      "generator": "an LLM the card and paper (arXiv 2504.00993) do not name, writing from knowledge-graph paths",
+      "publisher_verification": "paths 'validated for consistency with clinical logic'",
+      "answer_agreement": {
+        "n/a": 1375
+      },
+      "answer_verified": 0,
+      "suspected_bad": 0,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 22,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 1375,
+        "min": 372,
+        "median": 816,
+        "mean": 832.5,
+        "p90": 1064,
+        "p95": 1137,
+        "p99": 1311,
+        "max": 2416
+      },
+      "reasoning_tokens": {
+        "n": 1375,
+        "min": 267,
+        "median": 561,
+        "mean": 561.2,
+        "p90": 718,
+        "p95": 775,
+        "p99": 864,
+        "max": 1434
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {},
+      "suspicious": {
+        "refers to a provided answer": 19
+      },
+      "style": {
+        "first_person_open": 0.0,
+        "markdown": 0.952,
+        "kg_template": 1.0,
+        "self_checks_per_1k_words": 0.01
+      }
+    },
+    "medreason:mcq": {
+      "rows": 2750,
+      "reasoning_rows": 2750,
+      "mcq_rows": 2750,
+      "generator": "an LLM the card and paper (arXiv 2504.00993) do not name, writing from knowledge-graph paths",
+      "publisher_verification": "paths 'validated for consistency with clinical logic'",
+      "answer_agreement": {
+        "agree_text": 1865,
+        "unstated": 840,
+        "other_text": 45
+      },
+      "answer_verified": 1865,
+      "suspected_bad": 8,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 44,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 2750,
+        "min": 356,
+        "median": 777,
+        "mean": 788.1,
+        "p90": 1014,
+        "p95": 1074,
+        "p99": 1223,
+        "max": 1353
+      },
+      "reasoning_tokens": {
+        "n": 2750,
+        "min": 217,
+        "median": 560,
+        "mean": 559.6,
+        "p90": 717,
+        "p95": 761,
+        "p99": 832,
+        "max": 996
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 63,
+      "malformed": {
+        "duplicate option text": 8
+      },
+      "suspicious": {
+        "refers to a provided answer": 66
+      },
+      "style": {
+        "first_person_open": 0.0,
+        "markdown": 0.964,
+        "kg_template": 1.0,
+        "self_checks_per_1k_words": 0.02
+      }
+    },
+    "pubmedqa_artificial": {
+      "rows": 938,
+      "reasoning_rows": 0,
+      "mcq_rows": 938,
+      "generator": "abstract authors' conclusion; the yes/no label is generated heuristically by PubMedQA",
+      "publisher_verification": "heuristic label",
+      "answer_agreement": {
+        "n/a": 938
+      },
+      "answer_verified": 0,
+      "suspected_bad": 0,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 0,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 938,
+        "min": 199,
+        "median": 474,
+        "mean": 478.1,
+        "p90": 600,
+        "p95": 648,
+        "p99": 730,
+        "max": 1104
+      },
+      "reasoning_tokens": {
+        "n": 0
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {},
+      "suspicious": {},
+      "style": {
+        "first_person_open": null,
+        "markdown": null,
+        "kg_template": null,
+        "self_checks_per_1k_words": null
+      }
+    },
+    "r1_distill": {
+      "rows": 1945,
+      "reasoning_rows": 1945,
+      "mcq_rows": 0,
+      "generator": "DeepSeek-R1 (full)",
+      "publisher_verification": "not stated: problems are verifiable, outputs are not described as checked",
+      "answer_agreement": {
+        "n/a": 1945
+      },
+      "answer_verified": 0,
+      "suspected_bad": 0,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 31,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 1945,
+        "min": 424,
+        "median": 1262,
+        "mean": 1338.9,
+        "p90": 1977,
+        "p95": 2192,
+        "p99": 2427,
+        "max": 2494
+      },
+      "reasoning_tokens": {
+        "n": 1945,
+        "min": 230,
+        "median": 800,
+        "mean": 892.3,
+        "p90": 1459,
+        "p95": 1676,
+        "p99": 1969,
+        "max": 2233
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 0,
+      "malformed": {},
+      "suspicious": {
+        "trace ends mid-sentence": 7,
+        "refers to a provided answer": 1
+      },
+      "style": {
+        "first_person_open": 1.0,
+        "markdown": 0.029,
+        "kg_template": 0.0,
+        "self_checks_per_1k_words": 4.33
+      }
+    },
+    "reasonmed": {
+      "rows": 672,
+      "reasoning_rows": 672,
+      "mcq_rows": 672,
+      "generator": "three unnamed LLMs (card)",
+      "publisher_verification": "multi-agent check of each trace (card)",
+      "answer_agreement": {
+        "agree_text": 352,
+        "unstated": 248,
+        "agree": 23,
+        "other_text": 49
+      },
+      "answer_verified": 0,
+      "suspected_bad": 142,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 1,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 672,
+        "min": 179,
+        "median": 1436,
+        "mean": 1319.9,
+        "p90": 2088,
+        "p95": 2277,
+        "p99": 2425,
+        "max": 2499
+      },
+      "reasoning_tokens": {
+        "n": 672,
+        "min": 82,
+        "median": 1324,
+        "mean": 1197.4,
+        "p90": 1981,
+        "p95": 2144,
+        "p99": 2321,
+        "max": 2373
+      },
+      "truncated_at_max_seq": 1,
+      "ambiguous_options": 56,
+      "malformed": {
+        "duplicate option text": 3
+      },
+      "suspicious": {
+        "think tags inside the trace": 135,
+        "refers to a provided answer": 28,
+        "repeated lines (looping)": 7,
+        "trace ends mid-sentence": 4
+      },
+      "style": {
+        "first_person_open": 0.007,
+        "markdown": 0.842,
+        "kg_template": 0.0,
+        "self_checks_per_1k_words": 0.07
+      }
+    },
+    "ultramedical": {
+      "rows": 2062,
+      "reasoning_rows": 2062,
+      "mcq_rows": 2062,
+      "generator": "GPT-4",
+      "publisher_verification": "no; its `score` field is gpt-3.5-turbo's rating of the question",
+      "answer_agreement": {
+        "agree": 2062
+      },
+      "answer_verified": 2062,
+      "suspected_bad": 5,
+      "exact_duplicate_questions": 0,
+      "duplicate_responses": 0,
+      "near_duplicate_questions": 19,
+      "near_duplicate_traces": 0,
+      "tokens": {
+        "n": 2062,
+        "min": 248,
+        "median": 586,
+        "mean": 597.0,
+        "p90": 767,
+        "p95": 832,
+        "p99": 983,
+        "max": 1570
+      },
+      "reasoning_tokens": {
+        "n": 2062,
+        "min": 70,
+        "median": 285,
+        "mean": 282.3,
+        "p90": 399,
+        "p95": 433,
+        "p99": 528,
+        "max": 634
+      },
+      "truncated_at_max_seq": 0,
+      "ambiguous_options": 20,
+      "malformed": {
+        "duplicate option text": 5
+      },
+      "suspicious": {
+        "trace ends mid-sentence": 2
+      },
+      "style": {
+        "first_person_open": 0.0,
+        "markdown": 0.008,
+        "kg_template": 0.0,
+        "self_checks_per_1k_words": 0.08
+      }
+    }
+  },
+  "near_duplicate_question_pairs": 87,
+  "near_duplicate_trace_pairs": 0,
+  "cross_source_trace_pairs": 0,
+  "qwen3_base_traces": {
+    "traces": 1273,
+    "reasoning_tokens": {
+      "n": 1273,
+      "min": 190,
+      "median": 898,
+      "mean": 946.9,
+      "p90": 1534,
+      "p95": 1534,
+      "p99": 1534,
+      "max": 1535
+    },
+    "style": {
+      "first_person_open": 1.0,
+      "markdown": 0.0,
+      "kg_template": 0.0,
+      "self_checks_per_1k_words": 7.11
+    }
+  }
+}

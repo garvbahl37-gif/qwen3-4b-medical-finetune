@@ -1,0 +1,39 @@
+{
+  "experiment_id": "run3",
+  "status": "complete (frozen 2026-10-03 as the baseline fine-tune)",
+  "git_commit": "223edc5",
+  "git_commits": {"train_code": "223edc5", "launch": "8ba1348", "eval_code": "1e0b2d5",
+                  "results": "6370c93"},
+  "git_tags": {"run3-train": "223edc5", "run3-eval": "1e0b2d5"},
+  "dataset_version": "v2: 13,617 rows, nine sources, data fingerprint ee31015e2db1fe73, rendered with /think or /no_think (data/v2/data_report.json)",
+  "training": {
+    "base_model": "unsloth/Qwen3-4B-unsloth-bnb-4bit",
+    "quantization": "QLoRA 4-bit (Unsloth nf4)",
+    "lora_rank": 64, "lora_alpha": 64, "lora_dropout": 0.0,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    "learning_rate": 1e-4, "epochs": 1, "batch_size": 2, "gradient_accumulation": 8,
+    "max_seq_length": 2496, "warmup_ratio": 0.03, "weight_decay": 0.01,
+    "scheduler": "cosine", "optimizer": "adamw_8bit", "seed": 42, "group_by_length": true,
+    "loss": "response only", "validation_split": null, "steps": 852
+  },
+  "artifacts": {
+    "train_stats": "results/run3/train_stats.json",
+    "loss_curve": "results/run3/loss_curve.json",
+    "eval_report": "results/run3/run3_eval.json",
+    "notebooks": ["results/run3/kaggle_run3_notebook.ipynb", "results/run3/kaggle_eval3_notebook.ipynb"],
+    "adapter_sha256": "8240aa382a18d8b9c3fadc1d00f879575e5eb909f91bf6b9a728a9c1390fbef7",
+    "adapter_kaggle_dataset": "gb1105/medical-ft-adapter-run3",
+    "adapter_local_dir": "training/outputs/run3 (git-ignored)"
+  },
+  "evaluation": {
+    "format": "v2_predictions",
+    "protocol": "v2: thinking budget 1,536, batch 16, seed 1234, temperature 0.6 / top-p 0.95 / top-k 20, one sample; MedQA and MMLU-medical reasoning only for the base (deadline)",
+    "models": {
+      "base": {"label": "Qwen3-4B (base)", "dirs": ["results/run3/predictions/base"],
+               "quantization": "fp16"},
+      "run3": {"label": "Qwen3-4B + run3 adapter (fp16 base)",
+               "dirs": ["results/run3/predictions/tuned"], "trained": true}
+    }
+  },
+  "notes": "Reasoning scores are on the questions both models answered: the base reached 480 of 1,089 MMLU-medical questions and no PubMedQA or MedMCQA reasoning before the deadline."
+}

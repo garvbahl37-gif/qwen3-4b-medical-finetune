@@ -17,6 +17,7 @@ advice, and the model can give wrong answers.
 | Result | A small gain when choosing among the answer letters; worse when writing answers out, mostly from answer length and format. See below. |
 | Run 2 | Done 2026-09-26: a reasoning fine-tune on 13,617 examples. Letter choice +0.8 pooled (PubMedQA +3.1, significant); the fine-tune learned to skip thinking. See below. |
 | Run 3 | Done 2026-10-01: the fine-tune now reasons on every question, but reasons worse than the base model (MedQA 60.2% vs 69.7%). Letter choice +0.8 pooled. See below. |
+| Diagnosis (E0-E2) | Started 2026-10-03. The training data is audited ([`reports/DATASET_AUDIT.md`](reports/DATASET_AUDIT.md)), and the baseline evaluation E0 is configured but not run ([`experiments/`](experiments/README.md)). |
 | Chat frontend | Planned, not built. |
 
 ## Result
@@ -205,6 +206,9 @@ result.
 | `scripts/` | the notebook builder, the Kaggle upload and push scripts, and the local smoke test |
 | `tests/` | the pytest suite |
 | `results/run1/` | what run 1 measured, and the notebook and output that produced it |
+| `experiments/` | one `experiment.json` per run (commit, data, config, artifacts) and the generated `results.csv` |
+| `reports/` | the training-data audit |
+| `e0s1/`, `e0s2/` | the E0 baseline's two Kaggle session notebooks |
 | `docs/` | these guides; `docs/superpowers/` holds the design spec and the implementation plans |
 | `TODO.md` | where the project stands and what is left |
 
@@ -221,6 +225,10 @@ result.
 | `evaluate.py` | scores base against fine-tune and writes the report JSON |
 | `modeling.py` | device and precision choice, and model loading without Unsloth |
 | `kaggle_paths.py` | finds the uploaded code and adapter on Kaggle, and fingerprints the code |
+| `dataset_audit.py` | measures the training data source by source and writes `reports/DATASET_AUDIT.md` |
+| `experiments_config.py` | what each experiment runs; E0's models, budget, subsets and Kaggle sessions |
+| `run_plan.py` | turns an experiment's sessions into worker commands, estimates their time, runs one GPU's queue |
+| `experiments.py` | rebuilds `experiments/results.csv` from the raw predictions |
 
 ## Quick start
 
@@ -267,4 +275,8 @@ evaluation from.
   spec and the code disagree, the code and `results/run1/` describe what ran.
 - [`docs/superpowers/plans/`](docs/superpowers/plans/): the implementation plans
   for training, evaluation, and serving with the frontend
+- [`experiments/README.md`](experiments/README.md): the experiment records,
+  how `results.csv` is computed, and how to run E0
+- [`reports/DATASET_AUDIT.md`](reports/DATASET_AUDIT.md): what is in the run 2/3
+  training data, source by source
 - [`TODO.md`](TODO.md): status and remaining work

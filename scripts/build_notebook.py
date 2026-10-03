@@ -7,6 +7,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from training.kaggle_paths import code_fingerprint, data_fingerprint
 
+# `python scripts/build_notebook.py [name ...]` rebuilds only the named
+# notebooks (a kernel directory name: training, evaluation, run3, eval3, e0s1,
+# e0s2); no names rebuilds them all. Rebuilding bakes in the current code
+# fingerprint, so a notebook that already ran is left alone unless asked for.
+NOTEBOOKS = ("training", "evaluation", "run3", "eval3", "e0s1", "e0s2")
+WANT = set(sys.argv[1:])
+if WANT - set(NOTEBOOKS):
+    raise SystemExit(f"unknown notebook {sorted(WANT - set(NOTEBOOKS))}; known: {NOTEBOOKS}")
+
+
+def wanted(name: str) -> bool:
+    return not WANT or name in WANT
+
 # The notebook's code-fetch cell cannot `import training.kaggle_paths`: the
 # whole point of find_code_dir is to locate the uploaded code before it has
 # been copied anywhere importable. So its real implementation lives in
@@ -712,8 +725,10 @@ def write_notebook(cells: list[tuple[str, str]], path: Path) -> None:
     print(f"wrote {path}, {len(cells)} cells")
 
 
-write_notebook(CELLS, Path("training/kaggle_medical.ipynb"))
-write_notebook(EVAL_CELLS, Path("evaluation/kaggle_eval.ipynb"))
+if wanted("training"):
+    write_notebook(CELLS, Path("training/kaggle_medical.ipynb"))
+if wanted("evaluation"):
+    write_notebook(EVAL_CELLS, Path("evaluation/kaggle_eval.ipynb"))
 def run3_cells(data_fp: str) -> list[tuple[str, str]]:
     """Run 3 is run 2's notebook with its own names. run2/kaggle_run2.ipynb
     stays as it ran; run 3's change is in the code it uploads (every prompt
@@ -723,7 +738,9 @@ def run3_cells(data_fp: str) -> list[tuple[str, str]]:
             for kind, src in run2_cells(data_fp)]
 
 
-if (RUN2_DATA / "data_report.json").exists():
+if not wanted("run3"):
+    pass
+elif (RUN2_DATA / "data_report.json").exists():
     write_notebook(run3_cells(data_fingerprint(RUN2_DATA)), Path("run3/kaggle_run3.ipynb"))
 else:
     print("skipped run3/kaggle_run3.ipynb: no data/v2 (run training.prepare_data_v2)")
@@ -792,7 +809,9 @@ def eval3_cells(data_fp: str, adapter_sha: str) -> list[tuple[str, str]]:
     ]
 
 
-if (RUN2_DATA / "data_report.json").exists() and (RUN3_ADAPTER / "adapter_model.safetensors").exists():
+if not wanted("eval3"):
+    pass
+elif (RUN2_DATA / "data_report.json").exists() and (RUN3_ADAPTER / "adapter_model.safetensors").exists():
     import hashlib
 
     _digest = hashlib.sha256()
@@ -803,3 +822,149 @@ if (RUN2_DATA / "data_report.json").exists() and (RUN3_ADAPTER / "adapter_model.
                    Path("eval3/kaggle_eval3.ipynb"))
 else:
     print("skipped eval3/kaggle_eval3.ipynb: needs data/v2 and training/outputs/run3")
+
+
+# --- E0: the baseline evaluation, two sessions ----------------------------
+# Each session runs training/run_plan.py once per GPU. The queues, budget,
+# subsets and sample counts all come from training/experiments_config.py; the
+# notebook holds no evaluation settings of its own.
+from training.experiments_config import ADAPTERS, E0
+
+E0_PLAN_LINE = 'print(f"\\n{N_GPUS} GPU(s). Training uses GPU 0; evaluation runs {plan}.")'
+E0_PLAN_NEW = 'print(f"\\n{N_GPUS} GPU(s). Each GPU runs its own queue of E0 workers.")'
+
+
+def e0_models(session: str) -> list[str]:
+    return [m for queue in E0["sessions"][session].values() for m, _ in queue]
+
+
+def e0_intro(session: str) -> str:
+    other = "s2" if session == "s1" else "s1"
+    queues = []
+    for gpu, queue in E0["sessions"][session].items():
+        for model, stages in queue:
+            label = E0["models"][model]["label"]
+            queues.append(f"- GPU {gpu}: **{model}** ({label}): " + ", ".join(stages))
+    sizes = ", ".join(f"{b} {n}" for b, n in E0["sizes"].items())
+    return (f"# Qwen3-4B medical fine-tune, E0 baseline, session {session[1]}\n\n"
+            "E0 scores base Qwen3-4B (A), run 3's adapter on the fp16 base (B) and "
+            "run 3's adapter on its 4-bit training base (C) with the same generation "
+            f"settings: a {E0['think_budget']:,}-token thinking budget, temperature 0.6, "
+            f"top-p 0.95, top-k 20, seed {E0['seed']}. Reasoning runs on fixed seeded "
+            f"subsets ({sizes} questions); MedQA gets {E0['samples']['medqa']} samples "
+            f"per question. Session {other[1]} runs the rest.\n\nThis session:\n\n"
+            + "\n".join(queues) +
+            "\n\n**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach "
+            "`medical-ft-code`, `medical-ft-data` and `medical-ft-adapter-run3`. "
+            "Workers stop 40 minutes before Kaggle's 12-hour limit and keep what they scored.")
+
+
+def e0_download_cell(session: str) -> str:
+    repos = sorted({E0["models"][m]["base"] for m in e0_models(session)})
+    four_bit = any(E0["models"][m]["load_in_4bit"] for m in e0_models(session))
+    check = ('\nimport bitsandbytes\nprint("bitsandbytes", bitsandbytes.__version__)'
+             if four_bit else "")
+    return ('''# --- 4. Download each base model once, before any worker starts ------------
+# Two workers fetching the same 8GB model at once lost run 3's first
+# evaluation to a race. One download each, retried; then offline only.
+from huggingface_hub import snapshot_download
+
+for repo in ''' + repr(repos) + ''':
+    for attempt in range(1, 5):
+        try:
+            print(repo, "at", snapshot_download(repo))
+            break
+        except Exception as exc:
+            print(f"{repo}: download attempt {attempt} failed: {type(exc).__name__}: {exc}")
+            time.sleep(60)
+    else:
+        raise SystemExit(f"\\nSTOP. {repo} could not be downloaded from the Hub.")
+os.environ["HF_HUB_OFFLINE"] = "1"''' + check)
+
+
+def e0_run_cell(session: str) -> str:
+    return ('''# --- 5. A smoke run of every queue, then the session's real run ------------
+SESSION = "''' + session + '''"
+GPUS = ''' + repr(sorted(E0["sessions"][session])) + '''
+
+def driver(gpu: int, out: str, extra: str):
+    cmd = (f"python -m training.run_plan run --session {SESSION} --gpu {gpu} "
+           f"--out-dir {out}/gpu{gpu} --eval-dir data/v2 --adapter run3=outputs/run3 {extra}")
+    log = open(f"{out}-gpu{gpu}.log", "w")
+    return subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,
+                            env={**os.environ,
+                                 "CUDA_VISIBLE_DEVICES": str(gpu if N_GPUS > 1 else 0),
+                                 # hours of variable-length batches fragment memory
+                                 "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
+
+def run_all(out: str, extra: str, poll: int) -> dict:
+    """Each GPU's queue in parallel; on a single GPU, one after the other."""
+    Path(out).mkdir(parents=True, exist_ok=True)
+    if N_GPUS > 1:
+        procs = {g: driver(g, out, extra) for g in GPUS}
+        while any(p.poll() is None for p in procs.values()):
+            time.sleep(poll)
+            written = sum(1 for f in Path(out).rglob("*.jsonl") for _ in open(f))
+            print(time.strftime("%H:%M"), "answers written:", written, flush=True)
+        codes = {g: p.returncode for g, p in procs.items()}
+    else:
+        codes = {g: driver(g, out, extra).wait() for g in GPUS}
+    for g in GPUS:
+        print(f"--- GPU {g} log tail ---")
+        print("".join(open(f"{out}-gpu{g}.log").readlines()[-20:]))
+    return codes
+
+codes = run_all("outputs/e0_smoke", "--smoke", poll=15)
+if any(codes.values()):
+    raise SystemExit(f"\\nSTOP. The smoke run failed: {codes}. The log tails above say why.")
+step("python -m training.eval_report --root outputs/e0_smoke --bench-dir data/v2 "
+     "--out outputs/e0_smoke/report.json")
+
+codes = run_all(f"outputs/e0/{SESSION}", f"--deadline {DEADLINE:.0f}", poll=600)
+print("queue exit codes:", codes)
+OUT = Path("/kaggle/working")
+PRED = OUT / f"e0_{SESSION}_predictions"
+shutil.copytree(f"outputs/e0/{SESSION}", PRED, dirs_exist_ok=True)
+for log in Path("outputs/e0").glob(f"{SESSION}-gpu*.log"):
+    shutil.copy(log, OUT / f"e0_{log.name}")
+REPORT = OUT / f"e0_{SESSION}_report.json"
+PER_Q = OUT / f"e0_{SESSION}_per_question.jsonl"
+step(f"python -m training.eval_report --root {PRED} --bench-dir data/v2 "
+     f"--out {REPORT} --export {PER_Q}")
+# The working copy holds the code, the data and a second copy of the adapter.
+# None of it is a result, and all of it would download with the output.
+os.chdir(OUT)
+shutil.rmtree(WORK)
+print("Saved the predictions, the queue logs, the session report and the "
+      "per-question records to the Output panel.")''')
+
+
+def e0_cells(session: str, data_fp: str, adapter_sha: str) -> list[tuple[str, str]]:
+    cells = dict(enumerate(run3_cells(data_fp)))
+    hardware = cells[1][1]
+    if E0_PLAN_LINE not in hardware:
+        raise SystemExit("the hardware cell's plan line changed; update E0_PLAN_LINE")
+    return [
+        ("markdown", e0_intro(session)),
+        ("code", hardware.replace(E0_PLAN_LINE, E0_PLAN_NEW)),
+        cells[2], cells[3], cells[4],
+        ("code", eval3_adapter_cell(adapter_sha)),
+        ("code", e0_download_cell(session)),
+        ("code", e0_run_cell(session)),
+        ("markdown", f"## Done\n\nIn the **Output** panel: `e0_{session}_predictions/` "
+                     "(every answer, per GPU and model, beside each worker's `meta.json`), "
+                     f"`e0_{session}_report.json`, `e0_{session}_per_question.jsonl` and "
+                     "the queue logs. `experiments/README.md` says how to join both "
+                     "sessions into E0's report."),
+    ]
+
+
+for _session in ("s1", "s2"):
+    if not wanted(f"e0{_session}"):
+        continue
+    if not (RUN2_DATA / "data_report.json").exists():
+        print(f"skipped e0{_session}: no data/v2 (run training.prepare_data_v2)")
+        continue
+    write_notebook(e0_cells(_session, data_fingerprint(RUN2_DATA),
+                            ADAPTERS["run3"]["sha256_prefix"]),
+                   Path(f"e0{_session}/kaggle_e0{_session}.ipynb"))
