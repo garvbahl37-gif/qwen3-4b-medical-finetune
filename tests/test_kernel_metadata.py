@@ -17,7 +17,8 @@ def slugify(title: str) -> str:
                                   "run3/kernel-metadata.json",
                                   "eval3/kernel-metadata.json",
                                   "e0s1/kernel-metadata.json",
-                                  "e0s2/kernel-metadata.json"])
+                                  "e0s2/kernel-metadata.json",
+                                  "e2/kernel-metadata.json"])
 def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
     # Kaggle names a kernel by slugifying its title and ignores a mismatched
     # id. The first push then lands somewhere else and the second 409s.
@@ -32,7 +33,8 @@ def test_kernel_id_matches_the_slug_kaggle_derives_from_the_title(path):
                                   "run3/kernel-metadata.json",
                                   "eval3/kernel-metadata.json",
                                   "e0s1/kernel-metadata.json",
-                                  "e0s2/kernel-metadata.json"])
+                                  "e0s2/kernel-metadata.json",
+                                  "e2/kernel-metadata.json"])
 def test_kernel_is_pinned_to_a_t4(path):
     # Without machine_shape a push most likely lands on a P100, which the
     # hardware-check cell then stops on at cell 1.
@@ -80,3 +82,10 @@ def test_the_e0_kernels_attach_code_data_and_run_3s_adapter(session):
                                        "gb1105/medical-ft-adapter-run3"]
     assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
     assert meta["code_file"] == f"kaggle_e0s{session}.ipynb"
+
+
+def test_the_e2_kernel_attaches_code_and_the_v3_data():
+    meta = json.loads(Path("e2/kernel-metadata.json").read_text())
+    assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3"]
+    assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
+    assert meta["code_file"] == "kaggle_e2.ipynb"

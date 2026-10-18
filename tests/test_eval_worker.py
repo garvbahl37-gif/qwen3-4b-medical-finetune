@@ -143,3 +143,56 @@ def test_letter_stages_ignore_samples(tmp_path, monkeypatch):
                                   batch_size=2, budget=8, seed=1, deadline=float("inf"),
                                   rates={}, ids={}, think_id=0, stop_ids=set(), samples=2)
     assert (status, written) == ("done", 3)
+
+
+def test_pool_and_dev_stages_are_accepted_but_not_run_by_default():
+    assert ("reasoning", "pool") in parse_stages("reasoning:pool")
+    assert parse_stages("letter:dev_medqa,reasoning:dev_medmcqa") == [
+        ("letter", "dev_medqa"), ("reasoning", "dev_medmcqa")]
+    assert ("reasoning", "pool") not in parse_stages("")
+
+
+def test_shard_takes_every_nth_question_of_the_stage_order():
+    from training.eval_worker import shard
+
+    items = list(range(7))
+    assert shard(items, "0/2") == [0, 2, 4, 6] and shard(items, "1/2") == [1, 3, 5]
+    assert shard(items, "") == items
+    with pytest.raises(SystemExit):
+        shard(items, "2/2")
+
+
+def test_extra_benchmarks_skip_the_published_size_check(tmp_path):
+    import json
+
+    from training.eval_worker import load_benchmark
+
+    path = tmp_path / "eval_pool.jsonl"
+    path.write_text("".join(json.dumps(r.to_dict()) + "\n" for r in recs(3)))
+    assert len(load_benchmark(path, "pool")) == 3
+
+
+class Tok:
+    """Decodes token ids as their characters: id 99 is </think>."""
+
+    def decode(self, ids, skip_special_tokens=False):
+        return "".join("</think>" if i == 99 else chr(i) for i in ids)
+
+
+def test_row_from_tokens_reads_the_answer_after_the_think_block():
+    from training.eval_worker import row_from_tokens
+
+    rec = recs(1)[0]
+    new = [ord(c) for c in "hmm"] + [99] + [ord(c) for c in "\n\nAnswer: B"] + [7]
+    row = row_from_tokens(rec, new, Tok(), think_id=99, stop_ids={7}, seed=5)
+    assert (row["letter"], row["closed"], row["forced"]) == ("B", True, False)
+    assert (row["new_tokens"], row["think_tokens"], row["seed"]) == (len(new) - 1, 3, 5)
+    cut = row_from_tokens(rec, [ord(c) for c in "still thinking"], Tok(), think_id=99,
+                          stop_ids={7}, seed=5)
+    assert cut["letter"] is None and cut["forced"] and not cut["closed"]
+
+
+def test_counts_accept_the_pool_and_dev_benchmarks():
+    from training.eval_worker import parse_counts
+
+    assert parse_counts("pool=0,dev_medqa=50", minimum=0) == {"pool": 0, "dev_medqa": 50}

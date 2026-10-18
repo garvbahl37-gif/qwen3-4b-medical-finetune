@@ -33,3 +33,6 @@ next-env.d.ts
 
 # run 2 data, uploaded to Kaggle by scripts/push_data.sh, never committed
 /data/
+
+# reference checkouts (huggingface/trl for its docs and skill), never committed
+/third_party/

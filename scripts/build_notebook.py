@@ -11,7 +11,7 @@ from training.kaggle_paths import code_fingerprint, data_fingerprint
 # notebooks (a kernel directory name: training, evaluation, run3, eval3, e0s1,
 # e0s2); no names rebuilds them all. Rebuilding bakes in the current code
 # fingerprint, so a notebook that already ran is left alone unless asked for.
-NOTEBOOKS = ("training", "evaluation", "run3", "eval3", "e0s1", "e0s2")
+NOTEBOOKS = ("training", "evaluation", "run3", "eval3", "e0s1", "e0s2", "e2")
 WANT = set(sys.argv[1:])
 if WANT - set(NOTEBOOKS):
     raise SystemExit(f"unknown notebook {sorted(WANT - set(NOTEBOOKS))}; known: {NOTEBOOKS}")
@@ -968,3 +968,325 @@ for _session in ("s1", "s2"):
     write_notebook(e0_cells(_session, data_fingerprint(RUN2_DATA),
                             ADAPTERS["run3"]["sha256_prefix"]),
                    Path(f"e0{_session}/kaggle_e0{_session}.ipynb"))
+
+
+# --- E2: self-distillation, one session -----------------------------------
+# Generation, training and evaluation in one 12-hour session. Every setting
+# comes from training/experiments_config.py (E2); the cells only sequence the
+# phases and hold the clock.
+from training.experiments_config import E2
+from training.kaggle_paths import V3_DATA_FILES
+
+V3_DATA = Path("data/v3")
+
+E2_INTRO = """# Qwen3-4B medical fine-tune, E2: self-distillation
+
+Run 3 trained Qwen3-4B on reasoning written by other models. Its MedQA accuracy
+in thinking mode fell from 69.7% to 60.2%, and its median thinking from 1,036
+tokens to 403. E2 trains on the base model's **own** reasoning instead, kept
+only when it reaches the gold answer. Nothing is written for the model.
+
+1. **Generate** (both GPUs): base Qwen3-4B thinks through MedQA and MedMCQA
+   training questions (`data/v3` pool, decontaminated against every benchmark),
+   2 samples each, a 4,096-token budget.
+2. **Select**: a sample is kept only if it closed its own think block and stated
+   the gold letter. One kept sample per question, chosen at random. 20% of rows
+   are answer-only.
+3. **Train** (GPU 0): LoRA rank 16, lr 5e-5, one epoch, run 3's tested trainer.
+   Meanwhile GPU 1 scores the base model on the dev split and on MedQA.
+4. **Evaluate** (both GPUs): the E2 adapter on the dev split, the four
+   benchmarks by letter choice, and MedQA by reasoning.
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code` and
+`medical-ft-data-v3`. Generation uses vLLM if it installs and passes a smoke
+test, and transformers otherwise."""
+
+E2_PLAN_NEW = 'print(f"\\n{N_GPUS} GPU(s). E2 generates on all of them, trains on GPU 0.")'
+
+
+def e2_fetch_cell(data_fp: str) -> str:
+    return ('''# --- 3. Get the code and the v3 data from the attached datasets -----------
+import json, os, shlex, shutil, subprocess, sys
+from pathlib import Path
+
+INPUT = Path("/kaggle/input")
+WORK  = Path("/kaggle/working/ft")
+PKG   = WORK / "training"
+DATA  = WORK / "data" / "v3"
+PKG.mkdir(parents=True, exist_ok=True)
+DATA.mkdir(parents=True, exist_ok=True)
+
+''' + FIND_CODE_DIR_SRC + '''
+
+SRC = find_code_dir(INPUT, RUN2_REQUIRED | {"run_plan", "self_traces", "vllm_engine"})
+''' + CHECK_FINGERPRINT_SRC + '''
+DATA_SRC = find_data_dir(INPUT, V3_DATA_FILES)
+EXPECTED_DATA_FINGERPRINT = "''' + data_fp + '''"
+if data_fingerprint(DATA_SRC, V3_DATA_FILES) != EXPECTED_DATA_FINGERPRINT:
+    raise SystemExit(
+        f"\\nSTOP. The attached data ({data_fingerprint(DATA_SRC, V3_DATA_FILES)}) is not "
+        f"the data this notebook was built for ({EXPECTED_DATA_FINGERPRINT}).\\n"
+        "FIX: wait a minute and re-run; if it persists, run "
+        "scripts/push_data.sh data/v3 medical-ft-data-v3 again.")
+print("code:", SRC)
+print("data:", DATA_SRC)
+
+for src_file in sorted(SRC.glob("*.py")):
+    shutil.copy(src_file, PKG / src_file.name)
+(PKG / "__init__.py").touch()
+for name in V3_DATA_FILES:
+    shutil.copy(DATA_SRC / name, DATA / name)
+
+os.chdir(WORK)
+sys.path.insert(0, str(WORK))
+Path("outputs").mkdir(exist_ok=True)
+print(json.dumps(json.loads((DATA / "data_report.json").read_text())["sizes"]))
+
+def argv(cmd: str) -> list[str]:
+    args = shlex.split(cmd)
+    return [sys.executable] + args[1:] if args[0] == "python" else args
+
+def step(cmd: str, env: dict | None = None):
+    print(f"$ {cmd}\\n", flush=True)
+    p = subprocess.run(argv(cmd), env={**os.environ, **(env or {})})
+    if p.returncode != 0:
+        raise SystemExit(f"\\nStep failed (exit {p.returncode}):\\n  {cmd}")
+    print("\\nok\\n", flush=True)''')
+
+
+E2_DOWNLOAD = '''# --- 4. Download both base models once, then work offline -----------------
+# The fp16 model generates and evaluates; Unsloth's 4-bit copy is the one
+# training.train fine-tunes (run 1-3's base).
+from huggingface_hub import snapshot_download
+
+for repo in ("unsloth/Qwen3-4B", "unsloth/Qwen3-4B-unsloth-bnb-4bit"):
+    for attempt in range(1, 5):
+        try:
+            print(repo, "at", snapshot_download(repo))
+            break
+        except Exception as exc:
+            print(f"{repo}: download attempt {attempt} failed: {type(exc).__name__}: {exc}")
+            time.sleep(60)
+    else:
+        raise SystemExit(f"\\nSTOP. {repo} could not be downloaded from the Hub.")
+os.environ["HF_HUB_OFFLINE"] = "1"'''
+
+E2_VLLM = '''# --- 5. vLLM in its own environment, then a smoke test --------------------
+# vLLM pins its own torch and transformers, so it lives in a separate virtual
+# environment and the training stack above stays exactly as run 3 had it. If
+# it fails to install or to answer four questions, everything falls back to
+# transformers generation, which run 3 used: slower, so fewer traces.
+VENV = Path("/tmp/vllm-env")
+VLLM_PY = str(VENV / "bin" / "python")
+ENGINE, VLLM_EAGER = "hf", ""
+SMOKE_V = (f"{VLLM_PY} -m training.eval_worker --engine vllm --role base --device cuda "
+           "--eval-dir data/v3 --out-dir outputs/vllm_smoke --stages "
+           "letter:dev_medqa,reasoning:dev_medqa --limit 4 --think-budget 256 "
+           "--batch-size 4 --reasoning-batch-size 4")
+
+def run_logged(cmd: list[str], timeout: int, env: dict | None = None) -> int:
+    try:
+        p = subprocess.run(cmd, env={**os.environ, **(env or {})}, timeout=timeout,
+                           capture_output=True, text=True)
+    except subprocess.TimeoutExpired:
+        print(f"timed out after {timeout}s: {' '.join(cmd[:4])} ...")
+        return -1
+    print((p.stdout + p.stderr)[-3000:])
+    return p.returncode
+
+began = time.time()
+ok = run_logged([sys.executable, "-m", "pip", "install", "-q", "uv"], 300) == 0
+ok = ok and run_logged([sys.executable, "-m", "uv", "venv", "--python", sys.executable,
+                        str(VENV)], 300) == 0
+# --torch-backend=auto picks the torch build that matches this machine's
+# CUDA driver, as vLLM's installation guide does.
+ok = ok and run_logged([sys.executable, "-m", "uv", "pip", "install", "--python", VLLM_PY,
+                        "vllm", "--torch-backend=auto"], 1500) == 0
+print(f"vLLM install {'ok' if ok else 'FAILED'} in {time.time() - began:.0f}s")
+if ok:
+    for extra in ("", " --enforce-eager"):
+        code = run_logged(shlex.split(SMOKE_V + extra), 1200, env={"CUDA_VISIBLE_DEVICES": "0"})
+        rows = sum(1 for f in Path("outputs/vllm_smoke/base").glob("*.jsonl") for _ in open(f)) \\
+            if Path("outputs/vllm_smoke/base").exists() else 0
+        if code == 0 and rows >= 8:
+            ENGINE = "vllm"
+            VLLM_EAGER = extra
+            break
+        print(f"vLLM smoke{extra or ''} failed (exit {code}, {rows} rows)")
+if ENGINE == "vllm":
+    meta = json.loads(Path("outputs/vllm_smoke/base/meta.json").read_text())
+    print("vLLM", meta["environment"].get("vllm"), "smoke passed:", meta["stages"])
+print("ENGINE =", ENGINE)'''
+
+
+def e2_phase_cell() -> str:
+    return '''# --- 6. Phase runner: one run_plan queue per GPU --------------------------
+from training.experiments_config import E2
+from training.run_plan import traces_args, train_args
+
+GPUS = [0, 1] if N_GPUS > 1 else [0]
+GEN_END = min(SESSION_START + 5.0 * 3600, DEADLINE - 6.0 * 3600)
+
+def phase(name: str, gpu: int, out: str, extra: str = ""):
+    cmd = (f"python -m training.run_plan run --experiment E2 --session {name} --gpu {gpu} "
+           f"--out-dir {out}/gpu{gpu} --eval-dir data/v3 --engine {ENGINE} "
+           f"--vllm-python {VLLM_PY}{VLLM_EAGER} {extra}")
+    log = open(f"{out}-gpu{gpu}.log", "w")
+    # Its own process group, so stopping it also stops the worker it started.
+    return subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,
+                            start_new_session=True,
+                            env={**os.environ, "CUDA_VISIBLE_DEVICES": str(gpu),
+                                 "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
+
+def stop(proc) -> None:
+    import signal
+    if proc.poll() is None:
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        try:
+            proc.wait(120)
+        except subprocess.TimeoutExpired:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+
+def wait(procs: dict, out: str, poll: int) -> dict:
+    while any(p.poll() is None for p in procs.values()):
+        time.sleep(poll)
+        written = sum(1 for f in Path(out).rglob("*.jsonl") for _ in open(f))
+        print(time.strftime("%H:%M"), "answers written:", written, flush=True)
+    for g in procs:
+        print(f"--- {out} GPU {g} log tail ---")
+        print("".join(open(f"{out}-gpu{g}.log").readlines()[-12:]))
+    return {g: p.returncode for g, p in procs.items()}
+
+def run_phase(name: str, out: str, extra: str = "", poll: int = 600, gpus=None) -> dict:
+    Path(out).mkdir(parents=True, exist_ok=True)
+    gpus = [g for g in (gpus or GPUS) if g in E2["sessions"][name]]
+    return wait({g: phase(name, g, out, extra) for g in gpus}, out, poll)
+
+# The generation and base-evaluation queues on two questions first: wiring
+# errors cost minutes here instead of hours later. (The E2 queues need the
+# adapter training produces; run_plan retries any vLLM entry that fails
+# before writing an answer with transformers.)
+codes = run_phase("gen", "outputs/smoke/gen", "--smoke", poll=20)
+codes.update({f"base{g}": c for g, c in
+              run_phase("base_eval", "outputs/smoke/base", "--smoke", poll=20).items()})
+if any(codes.values()):
+    raise SystemExit(f"\\nSTOP. A smoke run failed: {codes}. The log tails above say why.")
+print("smoke runs passed; generating until", time.strftime("%H:%M", time.localtime(GEN_END)))'''
+
+
+E2_GENERATE = '''# --- 7. Generate: base Qwen3-4B thinks through the training pool ----------
+codes = run_phase("gen", "outputs/e2/gen", f"--deadline {GEN_END:.0f}", poll=900)
+print("generation exit codes:", codes)
+OUT = Path("/kaggle/working")
+shutil.copytree("outputs/e2/gen", OUT / "e2_generation", dirs_exist_ok=True)
+for log in Path("outputs/e2").glob("gen-gpu*.log"):
+    shutil.copy(log, OUT / f"e2_{log.name}")
+print("generation saved to the Output panel")'''
+
+E2_SELECT = '''# --- 8. Keep only verified traces, one per question ------------------------
+step("python " + " ".join(traces_args(E2, gen_dirs=["outputs/e2/gen"],
+                                      pool="data/v3/eval_pool.jsonl", out="data/e2")))
+TRACES = json.loads(Path("data/e2/e2_report.json").read_text())
+shutil.copy("data/e2/e2_report.json", OUT / "e2_traces_report.json")
+MAX_SEQ = TRACES["max_seq"]
+print(f"{TRACES['rows']:,} training rows ({TRACES['reasoning_rows']:,} traces, "
+      f"{TRACES['direct_rows']:,} answer-only); acceptance {TRACES['acceptance_rate']:.0%}; "
+      f"max_seq {MAX_SEQ}")'''
+
+E2_TRAIN = '''# --- 9. Train on GPU 0 while GPU 1 scores the base model ------------------
+# Leave the evaluation of the new adapter at least 1.6 hours.
+STOP_AFTER = int(min(E2["training"]["max_hours"] * 3600, DEADLINE - time.time() - 1.6 * 3600))
+if STOP_AFTER < 1800:
+    raise SystemExit(f"\\nSTOP. Only {STOP_AFTER / 60:.0f} minutes left for training.")
+TRAIN_END = time.time() + STOP_AFTER + 600
+print(f"training stops by itself after {STOP_AFTER / 3600:.2f}h at the latest")
+train_cmd = "python " + " ".join(train_args(E2, data_dir="data/e2", out_dir="outputs/e2_adapter",
+                                            max_seq=MAX_SEQ, stop_after=STOP_AFTER))
+print("$", train_cmd)
+train_log = open("outputs/e2-train.log", "w")
+trainer = subprocess.Popen(argv(train_cmd), stdout=train_log, stderr=subprocess.STDOUT,
+                           env={**os.environ, "CUDA_VISIBLE_DEVICES": "0"})
+base_procs = ({1: phase("base_eval", 1, "outputs/e2/base_eval", f"--deadline {TRAIN_END:.0f}")}
+              if N_GPUS > 1 else {})
+while trainer.poll() is None:
+    time.sleep(300)
+    tail = open("outputs/e2-train.log").readlines()[-2:]
+    print(time.strftime("%H:%M"), "".join(tail).strip()[-300:], flush=True)
+print("".join(open("outputs/e2-train.log").readlines()[-25:]))
+if trainer.returncode != 0:
+    raise SystemExit(f"\\nSTOP. Training failed (exit {trainer.returncode}); log above.")
+shutil.copytree("outputs/e2_adapter", OUT / "e2-adapter", dirs_exist_ok=True,
+                ignore=shutil.ignore_patterns("checkpoint-*"))
+shutil.copy("outputs/e2-train.log", OUT / "e2_train.log")
+print("adapter saved:", sorted(p.name for p in (OUT / "e2-adapter").iterdir()))
+# The base model's dev stages come first in its queue and finish long before
+# training does; give whatever it is still scoring 15 minutes, then stop it so
+# the new adapter gets the rest of the session. Its answers are already on disk.
+if base_procs:
+    limit = time.time() + 900
+    while base_procs[1].poll() is None and time.time() < limit:
+        time.sleep(30)
+    stop(base_procs[1])
+    print("base evaluation exit codes:", wait(base_procs, "outputs/e2/base_eval", 5))'''
+
+E2_EVALUATE = '''# --- 10. Score the E2 adapter, then write the comparison -------------------
+codes = run_phase("e2_eval", "outputs/e2/e2_eval",
+                  f"--deadline {DEADLINE:.0f} --adapter e2=outputs/e2_adapter", poll=600)
+print("e2 evaluation exit codes:", codes)
+for name in ("base_eval", "e2_eval"):
+    if Path(f"outputs/e2/{name}").exists():
+        shutil.copytree(f"outputs/e2/{name}", OUT / f"e2_{name}_predictions", dirs_exist_ok=True)
+for log in Path("outputs/e2").glob("*_eval-gpu*.log"):
+    shutil.copy(log, OUT / f"e2_{log.name}")
+roots = " ".join(f"--root {OUT / f'e2_{n}_predictions'}" for n in ("base_eval", "e2_eval")
+                 if (OUT / f"e2_{n}_predictions").exists())
+step(f"python -m training.eval_report {roots} --bench-dir data/v3 "
+     f"--out {OUT / 'e2_report.json'} --export {OUT / 'e2_per_question.jsonl'}")
+os.chdir(OUT)
+shutil.rmtree(WORK)
+print("Done. Everything is in the Output panel.")'''
+
+E2_DONE = """## Done
+
+In the **Output** panel:
+- `e2-adapter/`: the adapter, `train_stats.json` and `loss_curve.json`.
+- `e2_generation/`: every sampled completion on the training pool, per GPU.
+- `e2_traces_report.json`: generated, kept and rejected counts, the acceptance
+  rate and the thinking-length distribution.
+- `e2_base_eval_predictions/` and `e2_eval_predictions/`: every answer, with
+  each worker's settings.
+- `e2_report.json`: base against E2, stage by stage, with McNemar tests.
+- `e2_per_question.jsonl`: one record per model, question and sample.
+- The logs.
+
+Model selection reads the **dev** stages. The benchmark stages are reported,
+not tuned on."""
+
+
+def e2_cells(data_fp: str) -> list[tuple[str, str]]:
+    cells = dict(enumerate(run3_cells(data_fingerprint(RUN2_DATA))))
+    hardware = cells[1][1]
+    if E0_PLAN_LINE not in hardware:
+        raise SystemExit("the hardware cell's plan line changed; update E0_PLAN_LINE")
+    return [
+        ("markdown", E2_INTRO),
+        ("code", hardware.replace(E0_PLAN_LINE, E2_PLAN_NEW)),
+        cells[2], cells[3],
+        ("code", e2_fetch_cell(data_fp)),
+        ("code", E2_DOWNLOAD),
+        ("code", E2_VLLM),
+        ("code", e2_phase_cell()),
+        ("code", E2_GENERATE),
+        ("code", E2_SELECT),
+        ("code", E2_TRAIN),
+        ("code", E2_EVALUATE),
+        ("markdown", E2_DONE),
+    ]
+
+
+if wanted("e2"):
+    if (V3_DATA / "data_report.json").exists() and (RUN2_DATA / "data_report.json").exists():
+        write_notebook(e2_cells(data_fingerprint(V3_DATA, V3_DATA_FILES)),
+                       Path("e2/kaggle_e2.ipynb"))
+    else:
+        print("skipped e2: needs data/v2 and data/v3 (run training.prepare_pool_v3)")

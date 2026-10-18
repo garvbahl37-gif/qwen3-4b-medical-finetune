@@ -6,7 +6,7 @@ import statistics
 from pathlib import Path
 
 from training.check_lengths import percentile
-from training.eval_worker import STAGES, load_benchmark, stage_order
+from training.eval_worker import ALL_STAGES, STAGES, load_benchmark, stage_order
 from training.evalcore import paired_report
 from training.records import Record
 
@@ -99,7 +99,7 @@ def stage_files(dirs: list[Path]) -> dict[str, Path]:
     (a model can be scored over several sessions, one set of stages each)."""
     found: dict[str, Path] = {}
     for d in dirs:
-        for mode, bench in STAGES:
+        for mode, bench in ALL_STAGES:
             path = d / f"{mode}__{bench}.jsonl"
             if path.exists() and path.stat().st_size:
                 key = f"{mode}:{bench}"
@@ -107,6 +107,16 @@ def stage_files(dirs: list[Path]) -> dict[str, Path]:
                     raise SystemExit(f"\nSTOP. {key} is in both {found[key]} and {path}.")
                 found[key] = path
     return found
+
+
+def majority_letter(letters: list[str | None]) -> str | None:
+    """Self-consistency: the most common stated letter across samples. A tie
+    goes to the letter that appeared first; a sample with no letter is not a
+    vote."""
+    votes = [x for x in letters if x is not None]
+    if not votes:
+        return None
+    return max(dict.fromkeys(votes), key=votes.count)
 
 
 def model_summary(recs: list[Record], firsts: dict, samples: dict, mode: str) -> dict:
@@ -139,6 +149,9 @@ def model_summary(recs: list[Record], firsts: dict, samples: dict, mode: str) ->
                 "samples": k, "n": len(full),
                 "accuracy": sum(any(s["letter"] == gold[q] for s in samples[q][:k])
                                 for q in full) / len(full),
+                "majority_accuracy": sum(
+                    majority_letter([s["letter"] for s in samples[q][:k]]) == gold[q]
+                    for q in full) / len(full),
                 "first_sample_accuracy": sum(samples[q][0]["letter"] == gold[q]
                                              for q in full) / len(full)}
     return out
@@ -156,7 +169,7 @@ def build_comparison(models: dict[str, list[Path]], bench_dir: Path, *,
     metas = {name: [read_meta(d / "meta.json") for d in dirs] for name, dirs in models.items()}
     benches: dict[str, list[Record]] = {}
     stages: dict[str, dict] = {}
-    for mode, bench in STAGES:
+    for mode, bench in ALL_STAGES:
         key = f"{mode}:{bench}"
         have = [name for name in models if key in files[name]]
         if not have:

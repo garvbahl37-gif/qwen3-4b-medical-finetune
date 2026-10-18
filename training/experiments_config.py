@@ -74,3 +74,48 @@ E0 = {
 }
 
 EXPERIMENTS = {"E0": E0}
+
+
+# E2: Qwen3-4B trained on its own gold-verified reasoning, in one Kaggle session.
+# Generation, then training on GPU 0 while GPU 1 scores the base model, then
+# both GPUs score the new adapter. Selection reads the dev split (data/v3),
+# never the benchmarks; the benchmark stages are reported, not tuned on.
+DEV = ("reasoning:dev_medqa", "reasoning:dev_medmcqa", "letter:dev_medqa", "letter:dev_medmcqa")
+E2 = {
+    "experiment_id": "E2",
+    "purpose": "Self-distillation: fine-tune on base Qwen3-4B's own reasoning, kept only "
+               "when it reaches the gold letter, and compare with the base on the dev split.",
+    "seed": 1234,
+    # Evaluation uses E0's budget. Generation gets more (see gen entries): the
+    # m1 paper puts the medical optimum near 4K tokens, and a trace cut at the
+    # budget is rejected, so a tight budget would select for short thinking.
+    "think_budget": 3072,
+    "batch_size": 16,
+    "reasoning_batch_size": 8,
+    "vllm": {"batch_size": 512, "reasoning_batch_size": 192, "gpu_memory_utilization": 0.90},
+    "sizes": {"medqa": 0, "pool": 0, "dev_medqa": 0, "dev_medmcqa": 0},
+    "samples": {"pool": 2},
+    "sampling": SAMPLING,
+    "models": {
+        "base": {"label": "A", "base": DEFAULT_BASE, "adapter": None, "load_in_4bit": False},
+        "e2": {"label": "E2", "base": DEFAULT_BASE, "adapter": "e2", "load_in_4bit": False},
+    },
+    "sessions": {
+        "gen": {0: (("base", ("reasoning:pool",),
+                     {"shard": "0/2", "think_budget": 4096, "hf_reasoning_batch_size": 6}),),
+                1: (("base", ("reasoning:pool",),
+                     {"shard": "1/2", "think_budget": 4096, "hf_reasoning_batch_size": 6}),)},
+        "base_eval": {1: (("base", DEV + ("reasoning:medqa",)),)},
+        "e2_eval": {0: (("e2", DEV),),
+                    1: (("e2", LETTER + ("reasoning:medqa",)),)},
+    },
+    "traces": {"max_think": 3500, "cap": 4096, "direct_fraction": 0.2, "seed": 42,
+               "min_rows": 200},
+    # Conservative next to run 3 (rank 64, lr 1e-4): the data is the model's
+    # own, so the update only has to sharpen what it already does.
+    "training": {"rank": 16, "lr": 5e-5, "epochs": 1, "batch_size": 1, "grad_accum": 16,
+                 "save_steps": 100, "probe_steps": 20, "max_hours": 4.0},
+    "kaggle": {"e2": "gb1105/qwen3-4b-medical-e2-self-distillation"},
+}
+
+EXPERIMENTS = {"E0": E0, "E2": E2}

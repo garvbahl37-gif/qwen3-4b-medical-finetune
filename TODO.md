@@ -206,6 +206,31 @@ Kaggle yet.
 - [ ] General-capability and safety evaluation, then `reports/FINAL_REPORT.md`.
 - [ ] Read the audit's sample rows for medical correctness, or choose a judge model.
 
+## Accuracy programme: knowledge base and evidence-led fixes (started 2026-10-19)
+
+The goal is to make Qwen3-4B more accurate on medical QA than the base model
+already is in thinking mode. The base is the bar: MedQA 69.7% at a
+1,536-token budget. Agents stay token-frugal: at most two, each with capped
+fetches and short reports.
+
+- [x] Skill discovery. huggingface/trl is cloned to `third_party/trl`
+      (git-ignored) for its `trl-training` skill and its docs.
+- [ ] Research, by two capped agents: Qwen3, TRL, Unsloth and vLLM facts for
+      the pinned versions, and the medical-QA training literature
+- [ ] `docs/knowledge_base/` (13 documents, each claim tagged with its evidence),
+      plus a short repo-level `CLAUDE.md`
+- [ ] Ranked root-cause hypotheses and the smallest decisive experiments
+- [ ] GPU-free fixes, each with tests. Candidates:
+      - majority-vote (self-consistency) scoring;
+      - the E2 pipeline that builds traces from the base model's own
+        gold-verified answers;
+      - an untouched dev split, so model selection stops using the test sets;
+      - a loss-mask check.
+- [ ] GPU work, each step justified by the one before: E0, then E2 generation,
+      then E2 training
+- [ ] **Rotate the Hugging Face token** pasted into chat on 2026-10-19. It is
+      not written anywhere in the repo.
+
 ## Documentation
 
 - [x] `README.md` and three guides, written 2026-09-25 from the code and

@@ -95,3 +95,84 @@ def test_measured_speeds_are_run_3s():
 def test_the_adapter_checked_on_kaggle_is_the_one_run_3_evaluated():
     meta = json.loads(Path("results/run3/predictions/tuned/meta.json").read_text())
     assert meta["adapter_sha256"].startswith(ADAPTERS["run3"]["sha256_prefix"])
+
+
+from training.experiments_config import E2  # noqa: E402
+
+
+def test_e2_generation_shards_the_pool_with_a_longer_budget():
+    entry = E2["sessions"]["gen"][0][0]
+    args = worker_args(E2, entry[0], entry[1], out_dir="o", eval_dir="d", adapters={},
+                       extra=entry[2], engine="hf")
+    a = " ".join(args)
+    assert "--shard 0/2" in a and "--think-budget 4096" in a and "--samples pool=2" in a
+    assert "--reasoning-batch-size 6" in a and "--engine" not in args
+
+
+def test_the_vllm_engine_uses_its_own_chunk_sizes():
+    entry = E2["sessions"]["gen"][1][0]
+    args = worker_args(E2, entry[0], entry[1], out_dir="o", eval_dir="d", adapters={},
+                       extra=entry[2], engine="vllm")
+    a = " ".join(args)
+    assert "--engine vllm" in a and "--reasoning-batch-size 192" in a and "--batch-size 512" in a
+    assert "--gpu-memory-utilization 0.9" in a and "--shard 1/2" in a
+
+
+def test_e2_evaluates_both_models_on_dev_and_never_tunes_on_benchmarks():
+    stages = {m: {s for sess, g in E2["sessions"].items() if sess != "gen"
+                  for q in g.values() for e in q if e[0] == m for s in e[1]}
+              for m in ("base", "e2")}
+    dev = {"reasoning:dev_medqa", "reasoning:dev_medmcqa", "letter:dev_medqa", "letter:dev_medmcqa"}
+    assert dev <= stages["base"] and dev <= stages["e2"]
+    assert E2["training"]["lr"] < 1e-4 and E2["training"]["rank"] < 64
+
+
+def test_train_and_trace_commands():
+    from training.run_plan import traces_args, train_args
+
+    t = " ".join(train_args(E2, data_dir="data/e2", out_dir="outputs/e2", max_seq=3200,
+                            stop_after=7200))
+    assert "-m training.train --format v2 --data data/e2 --out outputs/e2" in t
+    assert "--rank 16" in t and "--lr 5e-05" in t and "--batch-size 1 --grad-accum 16" in t
+    assert "--max-seq 3200" in t and "--stop-after-seconds 7200" in t and "--no-probe-abort" in t
+    r = " ".join(traces_args(E2, gen_dirs=["g0", "g1"], pool="data/v3/eval_pool.jsonl",
+                             out="data/e2"))
+    assert "--gen g0 --gen g1" in r and "--max-think 3500" in r and "--direct-fraction 0.2" in r
+
+
+def test_an_entry_that_wrote_rows_is_not_rerun(tmp_path):
+    from training.run_plan import entry_wrote_rows
+
+    assert not entry_wrote_rows(tmp_path, "base", ("reasoning:pool",))
+    (tmp_path / "base").mkdir()
+    (tmp_path / "base" / "reasoning__pool.jsonl").write_text('{"id": "q"}\n')
+    assert entry_wrote_rows(tmp_path, "base", ("reasoning:pool",))
+
+
+def test_enforce_eager_reaches_the_vllm_worker():
+    entry = E2["sessions"]["gen"][0][0]
+    args = worker_args(E2, entry[0], entry[1], out_dir="o", eval_dir="d", adapters={},
+                       extra=entry[2], engine="vllm", enforce_eager=True)
+    assert "--enforce-eager" in args
+    hf = worker_args(E2, entry[0], entry[1], out_dir="o", eval_dir="d", adapters={},
+                     extra=entry[2], engine="hf", enforce_eager=True)
+    assert "--enforce-eager" not in hf
+
+
+def test_a_missing_vllm_interpreter_falls_back_to_transformers(tmp_path, monkeypatch):
+    import types
+
+    import training.run_plan as rp
+
+    calls = []
+
+    def fake_run(cmd, env=None):
+        calls.append(cmd[0])
+        if cmd[0] == "/no/such/python":
+            raise FileNotFoundError(cmd[0])
+        return types.SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(rp.subprocess, "run", fake_run)
+    code = rp.run_queue(E2, "gen", 0, out_dir=str(tmp_path), eval_dir="d", adapters={},
+                        engine="vllm", vllm_python="/no/such/python")
+    assert code == 0 and calls[0] == "/no/such/python" and calls[1] == rp.sys.executable

@@ -9,7 +9,8 @@ an experiment whose predictions are missing gets empty score cells.
 Within one experiment, each benchmark is scored on the questions every model
 that ran it answered (first sample), so the models in a row group are
 compared like for like. Thinking-mode scores use the first sample;
-medqa_reasoning_any_correct says how often any sample was right.
+medqa_reasoning_any_correct says how often any sample was right, and
+medqa_reasoning_majority how often the majority vote was (self-consistency).
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ import json
 from pathlib import Path
 
 from training.check_lengths import percentile
-from training.eval_report import read_rows, read_samples, stage_files
+from training.eval_report import majority_letter, read_rows, read_samples, stage_files
 from training.eval_worker import load_benchmark
 from training.records import Record
 
@@ -32,7 +33,7 @@ COLUMNS = [
     "pubmedqa", "mmlu_medical", "general_score", "safety_score",
     "median_thinking_length", "notes",
     # Added: what the scores above mean and rest on.
-    "medqa_reasoning_any_correct", "medmcqa_letter", "pubmedqa_letter",
+    "medqa_reasoning_any_correct", "medqa_reasoning_majority", "medmcqa_letter", "pubmedqa_letter",
     "mmlu_medical_letter", "n_medqa_reasoning", "n_medmcqa", "n_pubmedqa",
     "n_mmlu_medical", "thinking_length_kind", "eval_protocol",
 ]
@@ -119,6 +120,9 @@ def score(exp: dict, root: Path, bench_dir: Path) -> dict[str, dict]:
                     out[m]["medqa_reasoning_any_correct"] = round(sum(
                         any(s["letter"] == r.answer for s in samples[r.id]) for r in multi)
                         / len(multi), 4)
+                    out[m]["medqa_reasoning_majority"] = round(sum(
+                        majority_letter([s["letter"] for s in samples[r.id]]) == r.answer
+                        for r in multi) / len(multi), 4)
     return out
 
 

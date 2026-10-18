@@ -52,6 +52,7 @@ def test_scores_are_recomputed_on_questions_every_model_answered(tmp_path):
     assert base["medqa_reasoning"] == 1.0 and ft["medqa_reasoning"] == 0.5
     assert base["n_medqa_reasoning"] == ft["n_medqa_reasoning"] == 2
     assert base["medqa_reasoning_any_correct"] == 1.0 and ft["medqa_reasoning_any_correct"] == ""
+    assert base["medqa_reasoning_majority"] == 1.0 and ft["medqa_reasoning_majority"] == ""
     assert base["thinking_length_kind"] == "think_tokens" and base["median_thinking_length"] == 100
     assert ft["thinking_length_kind"].startswith("new_tokens") and ft["median_thinking_length"] == 7
     assert ft["train_loss"] == 0.1235 and ft["lora_rank"] == 16

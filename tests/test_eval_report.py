@@ -108,7 +108,7 @@ def test_build_comparison_pairs_each_model_with_the_baseline(tmp_path):
     base = reasoning["models"]["base"]
     assert base["accuracy"] == 0.5 and base["think_tokens"]["median"] == 200
     assert base["any_correct"] == {"samples": 2, "n": 4, "accuracy": 0.5,
-                                   "first_sample_accuracy": 0.5}
+                                   "majority_accuracy": 0.5, "first_sample_accuracy": 0.5}
     run3 = reasoning["models"]["run3"]
     # first sample 1/2 right; at least one of two samples right on both
     assert run3["accuracy"] == 0.5 and run3["any_correct"]["accuracy"] == 1.0
@@ -162,3 +162,44 @@ def test_discover_models_groups_worker_directories_by_name(tmp_path):
         "run3_4bit": ["s2/gpu1/run3_4bit"]}
     with pytest.raises(SystemExit):
         discover_models([tmp_path / "nothing"])
+
+
+def test_majority_vote_picks_the_most_common_letter_and_breaks_ties_by_first_appearance():
+    from training.eval_report import majority_letter
+
+    assert majority_letter(["B", "A", "A"]) == "A"
+    assert majority_letter(["B", "A"]) == "B"            # tie: the earlier sample wins
+    assert majority_letter([None, "C", None]) == "C"     # no letter is never a vote
+    assert majority_letter([None, None]) is None
+
+
+def test_model_summary_reports_majority_vote_beside_any_correct(tmp_path):
+    from training.eval_report import model_summary
+
+    recs = [Record(id=f"q{i}", source="medqa", kind="mcq", question="Q",
+                   options={"A": "a", "B": "b"}, answer="A", rationale=None,
+                   response=None, subject="s") for i in range(2)]
+    samples = {"q0": [{"id": "q0", "letter": "B", "sample": 0}, {"id": "q0", "letter": "A", "sample": 1},
+                      {"id": "q0", "letter": "A", "sample": 2}],
+               "q1": [{"id": "q1", "letter": "B", "sample": 0}, {"id": "q1", "letter": "B", "sample": 1},
+                      {"id": "q1", "letter": "A", "sample": 2}]}
+    firsts = {q: s[0] for q, s in samples.items()}
+    out = model_summary(recs, firsts, samples, "reasoning")
+    assert out["any_correct"]["accuracy"] == 1.0
+    assert out["any_correct"]["majority_accuracy"] == 0.5
+    assert out["any_correct"]["first_sample_accuracy"] == 0.0
+
+
+def test_dev_stages_are_compared_too(tmp_path):
+    from training.eval_report import build_comparison
+
+    recs = [Record(id=f"q{i}", source="medqa", kind="mcq", question=f"Q{i}",
+                   options={"A": "a", "B": "b"}, answer="A", rationale=None,
+                   response=None, subject="s") for i in range(2)]
+    write(tmp_path / "bench" / "eval_dev_medqa.jsonl", [r.to_dict() for r in recs])
+    for m, letter in (("base", "A"), ("e2", "B")):
+        write(tmp_path / m / "letter__dev_medqa.jsonl",
+              [{"id": f"q{i}", "letter": letter} for i in range(2)])
+    rep = build_comparison({"base": [tmp_path / "base"], "e2": [tmp_path / "e2"]},
+                           tmp_path / "bench")
+    assert rep["stages"]["letter:dev_medqa"]["vs_baseline"]["e2"]["tuned_accuracy"] == 0.0

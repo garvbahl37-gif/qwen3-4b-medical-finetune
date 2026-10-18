@@ -23,6 +23,14 @@ STAGES: tuple[tuple[str, str], ...] = (
     ("reasoning", "medqa"), ("reasoning", "mmlu_medical"),
     ("reasoning", "pubmedqa"), ("reasoning", "medmcqa"),
 )
+# Run only when asked for: E2's training-question pool and the dev split that
+# model selection uses instead of the benchmarks (data/v3).
+EXTRA_STAGES: tuple[tuple[str, str], ...] = (
+    ("reasoning", "pool"),
+    ("letter", "dev_medqa"), ("reasoning", "dev_medqa"),
+    ("letter", "dev_medmcqa"), ("reasoning", "dev_medmcqa"),
+)
+ALL_STAGES = STAGES + EXTRA_STAGES
 REASONING_SIZES = {"medqa": 0, "mmlu_medical": 0, "pubmedqa": 500, "medmcqa": 1000}
 # Qwen's recommended thinking-mode sampling. Greedy decoding in thinking mode
 # degrades answers and loops, per both Qwen and Unsloth.
@@ -45,9 +53,9 @@ def parse_stages(text: str) -> list[tuple[str, str]]:
     out = []
     for item in text.split(","):
         mode, _, bench = item.strip().partition(":")
-        if (mode, bench) not in STAGES:
+        if (mode, bench) not in ALL_STAGES:
             raise SystemExit(f"\nSTOP. Unknown stage {item!r}; known: "
-                             f"{[f'{m}:{b}' for m, b in STAGES]}")
+                             f"{[f'{m}:{b}' for m, b in ALL_STAGES]}")
         out.append((mode, bench))
     return out
 
@@ -71,9 +79,10 @@ def parse_counts(text: str, *, minimum: int) -> dict[str, int]:
     out = {}
     for item in filter(None, (x.strip() for x in (text or "").split(","))):
         bench, _, value = item.partition("=")
-        if bench not in EVAL_SIZES or not value.isdigit() or int(value) < minimum:
+        known = sorted({b for _, b in ALL_STAGES})
+        if bench not in known or not value.isdigit() or int(value) < minimum:
             raise SystemExit(f"\nSTOP. Bad entry {item!r}: expected benchmark=N with N >= "
-                             f"{minimum}, benchmark one of {sorted(EVAL_SIZES)}.")
+                             f"{minimum}, benchmark one of {known}.")
         out[bench] = int(value)
     return out
 
@@ -98,6 +107,17 @@ def think_length(new: list[int], think_id: int) -> int:
     return len(new) - new[::-1].index(think_id) - 1
 
 
+def shard(items: list, spec: str) -> list:
+    """'i/n': every n-th item from the i-th, so two GPUs split one stage
+    without overlap. '' keeps everything."""
+    if not spec:
+        return list(items)
+    i, _, n = spec.partition("/")
+    if not (i.isdigit() and n.isdigit() and 0 <= int(i) < int(n)):
+        raise SystemExit(f"\nSTOP. --shard {spec!r}: expected i/n with 0 <= i < n.")
+    return list(items)[int(i)::int(n)]
+
+
 def fits_before(deadline: float, now: float, est_seconds: float) -> bool:
     return now + est_seconds <= deadline
 
@@ -105,7 +125,7 @@ def fits_before(deadline: float, now: float, est_seconds: float) -> bool:
 def load_benchmark(path: Path, bench: str, *, check_size: bool = True) -> list[Record]:
     recs = [Record.from_dict(json.loads(line))
             for line in path.read_text().splitlines() if line]
-    if check_size and len(recs) != EVAL_SIZES[bench]:
+    if check_size and bench in EVAL_SIZES and len(recs) != EVAL_SIZES[bench]:
         raise SystemExit(f"\nSTOP. {path} holds {len(recs):,} questions, expected "
                          f"{EVAL_SIZES[bench]:,}.\nFIX: rebuild data/v2 and re-upload it.")
     bad = [r.id for r in recs if r.kind != "mcq" or r.answer not in (r.options or {})]
@@ -139,6 +159,24 @@ def letters_for_prompts(model, tok, prompts, letter_sets, ids) -> list[str]:
     return [pick_letter(row, ids, letters) for row, letters in zip(last, letter_sets)]
 
 
+def row_from_tokens(rec: Record, new: list[int], tok, *, think_id: int, stop_ids: set[int],
+                    seed: int) -> dict:
+    """One completion's record: its letter if the text after the think block
+    states one, whether thinking closed, and its token counts. Shared by the
+    transformers and vLLM engines, so both score completions identically."""
+    new = list(new)
+    while new and new[-1] in stop_ids:
+        new.pop()
+    closed = think_id in new
+    letter = None
+    if closed:
+        after = new[len(new) - new[::-1].index(think_id):]
+        letter = final_letter(tok.decode(after, skip_special_tokens=True), option_letters(rec))
+    return {"id": rec.id, "letter": letter, "closed": closed, "forced": letter is None,
+            "new_tokens": len(new), "think_tokens": think_length(new, think_id),
+            "seed": seed, "text": tok.decode(new, skip_special_tokens=False)}
+
+
 def reason_batch(model, tok, recs, *, ids, think_id, stop_ids, budget, seed) -> list[dict]:
     """Think, then answer. A completion that states no letter -- the budget
     ran out mid-thought, or it never wrote 'Answer: X' -- is budget-forced:
@@ -154,24 +192,9 @@ def reason_batch(model, tok, recs, *, ids, think_id, stop_ids, budget, seed) -> 
         out = model.generate(**enc, max_new_tokens=budget,
                              pad_token_id=tok.pad_token_id, **SAMPLING)
     width = enc["input_ids"].shape[1]
-    rows, to_force = [], []
-    for i, (rec, seq) in enumerate(zip(recs, out)):
-        new = seq[width:].tolist()
-        while new and new[-1] in stop_ids:
-            new.pop()
-        closed = think_id in new
-        letter = None
-        if closed:
-            after = new[len(new) - new[::-1].index(think_id):]
-            letter = final_letter(tok.decode(after, skip_special_tokens=True),
-                                  option_letters(rec))
-        text = tok.decode(new, skip_special_tokens=False)
-        rows.append({"id": rec.id, "letter": letter, "closed": closed,
-                     "forced": letter is None, "new_tokens": len(new),
-                     "think_tokens": think_length(new, think_id), "seed": seed,
-                     "text": text})
-        if letter is None:
-            to_force.append(i)
+    rows = [row_from_tokens(rec, seq[width:].tolist(), tok, think_id=think_id,
+                            stop_ids=stop_ids, seed=seed) for rec, seq in zip(recs, out)]
+    to_force = [i for i, row in enumerate(rows) if row["letter"] is None]
     # Forced prompts carry the whole thinking trace, up to ~2,500 tokens, and
     # a no-cache forward pass over sixteen of them ran a T4 out of memory in
     # run 2. Two at a time is cheap next to the generation itself.
@@ -222,7 +245,8 @@ def batch_seed(seed: int, start: int, sample: int) -> int:
 
 
 def run_stage(model, tok, mode, recs, out_path: Path, *, batch_size, budget, seed,
-              deadline, rates, ids, think_id, stop_ids, samples: int = 1) -> tuple[str, int]:
+              deadline, rates, ids, think_id, stop_ids, samples: int = 1,
+              llm=None, lora=None) -> tuple[str, int]:
     """Score a stage. Reasoning with several samples runs the whole stage for
     sample 0, then again for sample 1, ...: a deadline leaves complete
     first-sample coverage rather than two samples of fewer questions."""
@@ -237,10 +261,23 @@ def run_stage(model, tok, mode, recs, out_path: Path, *, batch_size, budget, see
                 began = time.time()
                 if mode == "letter":
                     def fn(g):
-                        letters = letters_for_prompts(
-                            model, tok, [render_letter_prompt(tok, r) for r in g],
-                            [option_letters(r) for r in g], ids)
+                        prompts = [render_letter_prompt(tok, r) for r in g]
+                        sets = [option_letters(r) for r in g]
+                        if llm is not None:
+                            from training.vllm_engine import vllm_letters
+                            letters = vllm_letters(llm, tok, prompts, sets, ids, lora)
+                        else:
+                            letters = letters_for_prompts(model, tok, prompts, sets, ids)
                         return [{"id": r.id, "letter": L} for r, L in zip(g, letters)]
+                elif llm is not None:
+                    def fn(g, _start=start, _sample=sample):
+                        from training.vllm_engine import vllm_reason
+                        # one seed per question, so a row does not depend on its batch
+                        rows = vllm_reason(llm, tok, g, ids=ids, think_id=think_id,
+                                           stop_ids=stop_ids, budget=budget, lora=lora,
+                                           seeds=[batch_seed(seed, _start + j, _sample)
+                                                  for j in range(len(g))])
+                        return [{**row, "sample": _sample} for row in rows]
                 else:
                     def fn(g, _start=start, _sample=sample):
                         rows = reason_batch(model, tok, g, ids=ids, think_id=think_id,
@@ -281,9 +318,13 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=0, help="questions per stage (smoke runs)")
     p.add_argument("--no-size-check", action="store_true")
     p.add_argument("--device", choices=("cuda", "mps", "cpu"), default=None)
+    p.add_argument("--engine", choices=("hf", "vllm"), default="hf",
+                   help="vllm: generate with vLLM (CUDA only); batches become chunks")
+    p.add_argument("--gpu-memory-utilization", type=float, default=0.90)
+    p.add_argument("--enforce-eager", action="store_true", help="vLLM without CUDA graphs")
+    p.add_argument("--shard", default="", help="i/n: this worker's share of every stage")
     args = p.parse_args()
 
-    import peft
     import torch
     import transformers
 
@@ -300,28 +341,50 @@ def main() -> None:
             "batch_size": args.batch_size, "reasoning_batch_size": reasoning_batch,
             "load_in_4bit": args.load_in_4bit, "sampling": SAMPLING,
             "sizes": {**REASONING_SIZES, **sizes}, "samples": samples,
-            "deadline": args.deadline, "limit": args.limit, "started": time.time(),
-            "status": "running", "stages": {}}
+            "deadline": args.deadline, "limit": args.limit, "engine": args.engine,
+            "shard": args.shard, "started": time.time(), "status": "running", "stages": {}}
 
     def save_meta() -> None:
         (out_dir / "meta.json").write_text(json.dumps(meta, indent=2))
 
     save_meta()
     began = time.time()
-    model, tok, choice = load_model(args.base, adapter, device=args.device,
-                                    load_in_4bit=args.load_in_4bit)
+    llm = lora = model = None
+    if args.engine == "vllm":
+        import vllm
+        from transformers import AutoTokenizer
+
+        from training.vllm_engine import lora_request, make_llm
+
+        tok = AutoTokenizer.from_pretrained(args.base)
+        llm = make_llm(args.base, adapter, budget=args.think_budget, seed=args.seed,
+                       load_in_4bit=args.load_in_4bit,
+                       gpu_memory_utilization=args.gpu_memory_utilization,
+                       enforce_eager=args.enforce_eager)
+        lora = lora_request(adapter)
+        # The stop tokens vLLM itself honours come from the same file.
+        generation_eos = transformers.GenerationConfig.from_pretrained(args.base).eos_token_id
+        meta["environment"] = {"torch": torch.__version__,
+                               "transformers": transformers.__version__,
+                               "vllm": vllm.__version__, "device": "cuda", "dtype": "float16",
+                               "device_name": torch.cuda.get_device_name(0)}
+    else:
+        import peft
+
+        model, tok, choice = load_model(args.base, adapter, device=args.device,
+                                        load_in_4bit=args.load_in_4bit)
+        generation_eos = getattr(model.generation_config, "eos_token_id", None)
+        meta["environment"] = {
+            "torch": torch.__version__, "transformers": transformers.__version__,
+            "peft": peft.__version__, "device": choice.device, "dtype": choice.dtype_name,
+            "device_name": (torch.cuda.get_device_name(0) if choice.device == "cuda"
+                            else choice.device)}
     meta["load_seconds"] = round(time.time() - began, 1)
-    meta["environment"] = {
-        "torch": torch.__version__, "transformers": transformers.__version__,
-        "peft": peft.__version__, "device": choice.device, "dtype": choice.dtype_name,
-        "device_name": (torch.cuda.get_device_name(0) if choice.device == "cuda"
-                        else choice.device)}
     if adapter:
         meta["adapter_sha256"] = sha256_of_file(Path(adapter) / "adapter_model.safetensors")
     ids = letter_token_ids(tok)
     think_id = tok.convert_tokens_to_ids("</think>")
-    stop_ids = resolve_eos_ids(getattr(model.generation_config, "eos_token_id", None),
-                               tok.eos_token_id)
+    stop_ids = resolve_eos_ids(generation_eos, tok.eos_token_id)
     if tok.pad_token_id is not None:
         stop_ids.add(tok.pad_token_id)
     save_meta()
@@ -336,6 +399,7 @@ def main() -> None:
             recs = stage_order(benches[bench], mode, bench, args.seed, sizes)
             if args.limit:
                 recs = recs[: args.limit]
+            recs = shard(recs, args.shard)
             key = f"{mode}:{bench}"
             n_samples = samples.get(bench, 1) if mode == "reasoning" else 1
             began = time.time()
@@ -344,7 +408,7 @@ def main() -> None:
                 batch_size=reasoning_batch if mode == "reasoning" else args.batch_size,
                 budget=args.think_budget, seed=args.seed,
                 deadline=deadline, rates=rates, ids=ids, think_id=think_id,
-                stop_ids=stop_ids, samples=n_samples)
+                stop_ids=stop_ids, samples=n_samples, llm=llm, lora=lora)
             meta["stages"][key] = {"planned": len(recs) * n_samples, "questions": len(recs),
                                    "samples": n_samples, "scored": written,
                                    "status": status,
