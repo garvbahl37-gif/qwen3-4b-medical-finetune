@@ -44,7 +44,8 @@ for _ in $(seq 1 120); do
       # Keep only rows after the header, regardless of any preamble (a stale
       # CLI's version warning, printed to stdout, would otherwise be read as
       # the first "file").
-      listed="$("$KAGGLE" -W datasets files "$USER/$SLUG" --csv 2>/dev/null \
+      # The listing pages at 20 files by default; the code alone is more than that.
+      listed="$("$KAGGLE" -W datasets files "$USER/$SLUG" --csv --page-size 200 2>/dev/null \
                 | sed -n '/^name,size,creationDate/,$p' | tail -n +2 \
                 | cut -d, -f1,2 | sort || true)"
       if [ "$listed" = "$expected" ]; then

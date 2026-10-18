@@ -215,19 +215,36 @@ fetches and short reports.
 
 - [x] Skill discovery. huggingface/trl is cloned to `third_party/trl`
       (git-ignored) for its `trl-training` skill and its docs.
-- [ ] Research, by two capped agents: Qwen3, TRL, Unsloth and vLLM facts for
-      the pinned versions, and the medical-QA training literature
-- [ ] `docs/knowledge_base/` (13 documents, each claim tagged with its evidence),
-      plus a short repo-level `CLAUDE.md`
-- [ ] Ranked root-cause hypotheses and the smallest decisive experiments
-- [ ] GPU-free fixes, each with tests. Candidates:
-      - majority-vote (self-consistency) scoring;
-      - the E2 pipeline that builds traces from the base model's own
-        gold-verified answers;
-      - an untouched dev split, so model selection stops using the test sets;
-      - a loss-mask check.
-- [ ] GPU work, each step justified by the one before: E0, then E2 generation,
-      then E2 training
+- [x] Research, by two capped agents (about 85k and 81k tokens):
+      Qwen3, TRL, Unsloth and vLLM facts, and the medical-QA literature.
+      Ranked result: self-distillation first, small GRPO second, test-time
+      budget and voting third (`docs/knowledge_base/research_sources.md`)
+- [x] `docs/knowledge_base/` has 13 documents, each claim tagged with its
+      evidence, plus a repo-level `CLAUDE.md`
+- [x] Ranked hypotheses H1–H7, with pre-registered success and failure
+      criteria (`open_questions.md`)
+- [x] GPU-free fixes, each with tests (294 tests):
+      - majority-vote scoring;
+      - a pool and dev split (`prepare_pool_v3`: 6,000 + 600 questions,
+        decontaminated);
+      - a vLLM engine with the same scoring as transformers;
+      - E2 trace selection (`self_traces`);
+      - E2 queues in `run_plan` with a per-entry fallback to transformers;
+      - an upload fix (Kaggle lists only 20 files per page).
+      Loss masking was checked and works (run 3 log).
+- [x] **E2 launched on Kaggle 2026-10-19 00:40 IST**
+      ([kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-e2-self-distillation),
+      code d3ed0cd, data `medical-ft-data-v3`). Rehearsed end to end on
+      Qwen3-0.6B first. The session:
+      1. generates on both GPUs until about 5 h in;
+      2. selects verified traces;
+      3. trains (at most 4 h) while GPU 1 scores the base;
+      4. scores E2.
+- [ ] Download E2's output to `results/e2/`, run `training.eval_report` and
+      `training.experiments`, decide by the dev split (H1), and update the
+      knowledge base
+- [ ] If vLLM worked: measure H3 (majority vote of 5 samples) and H6 (agreement
+      between the two engines); then decide between E2 round 2 and a GRPO pilot
 - [ ] **Rotate the Hugging Face token** pasted into chat on 2026-10-19. It is
       not written anywhere in the repo.
 
