@@ -1,6 +1,6 @@
 {
   "experiment_id": "E2",
-  "status": "attempt 1 (2026-10-19, code d3ed0cd): generation and selection done, training failed before step 1 (offline tokenizer lookup). Attempt 2 launched 2026-10-19 from the saved training set (kernel gb1105/qwen3-4b-medical-e2-train-and-evaluate, code d60735e); results pending",
+  "status": "attempt 1 (code d3ed0cd): generation and selection done, training failed before step 1 (offline tokenizer lookup). Attempt 2, e2t version 1 (d60735e): died 10 minutes in on a missing output folder. e2t version 2 (notebook ce5206d, same training code) launched 2026-10-19 12:43 IST; results pending",
   "git_commit": "d60735e",
   "dataset_version": "v3: 6,000-question pool (4,000 MedQA train, 2,000 MedMCQA train) and 600-question dev split, decontaminated against all four benchmarks, data fingerprint f102ed1e8991077c (data/v3/data_report.json)",
   "hypothesis": "Fine-tuning on the base model's own gold-verified reasoning keeps its native thinking (length within about 20% of the base) and does not lose accuracy, unlike run 3's foreign traces. Success: E2 >= base on dev_medqa thinking-mode accuracy (paired), with median thinking within 20% of the base. Failure: E2 below the base on dev, or thinking that collapses as in run 3.",
@@ -65,7 +65,8 @@
   "notes": "Training stops by a time guard (at most 4 h); if it stops before the end of the epoch, the cosine schedule is cut short. Gold-letter filtering cannot catch right answers reached by wrong reasoning.",
   "git_commits": {
     "generation": "d3ed0cd",
-    "training_and_evaluation": "d60735e"
+    "training_and_evaluation": "d60735e",
+    "training_and_evaluation_notebook": "ce5206d"
   },
   "generation_result": {
     "questions": 4608,

@@ -253,6 +253,11 @@ fetches and short reports.
       code d60735e). It trains from the saved set (`medical-ft-data-e2`)
       with the network allowed for training. GPU 1 scores the base model
       meanwhile, then both GPUs score E2.
+- [x] e2t version 1 died 10 minutes in (a log opened before its folder
+      existed). Fixed, and `tests/test_notebook_cells.py` now runs the
+      notebook's orchestration cells locally against stand-ins for the GPU
+      processes.
+- [x] **e2t version 2 launched 2026-10-19 12:43 IST** (notebook ce5206d)
 - [ ] Download E2's output to `results/e2/`, run `training.eval_report` and
       `training.experiments`, decide by the dev split (H1), and update the
       knowledge base
