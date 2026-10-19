@@ -1148,6 +1148,9 @@ def phase(name: str, gpu: int, out: str, extra: str = "", device: int | None = N
     cmd = (f"python -m training.run_plan run --experiment E2 --session {name} --gpu {gpu} "
            f"--out-dir {out}/gpu{gpu} --eval-dir data/v3 --engine {ENGINE} "
            f"--vllm-python {VLLM_PY}{VLLM_EAGER} {extra}")
+    # The log sits beside the output folder; create the folder's parent here,
+    # since a phase can be the first thing to write under it.
+    Path(out).mkdir(parents=True, exist_ok=True)
     log = open(f"{out}-gpu{gpu}.log", "w")
     # Its own process group, so stopping it also stops the worker it started.
     return subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,

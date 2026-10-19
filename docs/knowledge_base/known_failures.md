@@ -18,6 +18,7 @@
 | 14 | Rebuilding all notebooks rewrote the fingerprints of runs that had already happened | [measured] 2026-10-03 | `build_notebook.py NAME` rebuilds one; `push_kaggle.sh` passes its kernel |
 | 15 | Thinking length was reported as new tokens (thinking + answer) | [code] | `think_tokens` recorded from E0 on |
 | 16 | E2 attempt 1 died before training step 1: Unsloth's tokenizer loader looked up a repository the download cell had not fetched, and `HF_HUB_OFFLINE=1` blocked it | [measured] `results/e2/attempt1/e2_train_failed.log` | training runs with the network allowed; only the vLLM workers stay offline. The generation was kept and reused (e2t). |
+| 17 | e2t version 1 died 10 minutes in: the train-and-evaluate cell opened a log in `outputs/e2/` before anything had created it | [measured] `results/e2/attempt2/kaggle_e2t_v1_output.log` | `phase()` creates its folder. `tests/test_notebook_cells.py` now executes the notebook's orchestration cells against stand-ins for the GPU processes, the check the module tests could not make. |
 
 Approaches that have been tried and did not beat the base in thinking mode:
 the run 2 and run 3 data mixes (external traces, 75/25), at rank 64 and

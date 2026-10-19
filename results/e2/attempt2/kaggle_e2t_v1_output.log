@@ -1,0 +1,304 @@
+[{"stream_name":"stderr","time":6.51199112,"data":"/usr/local/lib/python3.13/dist-packages/nbformat/validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":6.512037018,"data":"  _validate(nbdict, ref, version, version_minor, relax_add_props)\n"}
+,{"stream_name":"stderr","time":7.457205379,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.457233627,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.457238854,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.457242868,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.056627274,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.056655796,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.056660062,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.056665419,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":16.125911566,"data":"GPU 0      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":16.125942899,"data":"GPU 1      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":16.125957529,"data":"capability : 7.5\n"}
+,{"stream_name":"stdout","time":16.125960134,"data":"torch      : 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":16.125962455,"data":"\n"}
+,{"stream_name":"stdout","time":16.125964735,"data":"2 GPU(s). E2 trains on GPU 0 and evaluates on all of them.\n"}
+,{"stream_name":"stdout","time":55.066450382,"data":"ok | unsloth 2026.9.7 | transformers 5.5.0 | trl 0.24.0 | peft 0.19.1 | torch 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":84.970435311,"data":"ok | peft can wrap a layer on this image\n"}
+,{"stream_name":"stdout","time":109.776513247,"data":"ok | SFTConfig accepts train_sampling_strategy\n"}
+,{"stream_name":"stdout","time":110.436696587,"data":"code: /kaggle/input/datasets/gb1105/medical-ft-code\n"}
+,{"stream_name":"stdout","time":110.436739518,"data":"data: /kaggle/input/datasets/gb1105/medical-ft-data-v3\n"}
+,{"stream_name":"stdout","time":110.436760496,"data":"{\"dev_medqa\": 300, \"dev_medmcqa\": 300, \"pool\": 6000}\n"}
+,{"stream_name":"stdout","time":110.5383527,"data":"E2 training set: /kaggle/input/datasets/gb1105/medical-ft-data-e2\n"}
+,{"stream_name":"stderr","time":111.308129673,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":111.308169292,"data":"\n"}
+,{"stream_name":"stderr","time":111.30817509,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":141.122899162,"data":"unsloth/Qwen3-4B at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B/snapshots/64033659d5caf1b8ed7f929b29de705e93a4d468\n"}
+,{"stream_name":"stdout","time":153.561927802,"data":"unsloth/Qwen3-4B-unsloth-bnb-4bit at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B-unsloth-bnb-4bit/snapshots/bbe12ebf9362b3bcbf44e826e4c98910f2c02e72\n"}
+,{"stream_name":"stdout","time":172.044415781,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.3/17.3 MB 81.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":172.044455391,"data":"\n"}
+,{"stream_name":"stdout","time":172.044459549,"data":"warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?\n"}
+,{"stream_name":"stdout","time":172.044462714,"data":"Using CPython 3.13.15 interpreter at: /usr/bin/python3\n"}
+,{"stream_name":"stdout","time":172.044465805,"data":"Creating virtual environment at: /tmp/vllm-env\n"}
+,{"stream_name":"stdout","time":172.044468655,"data":"Activate with: source /tmp/vllm-env/bin/activate\n"}
+,{"stream_name":"stdout","time":172.044471494,"data":"\n"}
+,{"stream_name":"stdout","time":222.585046211,"data":"=0.65.0\n"}
+,{"stream_name":"stdout","time":222.58508525,"data":" + numpy==2.4.6\n"}
+,{"stream_name":"stdout","time":222.585098366,"data":" + nvidia-cublas==13.4.0.1\n"}
+,{"stream_name":"stdout","time":222.585102379,"data":" + nvidia-cuda-cccl==13.3.4.3.1\n"}
+,{"stream_name":"stdout","time":222.585105622,"data":" + nvidia-cuda-crt==13.4.92\n"}
+,{"stream_name":"stdout","time":222.585108823,"data":" + nvidia-cuda-cupti==13.2.75\n"}
+,{"stream_name":"stdout","time":222.585111941,"data":" + nvidia-cuda-nvcc==13.4.92\n"}
+,{"stream_name":"stdout","time":222.585114976,"data":" + nvidia-cuda-nvrtc==13.2.78\n"}
+,{"stream_name":"stdout","time":222.585117918,"data":" + nvidia-cuda-runtime==13.2.75\n"}
+,{"stream_name":"stdout","time":222.585120959,"data":" + nvidia-cudnn-cu13==9.20.0.48\n"}
+,{"stream_name":"stdout","time":222.585123947,"data":" + nvidia-cudnn-frontend==1.31.0\n"}
+,{"stream_name":"stdout","time":222.585126844,"data":" + nvidia-cufft==12.2.0.46\n"}
+,{"stream_name":"stdout","time":222.585129711,"data":" + nvidia-cufile==1.17.1.22\n"}
+,{"stream_name":"stdout","time":222.585132832,"data":" + nvidia-curand==10.4.2.55\n"}
+,{"stream_name":"stdout","time":222.585135705,"data":" + nvidia-cusolver==12.2.0.1\n"}
+,{"stream_name":"stdout","time":222.585138588,"data":" + nvidia-cusparse==12.7.10.1\n"}
+,{"stream_name":"stdout","time":222.585141502,"data":" + nvidia-cusparselt-cu13==0.8.1\n"}
+,{"stream_name":"stdout","time":222.585144462,"data":" + nvidia-cutlass-dsl==4.8.0\n"}
+,{"stream_name":"stdout","time":222.585147963,"data":" + nvidia-cutlass-dsl-libs-base==4.8.0\n"}
+,{"stream_name":"stdout","time":222.585151078,"data":" + nvidia-cutlass-dsl-libs-core==4.8.0\n"}
+,{"stream_name":"stdout","time":222.585154019,"data":" + nvidia-cutlass-dsl-libs-cu12==4.8.0\n"}
+,{"stream_name":"stdout","time":222.585156997,"data":" + nvidia-cutlass-dsl-libs-cu13==4.8.0\n"}
+,{"stream_name":"stdout","time":222.585159889,"data":" + nvidia-ml-py==13.615.71\n"}
+,{"stream_name":"stdout","time":222.585162763,"data":" + nvidia-nccl-cu13==2.29.7\n"}
+,{"stream_name":"stdout","time":222.585165645,"data":" + nvidia-nvjitlink==13.4.92\n"}
+,{"stream_name":"stdout","time":222.585168587,"data":" + nvidia-nvshmem-cu13==3.4.5\n"}
+,{"stream_name":"stdout","time":222.585171468,"data":" + nvidia-nvtx==13.2.75\n"}
+,{"stream_name":"stdout","time":222.585174348,"data":" + nvidia-nvvm==13.4.92\n"}
+,{"stream_name":"stdout","time":222.585177192,"data":" + nvtx==0.2.15\n"}
+,{"stream_name":"stdout","time":222.585180127,"data":" + openai==3.35.1\n"}
+,{"stream_name":"stdout","time":222.585183,"data":" + opencv-python-headless==5.0.0.93\n"}
+,{"stream_name":"stdout","time":222.585185963,"data":" + opentelemetry-api==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585195531,"data":" + opentelemetry-exporter-http-transport==0.66b1\n"}
+,{"stream_name":"stdout","time":222.585198169,"data":" + opentelemetry-exporter-otlp==1.45.1\n"}
+,{"stream_name":"stdout","time":222.58520048,"data":" + opentelemetry-exporter-otlp-common==0.66b1\n"}
+,{"stream_name":"stdout","time":222.585202815,"data":" + opentelemetry-exporter-otlp-proto-common==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585205162,"data":" + opentelemetry-exporter-otlp-proto-grpc==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585207561,"data":" + opentelemetry-exporter-otlp-proto-http==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585209894,"data":" + opentelemetry-proto==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585212217,"data":" + opentelemetry-sdk==1.45.1\n"}
+,{"stream_name":"stdout","time":222.585214475,"data":" + opentelemetry-semantic-conventions==0.66b1\n"}
+,{"stream_name":"stdout","time":222.585216848,"data":" + opentelemetry-semantic-conventions-ai==0.5.1\n"}
+,{"stream_name":"stdout","time":222.585219164,"data":" + oss-harmony==0.0.11\n"}
+,{"stream_name":"stdout","time":222.585221425,"data":" + outlines-core==0.2.14\n"}
+,{"stream_name":"stdout","time":222.585223701,"data":" + packaging==26.3\n"}
+,{"stream_name":"stdout","time":222.585226033,"data":" + partial-json-parser==0.2.1.1.post7\n"}
+,{"stream_name":"stdout","time":222.585228376,"data":" + pillow==13.0.0\n"}
+,{"stream_name":"stdout","time":222.585230649,"data":" + prometheus-client==0.26.0\n"}
+,{"stream_name":"stdout","time":222.585233067,"data":" + prometheus-fastapi-instrumentator==8.1.0\n"}
+,{"stream_name":"stdout","time":222.585235447,"data":" + propcache==0.5.4\n"}
+,{"stream_name":"stdout","time":222.585237708,"data":" + protobuf==7.36.2\n"}
+,{"stream_name":"stdout","time":222.585239962,"data":" + psutil==7.2.2\n"}
+,{"stream_name":"stdout","time":222.585242225,"data":" + py-cpuinfo==9.0.0\n"}
+,{"stream_name":"stdout","time":222.585244493,"data":" + pybase64==1.5.1\n"}
+,{"stream_name":"stdout","time":222.585246745,"data":" + pycountry==26.2.16\n"}
+,{"stream_name":"stdout","time":222.585249031,"data":" + pycparser==3.11\n"}
+,{"stream_name":"stdout","time":222.585251274,"data":" + pydantic==2.14.1\n"}
+,{"stream_name":"stdout","time":222.585253525,"data":" + pydantic-core==2.50.1\n"}
+,{"stream_name":"stdout","time":222.585255796,"data":" + pydantic-extra-types==2.11.1\n"}
+,{"stream_name":"stdout","time":222.585258095,"data":" + pydantic-settings==2.16.0\n"}
+,{"stream_name":"stdout","time":222.585260347,"data":" + pygments==2.21.0\n"}
+,{"stream_name":"stdout","time":222.585262607,"data":" + pyjwt==2.15.1\n"}
+,{"stream_name":"stdout","time":222.585264854,"data":" + pynvvideocodec==2.0.4\n"}
+,{"stream_name":"stdout","time":222.585267111,"data":" + python-dotenv==1.2.4\n"}
+,{"stream_name":"stdout","time":222.585269379,"data":" + python-json-logger==4.2.0\n"}
+,{"stream_name":"stdout","time":222.585271647,"data":" + python-multipart==0.0.32\n"}
+,{"stream_name":"stdout","time":222.585273929,"data":" + pyyaml==6.0.3\n"}
+,{"stream_name":"stdout","time":222.585276187,"data":" + pyzmq==27.2.0\n"}
+,{"stream_name":"stdout","time":222.585278439,"data":" + quack-kernels==0.6.5\n"}
+,{"stream_name":"stdout","time":222.58528069,"data":" + referencing==0.37.0\n"}
+,{"stream_name":"stdout","time":222.585282977,"data":" + regex==2026.9.29\n"}
+,{"stream_name":"stdout","time":222.585287234,"data":" + requests==2.34.2\n"}
+,{"stream_name":"stdout","time":222.585289586,"data":" + rich==15.0.0\n"}
+,{"stream_name":"stdout","time":222.585294227,"data":" + rich-toolkit==0.20.6\n"}
+,{"stream_name":"stdout","time":222.585296565,"data":" + rignore==0.8.1\n"}
+,{"stream_name":"stdout","time":222.585298819,"data":" + rpds-py==2026.9.1\n"}
+,{"stream_name":"stdout","time":222.585301079,"data":" + safetensors==0.8.0\n"}
+,{"stream_name":"stdout","time":222.585303326,"data":" + sentencepiece==0.2.2\n"}
+,{"stream_name":"stdout","time":222.58530559,"data":" + sentry-sdk==2.72.0\n"}
+,{"stream_name":"stdout","time":222.585307859,"data":" + setproctitle==1.3.8\n"}
+,{"stream_name":"stdout","time":222.585310126,"data":" + setuptools==80.10.2\n"}
+,{"stream_name":"stdout","time":222.585312363,"data":" + shellingham==1.5.4\n"}
+,{"stream_name":"stdout","time":222.58531473,"data":" + six==1.17.0\n"}
+,{"stream_name":"stdout","time":222.58531699,"data":" + sniffio==1.3.1\n"}
+,{"stream_name":"stdout","time":222.585319237,"data":" + sse-starlette==3.5.0\n"}
+,{"stream_name":"stdout","time":222.585321499,"data":" + starlette==1.9.0\n"}
+,{"stream_name":"stdout","time":222.585323756,"data":" + supervisor==4.3.0\n"}
+,{"stream_name":"stdout","time":222.585326019,"data":" + sympy==1.14.0\n"}
+,{"stream_name":"stdout","time":222.585328426,"data":" + tabulate==0.10.0\n"}
+,{"stream_name":"stdout","time":222.585330685,"data":" + tiktoken==0.14.0\n"}
+,{"stream_name":"stdout","time":222.585332939,"data":" + tilelang==0.1.12\n"}
+,{"stream_name":"stdout","time":222.585335179,"data":" + tokenizers==0.23.3\n"}
+,{"stream_name":"stdout","time":222.585337471,"data":" + tokenspeed-mla==0.2.15\n"}
+,{"stream_name":"stdout","time":222.585339794,"data":" + tokenspeed-triton==3.9.10.post20261008\n"}
+,{"stream_name":"stdout","time":222.585342108,"data":" + torch==2.13.0+cu132\n"}
+,{"stream_name":"stdout","time":222.585344375,"data":" + torch-c-dlpack-ext==0.1.5\n"}
+,{"stream_name":"stdout","time":222.585346653,"data":" + torchaudio==2.11.0+cpu\n"}
+,{"stream_name":"stdout","time":222.585348961,"data":" + torchcodec==0.17.0+cu132\n"}
+,{"stream_name":"stdout","time":222.585351242,"data":" + torchvision==0.28.0+cu132\n"}
+,{"stream_name":"stdout","time":222.585353516,"data":" + tqdm==4.70.1\n"}
+,{"stream_name":"stdout","time":222.585355741,"data":" + transformers==5.19.0\n"}
+,{"stream_name":"stdout","time":222.585358017,"data":" + triton==3.7.1\n"}
+,{"stream_name":"stdout","time":222.58536025,"data":" + truststore==0.10.5\n"}
+,{"stream_name":"stdout","time":222.585362505,"data":" + typer==0.27.3\n"}
+,{"stream_name":"stdout","time":222.585403377,"data":" + typing-extensions==4.16.0\n"}
+,{"stream_name":"stdout","time":222.585410653,"data":" + typing-inspection==0.4.4\n"}
+,{"stream_name":"stdout","time":222.585414703,"data":" + urllib3==2.8.0\n"}
+,{"stream_name":"stdout","time":222.585418664,"data":" + uvicorn==0.54.0\n"}
+,{"stream_name":"stdout","time":222.585422027,"data":" + uvloop==0.23.0\n"}
+,{"stream_name":"stdout","time":222.585425871,"data":" + vllm==0.32.0\n"}
+,{"stream_name":"stdout","time":222.585429271,"data":" + watchfiles==1.3.0\n"}
+,{"stream_name":"stdout","time":222.585433115,"data":" + websockets==17.2\n"}
+,{"stream_name":"stdout","time":222.585436987,"data":" + xgrammar==0.2.8\n"}
+,{"stream_name":"stdout","time":222.585440408,"data":" + yarl==1.25.1\n"}
+,{"stream_name":"stdout","time":222.585443851,"data":" + z3-solver==4.15.4.0\n"}
+,{"stream_name":"stdout","time":222.585458654,"data":"\n"}
+,{"stream_name":"stdout","time":222.585463303,"data":"vLLM install ok in 69s\n"}
+,{"stream_name":"stderr","time":231.219649906,"data":"Exception in thread Thread-5:\n"}
+,{"stream_name":"stderr","time":231.219684629,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":231.219689535,"data":"  File \"/usr/lib/python3.13/threading.py\", line 1044, in _bootstrap_inner\n"}
+,{"stream_name":"stderr","time":231.219693056,"data":"    self.run()\n"}
+,{"stream_name":"stderr","time":231.219696216,"data":"    ~~~~~~~~^^\n"}
+,{"stream_name":"stderr","time":231.21969932,"data":"  File \"/usr/local/lib/python3.13/dist-packages/tqdm/_monitor.py\", line 69, in run\n"}
+,{"stream_name":"stderr","time":231.219702603,"data":"    instances = self.get_instances()\n"}
+,{"stream_name":"stderr","time":231.219706045,"data":"  File \"/usr/local/lib/python3.13/dist-packages/tqdm/_monitor.py\", line 49, in get_instances\n"}
+,{"stream_name":"stderr","time":231.219709594,"data":"    return [i for i in self.tqdm_cls._instances.copy()\n"}
+,{"stream_name":"stderr","time":231.219713178,"data":"                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n"}
+,{"stream_name":"stderr","time":231.219717003,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 96, in copy\n"}
+,{"stream_name":"stderr","time":231.219721184,"data":"    return self.__class__(self)\n"}
+,{"stream_name":"stderr","time":231.219725114,"data":"           ~~~~~~~~~~~~~~^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219729058,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 51, in __init__\n"}
+,{"stream_name":"stderr","time":231.219732858,"data":"    self.update(data)\n"}
+,{"stream_name":"stderr","time":231.219736334,"data":"    ~~~~~~~~~~~^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219740067,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 123, in update\n"}
+,{"stream_name":"stderr","time":231.219744185,"data":"    for element in other:\n"}
+,{"stream_name":"stderr","time":231.219748086,"data":"                   ^^^^^\n"}
+,{"stream_name":"stderr","time":231.219751523,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 65, in __iter__\n"}
+,{"stream_name":"stderr","time":231.219755469,"data":"    for itemref in self.data:\n"}
+,{"stream_name":"stderr","time":231.21975922,"data":"                   ^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219763143,"data":"RuntimeError: Set changed size during iteration\n"}
+,{"stream_name":"stderr","time":231.21976695,"data":"\n"}
+,{"stream_name":"stderr","time":231.219770475,"data":"Exception in thread Thread-5:\n"}
+,{"stream_name":"stderr","time":231.219774095,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":231.219777648,"data":"  File \"/usr/lib/python3.13/threading.py\", line 1044, in _bootstrap_inner\n"}
+,{"stream_name":"stderr","time":231.219781758,"data":"    self.run()\n"}
+,{"stream_name":"stderr","time":231.219785033,"data":"    ~~~~~~~~^^\n"}
+,{"stream_name":"stderr","time":231.219788785,"data":"  File \"/usr/local/lib/python3.13/dist-packages/tqdm/_monitor.py\", line 69, in run\n"}
+,{"stream_name":"stderr","time":231.219792067,"data":"    instances = self.get_instances()\n"}
+,{"stream_name":"stderr","time":231.21979528,"data":"  File \"/usr/local/lib/python3.13/dist-packages/tqdm/_monitor.py\", line 49, in get_instances\n"}
+,{"stream_name":"stderr","time":231.219799201,"data":"    return [i for i in self.tqdm_cls._instances.copy()\n"}
+,{"stream_name":"stderr","time":231.219803248,"data":"                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n"}
+,{"stream_name":"stderr","time":231.21980712,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 96, in copy\n"}
+,{"stream_name":"stderr","time":231.219811116,"data":"    return self.__class__(self)\n"}
+,{"stream_name":"stderr","time":231.21981477,"data":"           ~~~~~~~~~~~~~~^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219823356,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 51, in __init__\n"}
+,{"stream_name":"stderr","time":231.219827813,"data":"    self.update(data)\n"}
+,{"stream_name":"stderr","time":231.219831452,"data":"    ~~~~~~~~~~~^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219835171,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 123, in update\n"}
+,{"stream_name":"stderr","time":231.219839168,"data":"    for element in other:\n"}
+,{"stream_name":"stderr","time":231.219842716,"data":"                   ^^^^^\n"}
+,{"stream_name":"stderr","time":231.219846296,"data":"  File \"/usr/lib/python3.13/_weakrefset.py\", line 65, in __iter__\n"}
+,{"stream_name":"stderr","time":231.219849789,"data":"    for itemref in self.data:\n"}
+,{"stream_name":"stderr","time":231.219853336,"data":"                   ^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":231.219857126,"data":"RuntimeError: Set changed size during iteration\n"}
+,{"stream_name":"stdout","time":429.450915592,"data":"pturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:06\u003c00:01,  8.88it/s]\n"}
+,{"stream_name":"stdout","time":429.45097621,"data":"Capturing CUDA graphs (PIECEWISE):  73%|███████▎  | 37/51 [00:06\u003c00:01,  9.15it/s]\n"}
+,{"stream_name":"stdout","time":429.45098257,"data":"Capturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:06\u003c00:01,  9.21it/s]\n"}
+,{"stream_name":"stdout","time":429.450987535,"data":"Capturing CUDA graphs (PIECEWISE):  76%|███████▋  | 39/51 [00:06\u003c00:01,  9.29it/s]\n"}
+,{"stream_name":"stdout","time":429.450992343,"data":"Capturing CUDA graphs (PIECEWISE):  80%|████████  | 41/51 [00:06\u003c00:01,  9.94it/s]\n"}
+,{"stream_name":"stdout","time":429.450997046,"data":"Capturing CUDA graphs (PIECEWISE):  84%|████████▍ | 43/51 [00:06\u003c00:00, 10.43it/s]\n"}
+,{"stream_name":"stdout","time":429.45100168,"data":"Capturing CUDA graphs (PIECEWISE):  88%|████████▊ | 45/51 [00:06\u003c00:00, 10.74it/s]\n"}
+,{"stream_name":"stdout","time":429.451007213,"data":"Capturing CUDA graphs (PIECEWISE):  92%|█████████▏| 47/51 [00:07\u003c00:00, 11.00it/s]\n"}
+,{"stream_name":"stdout","time":429.451011853,"data":"Capturing CUDA graphs (PIECEWISE):  96%|█████████▌| 49/51 [00:07\u003c00:00, 11.37it/s]\n"}
+,{"stream_name":"stdout","time":429.451016722,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:07\u003c00:00, 11.79it/s]\n"}
+,{"stream_name":"stdout","time":429.451021474,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:07\u003c00:00,  6.84it/s]\n"}
+,{"stream_name":"stdout","time":429.451026433,"data":"\n"}
+,{"stream_name":"stdout","time":429.451030463,"data":"Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":429.451034823,"data":"Capturing CUDA graphs (FULL):   3%|▎         | 1/35 [00:00\u003c00:04,  8.05it/s]\n"}
+,{"stream_name":"stdout","time":429.451039225,"data":"Capturing CUDA graphs (FULL):   6%|▌         | 2/35 [00:00\u003c00:04,  7.94it/s]\n"}
+,{"stream_name":"stdout","time":429.45104377,"data":"Capturing CUDA graphs (FULL):   9%|▊         | 3/35 [00:00\u003c00:04,  7.97it/s]\n"}
+,{"stream_name":"stdout","time":429.451048133,"data":"Capturing CUDA graphs (FULL):  11%|█▏        | 4/35 [00:00\u003c00:03,  8.06it/s]\n"}
+,{"stream_name":"stdout","time":429.451052976,"data":"Capturing CUDA graphs (FULL):  14%|█▍        | 5/35 [00:00\u003c00:03,  8.07it/s]\n"}
+,{"stream_name":"stdout","time":429.451067249,"data":"Capturing CUDA graphs (FULL):  17%|█▋        | 6/35 [00:00\u003c00:03,  8.18it/s]\n"}
+,{"stream_name":"stdout","time":429.451072075,"data":"Capturing CUDA graphs (FULL):  20%|██        | 7/35 [00:00\u003c00:03,  8.30it/s]\n"}
+,{"stream_name":"stdout","time":429.451075823,"data":"Capturing CUDA graphs (FULL):  23%|██▎       | 8/35 [00:00\u003c00:03,  8.33it/s]\n"}
+,{"stream_name":"stdout","time":429.451079431,"data":"Capturing CUDA graphs (FULL):  26%|██▌       | 9/35 [00:01\u003c00:03,  8.56it/s]\n"}
+,{"stream_name":"stdout","time":429.451083069,"data":"Capturing CUDA graphs (FULL):  29%|██▊       | 10/35 [00:01\u003c00:02,  8.75it/s]\n"}
+,{"stream_name":"stdout","time":429.451092346,"data":"Capturing CUDA graphs (FULL):  31%|███▏      | 11/35 [00:01\u003c00:02,  8.92it/s]\n"}
+,{"stream_name":"stdout","time":429.451096505,"data":"Capturing CUDA graphs (FULL):  34%|███▍      | 12/35 [00:01\u003c00:02,  9.02it/s]\n"}
+,{"stream_name":"stdout","time":429.451100166,"data":"Capturing CUDA graphs (FULL):  37%|███▋      | 13/35 [00:01\u003c00:02,  9.19it/s]\n"}
+,{"stream_name":"stdout","time":429.451104436,"data":"Capturing CUDA graphs (FULL):  40%|████      | 14/35 [00:01\u003c00:02,  9.34it/s]\n"}
+,{"stream_name":"stdout","time":429.451108418,"data":"Capturing CUDA graphs (FULL):  43%|████▎     | 15/35 [00:01\u003c00:02,  9.50it/s]\n"}
+,{"stream_name":"stdout","time":429.45111223,"data":"Capturing CUDA graphs (FULL):  46%|████▌     | 16/35 [00:01\u003c00:01,  9.59it/s]\n"}
+,{"stream_name":"stdout","time":429.451116052,"data":"Capturing CUDA graphs (FULL):  51%|█████▏    | 18/35 [00:01\u003c00:01, 10.30it/s]\n"}
+,{"stream_name":"stdout","time":429.451119449,"data":"Capturing CUDA graphs (FULL):  57%|█████▋    | 20/35 [00:02\u003c00:01, 10.77it/s]\n"}
+,{"stream_name":"stdout","time":429.451122929,"data":"Capturing CUDA graphs (FULL):  63%|██████▎   | 22/35 [00:02\u003c00:01, 11.19it/s]\n"}
+,{"stream_name":"stdout","time":429.451126559,"data":"Capturing CUDA graphs (FULL):  69%|██████▊   | 24/35 [00:02\u003c00:00, 11.54it/s]\n"}
+,{"stream_name":"stdout","time":429.451130103,"data":"Capturing CUDA graphs (FULL):  74%|███████▍  | 26/35 [00:02\u003c00:00, 11.91it/s]\n"}
+,{"stream_name":"stdout","time":429.451133708,"data":"Capturing CUDA graphs (FULL):  80%|████████  | 28/35 [00:02\u003c00:00, 12.17it/s]\n"}
+,{"stream_name":"stdout","time":429.451137339,"data":"Capturing CUDA graphs (FULL):  86%|████████▌ | 30/35 [00:02\u003c00:00, 12.72it/s]\n"}
+,{"stream_name":"stdout","time":429.451140735,"data":"Capturing CUDA graphs (FULL):  91%|█████████▏| 32/35 [00:03\u003c00:00, 13.45it/s]\n"}
+,{"stream_name":"stdout","time":429.451144318,"data":"Capturing CUDA graphs (FULL):  97%|█████████▋| 34/35 [00:03\u003c00:00, 14.13it/s]\n"}
+,{"stream_name":"stdout","time":429.451147761,"data":"Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:03\u003c00:00, 10.70it/s]\n"}
+,{"stream_name":"stdout","time":429.451151366,"data":"\n"}
+,{"stream_name":"stdout","time":429.451154544,"data":"vLLM 0.32.0 smoke passed: {'letter:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 1.5}, 'reasoning:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 14.1}}\n"}
+,{"stream_name":"stdout","time":429.451166457,"data":"ENGINE = vllm\n"}
+,{"stream_name":"stdout","time":449.484556944,"data":"07:06 answers written: 0\n"}
+,{"stream_name":"stdout","time":469.487735317,"data":"07:07 answers written: 0\n"}
+,{"stream_name":"stdout","time":489.487005177,"data":"07:07 answers written: 0\n"}
+,{"stream_name":"stdout","time":509.491162607,"data":"07:07 answers written: 0\n"}
+,{"stream_name":"stdout","time":529.490330881,"data":"07:08 answers written: 0\n"}
+,{"stream_name":"stdout","time":549.496579467,"data":"07:08 answers written: 0\n"}
+,{"stream_name":"stdout","time":569.494156379,"data":"07:08 answers written: 18\n"}
+,{"stream_name":"stdout","time":569.495720953,"data":"--- outputs/smoke/base_eval GPU 1 log tail ---\n"}
+,{"stream_name":"stdout","time":569.495743279,"data":"base letter:dev_medmcqa: 2/2 done in 0s\n"}
+,{"stream_name":"stdout","time":569.495749017,"data":"base letter:medqa: 2/2 done in 0s\n"}
+,{"stream_name":"stdout","time":569.495754343,"data":"base letter:medmcqa: 2/2 done in 0s\n"}
+,{"stream_name":"stdout","time":569.495759325,"data":"base letter:pubmedqa: 2/2 done in 0s\n"}
+,{"stream_name":"stdout","time":569.495764177,"data":"base letter:mmlu_medical: 2/2 done in 0s\n"}
+,{"stream_name":"stdout","time":569.495769077,"data":"base reasoning:medqa: 2/2 done in 3s\n"}
+,{"stream_name":"stdout","time":569.495774059,"data":"(MainProcess pid=546) INFO 10-19 07:08:37 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore\n"}
+,{"stream_name":"stdout","time":569.495778937,"data":"(EngineCore pid=567) INFO 10-19 07:08:37 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":569.495783807,"data":"(EngineCore pid=567) INFO 10-19 07:08:37 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":569.495788511,"data":"(EngineCore pid=567) INFO 10-19 07:08:37 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":569.495793153,"data":"(EngineCore pid=567) INFO 10-19 07:08:37 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":569.495797797,"data":"base (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":569.495802053,"data":"\n"}
+,{"stream_name":"stdout","time":569.495806355,"data":"smoke runs passed: {'base_eval1': 0}\n"}
+,{"stream_name":"stdout","time":569.522493131,"data":"3,978 rows, max_seq 3968; training stops by itself after 4.00h at the latest\n"}
+,{"stream_name":"stdout","time":569.522519482,"data":"$ python -m training.train --format v2 --data data/e2 --out outputs/e2_adapter --max-seq 3968 --batch-size 1 --grad-accum 16 --rank 16 --lr 5e-05 --epochs 1 --save-steps 100 --group-by-length --probe-steps 20 --no-probe-abort --stop-after-seconds 14400\n"}
+,{"stream_name":"stderr","time":572.366443232,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":572.367193872,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":572.367218193,"data":"    import sys;import papermill as pm;pm.execute_notebook(\"__notebook__.ipynb\",\"__notebook__.ipynb\",progress_bar=False,log_output=True,stdout_file=sys.stdout,stderr_file=sys.stderr,allow_errors=False,timeout=43200)\n"}
+,{"stream_name":"stderr","time":572.367227162,"data":"                                      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":572.367233512,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":572.367239414,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":572.36724487,"data":"    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":572.367261104,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":572.367266638,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":572.36727117,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":572.367275354,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":572.36728012,"data":"Exception encountered at \"In [8]\":\n"}
+,{"stream_name":"stderr","time":572.367285042,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":572.367289637,"data":"FileNotFoundError                         Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":572.367294793,"data":"/tmp/ipykernel_23/107539794.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":572.367300087,"data":"     22 # GPU 1 scores the base model meanwhile: dev, letters, then MedQA reasoning,\n"}
+,{"stream_name":"stderr","time":572.367305254,"data":"     23 # stopping an hour before the end so E2's letter stages still fit after it.\n"}
+,{"stream_name":"stderr","time":572.367310297,"data":"---\u003e 24 base_procs = ({1: phase(\"base_eval\", 1, \"outputs/e2/base_eval\",\n"}
+,{"stream_name":"stderr","time":572.367315741,"data":"     25                         f\"--deadline {DEADLINE - 3600:.0f}\")} if N_GPUS \u003e 1 else {})\n"}
+,{"stream_name":"stderr","time":572.367321332,"data":"     26 while trainer.poll() is None:\n"}
+,{"stream_name":"stderr","time":572.367326167,"data":"\n"}
+,{"stream_name":"stderr","time":572.367330878,"data":"/tmp/ipykernel_23/308821074.py in phase(name, gpu, out, extra, device)\n"}
+,{"stream_name":"stderr","time":572.367335849,"data":"     11            f\"--out-dir {out}/gpu{gpu} --eval-dir data/v3 --engine {ENGINE} \"\n"}
+,{"stream_name":"stderr","time":572.367341125,"data":"     12            f\"--vllm-python {VLLM_PY}{VLLM_EAGER} {extra}\")\n"}
+,{"stream_name":"stderr","time":572.367346704,"data":"---\u003e 13     log = open(f\"{out}-gpu{gpu}.log\", \"w\")\n"}
+,{"stream_name":"stderr","time":572.36735202,"data":"     14     # Its own process group, so stopping it also stops the worker it started.\n"}
+,{"stream_name":"stderr","time":572.367357138,"data":"     15     return subprocess.Popen(argv(cmd), stdout=log, stderr=subprocess.STDOUT,\n"}
+,{"stream_name":"stderr","time":572.367361967,"data":"\n"}
+,{"stream_name":"stderr","time":572.36739534,"data":"FileNotFoundError: [Errno 2] No such file or directory: 'outputs/e2/base_eval-gpu1.log'\n"}
+,{"stream_name":"stderr","time":572.367401087,"data":"\n"}
+,{"stream_name":"stderr","time":574.673579542,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":574.673621167,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":574.856254197,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":574.856281034,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":575.65999494,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":575.752284982,"data":"[NbConvertApp] Writing 121063 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":578.317334469,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":578.937161591,"data":"[NbConvertApp] Writing 452595 bytes to __results__.html\n"}
+]
