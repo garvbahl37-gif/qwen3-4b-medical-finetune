@@ -12,7 +12,7 @@ numbers come from that CSV.
 | run3 | `/think` and `/no_think` added | done 2026-10-01; frozen (tags `run3-train`, `run3-eval`) | **69.7 → 60.2** (1,273 questions) | 57.0 → 58.4 | thinks on every question, but shorter and worse |
 | E0 | baseline at a 3,072 budget: base, run 3 fp16, run 3 4-bit; 2 MedQA samples | configured, not run | — | — | superseded in part by E2's in-session base evaluation |
 | E1 | gentle SFT: lr 2e-5, rank 16, same v2 data | not built | — | — | lower priority than E2 (decisions D2) |
-| E2 | SFT on the base model's own gold-verified reasoning (v3 pool) | attempt 1 (code d3ed0cd): generation done, training failed on an offline tokenizer lookup. **Attempt 2 launched 2026-10-19** from the saved traces (`gb1105/qwen3-4b-medical-e2-train-and-evaluate`, code d60735e) | pending | pending | 4,608 completions, 69% verified, 3,182 traces; selection on the dev split |
+| E2 | SFT on the base model's own gold-verified reasoning (v3 pool; 3,182 traces + 796 answer-only rows), rank 16, lr 5e-5 | **done 2026-10-19** (generation d3ed0cd; training and evaluation e2t v2, ce5206d) | **70.9 → 71.0** (1,273 questions, budget 3,072, vLLM; p 0.94). Dev MedQA 70.0 → 69.0 (p 0.76) | 57.0 → 58.4 (p 0.14) | **tie**: repairs run 3's damage but adds no accuracy; thinking −7% to −21%. The base stays the best model. |
 
 Model selection rule: a candidate must beat the base on the dev split, with
 no meaningful loss on any benchmark and no collapse in thinking length,

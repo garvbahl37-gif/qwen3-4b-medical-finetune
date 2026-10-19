@@ -12,3 +12,5 @@
 | D8 | 2026-10-19 | Keep **20% answer-only rows** in E2 | Unsloth's 75/25 guidance [docs]; letter mode is also reported | slight dilution of thinking rows |
 | D9 | 2026-10-19 | No GRPO until E2 reports | the earlier plan's rule; AlphaMed's compute is far above a T4 [paper] | a delay, if RL would have been the winner |
 | D10 | 2026-10-19 | The HF token pasted in chat is **not used or stored** | public models and datasets need no token | none; rotate it |
+| D11 | 2026-10-19 | **The base model stays the best model**; the E2 adapter is kept (`training/outputs/e2`) but not adopted | E2 failed its pre-registered success criterion on dev (−1.0 and −1.3 points, not significant) and is level on the MedQA test (+0.2) | none: the selection rule says to keep the base until a candidate wins on dev |
+| D12 | 2026-10-19 | Next: self-consistency (H3), then a GRPO pilot on partially solved questions (H5). Not more E2-style SFT. | E2 trained only on already-solved questions and added nothing; vLLM makes multi-sample work affordable on a T4 [measured] | one session each |

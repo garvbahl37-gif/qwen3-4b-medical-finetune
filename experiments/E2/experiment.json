@@ -1,6 +1,6 @@
 {
   "experiment_id": "E2",
-  "status": "attempt 1 (code d3ed0cd): generation and selection done, training failed before step 1 (offline tokenizer lookup). Attempt 2, e2t version 1 (d60735e): died 10 minutes in on a missing output folder. e2t version 2 (notebook ce5206d, same training code) launched 2026-10-19 12:43 IST; results pending",
+  "status": "complete 2026-10-19 (e2t version 2, notebook ce5206d). Generation in attempt 1 (d3ed0cd); training 249 steps, 1.86 h, full epoch; every evaluation stage scored for both models with vLLM 0.32.0",
   "git_commit": "d60735e",
   "dataset_version": "v3: 6,000-question pool (4,000 MedQA train, 2,000 MedMCQA train) and 600-question dev split, decontaminated against all four benchmarks, data fingerprint f102ed1e8991077c (data/v3/data_report.json)",
   "hypothesis": "Fine-tuning on the base model's own gold-verified reasoning keeps its native thinking (length within about 20% of the base) and does not lose accuracy, unlike run 3's foreign traces. Success: E2 >= base on dev_medqa thinking-mode accuracy (paired), with median thinking within 20% of the base. Failure: E2 below the base on dev, or thinking that collapses as in run 3.",
@@ -39,7 +39,11 @@
     "download_to": "results/e2",
     "generation_kernel": "gb1105/qwen3-4b-medical-e2-self-distillation",
     "kaggle_traces": "gb1105/medical-ft-data-e2",
-    "generation": "results/e2/attempt1 (4,608 completions, traces report, logs)"
+    "generation": "results/e2/attempt1 (4,608 completions, traces report, logs)",
+    "train_stats": "results/e2/train_stats.json",
+    "loss_curve": "results/e2/loss_curve.json",
+    "adapter_sha256": "6ab79274945d0a92bc9080fde174e53c7ad3eaaa7ead2131c64a34ebad49489d",
+    "adapter_local_dir": "training/outputs/e2 (git-ignored)"
   },
   "evaluation": {
     "format": "v2_predictions",
@@ -60,7 +64,8 @@
           "results/e2/e2_eval_predictions/gpu1/e2"
         ]
       }
-    }
+    },
+    "bench_dir": "data/v3"
   },
   "notes": "Training stops by a time guard (at most 4 h); if it stops before the end of the epoch, the cosine schedule is cut short. Gold-letter filtering cannot catch right answers reached by wrong reasoning.",
   "git_commits": {
@@ -83,5 +88,73 @@
     "think_tokens_kept_median": 625,
     "max_seq": 3968,
     "engine": "vLLM 0.32.0"
+  },
+  "result": {
+    "verdict": "tie: no significant change on any stage; the pre-registered success criterion was not met (dev MedQA -1.0 points, dev thinking -21%); the base remains the best model",
+    "dev_medqa_reasoning": {
+      "base": 0.7,
+      "e2": 0.69,
+      "p": 0.755,
+      "ci95": [
+        -0.052,
+        0.032
+      ],
+      "n": 300
+    },
+    "dev_medmcqa_reasoning": {
+      "base": 0.69,
+      "e2": 0.677,
+      "p": 0.636,
+      "n": 300
+    },
+    "medqa_reasoning_test": {
+      "base": 0.7086,
+      "e2": 0.7101,
+      "p": 0.939,
+      "ci95": [
+        -0.019,
+        0.022
+      ],
+      "n": 1273
+    },
+    "letter": {
+      "medqa": [
+        0.5703,
+        0.5837
+      ],
+      "medmcqa": [
+        0.5472,
+        0.5391
+      ],
+      "pubmedqa": [
+        0.729,
+        0.722
+      ],
+      "mmlu_medical": [
+        0.7337,
+        0.7319
+      ]
+    },
+    "median_think_tokens": {
+      "medqa": [
+        879,
+        773
+      ],
+      "dev_medqa": [
+        867,
+        681
+      ],
+      "dev_medmcqa": [
+        517,
+        480
+      ]
+    },
+    "train": {
+      "steps": 249,
+      "runtime_h": 1.86,
+      "loss_first_logged": 0.347,
+      "loss_last_logged": 0.22,
+      "train_loss": 0.2412
+    }
   }
 }

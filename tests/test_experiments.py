@@ -101,3 +101,18 @@ def test_every_record_names_its_commit_and_data():
 def test_the_committed_csv_has_the_current_columns():
     with Path("experiments/results.csv").open() as fh:
         assert next(csv.reader(fh)) == COLUMNS
+
+
+def test_an_experiment_can_name_its_own_benchmark_dir_and_dev_scores_are_reported(tmp_path):
+    b = tmp_path / "v3"
+    recs = [Record(id=f"d{i}", source="medqa", kind="mcq", question=f"Q{i}",
+                   options={"A": "a", "B": "b"}, answer="A", rationale=None,
+                   response=None, subject="s") for i in range(2)]
+    write(b / "eval_dev_medqa.jsonl", [r.to_dict() for r in recs])
+    write(b / "eval_medqa.jsonl", [r.to_dict() for r in recs])
+    write(tmp_path / "p/base/reasoning__dev_medqa.jsonl",
+          [{"id": "d0", "letter": "A"}, {"id": "d1", "letter": "B"}])
+    exp = {"experiment_id": "E", "evaluation": {"format": "v2_predictions", "bench_dir": "v3",
+                                                 "models": {"base": {"dirs": ["p/base"]}}}}
+    (row,) = rows_for(exp, tmp_path, tmp_path / "no_such_dir")
+    assert row["dev_medqa_reasoning"] == 0.5 and row["n_dev_medqa"] == 2

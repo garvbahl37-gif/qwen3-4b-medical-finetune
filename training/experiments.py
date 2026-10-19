@@ -36,6 +36,8 @@ COLUMNS = [
     "medqa_reasoning_any_correct", "medqa_reasoning_majority", "medmcqa_letter", "pubmedqa_letter",
     "mmlu_medical_letter", "n_medqa_reasoning", "n_medmcqa", "n_pubmedqa",
     "n_mmlu_medical", "thinking_length_kind", "eval_protocol",
+    # The dev split (data/v3), which model selection reads from E2 on.
+    "dev_medqa_reasoning", "dev_medmcqa_reasoning", "n_dev_medqa", "n_dev_medmcqa",
 ]
 TRAINING_FIELDS = ("quantization", "lora_rank", "lora_alpha", "learning_rate", "epochs",
                    "batch_size", "gradient_accumulation", "max_seq_length",
@@ -47,9 +49,12 @@ STAGE_COLUMNS = {"medqa_reasoning": "reasoning:medqa", "medqa_letter": "letter:m
                  "medmcqa": "reasoning:medmcqa", "pubmedqa": "reasoning:pubmedqa",
                  "mmlu_medical": "reasoning:mmlu_medical",
                  "medmcqa_letter": "letter:medmcqa", "pubmedqa_letter": "letter:pubmedqa",
-                 "mmlu_medical_letter": "letter:mmlu_medical"}
+                 "mmlu_medical_letter": "letter:mmlu_medical",
+                 "dev_medqa_reasoning": "reasoning:dev_medqa",
+                 "dev_medmcqa_reasoning": "reasoning:dev_medmcqa"}
 N_COLUMNS = {"n_medqa_reasoning": "reasoning:medqa", "n_medmcqa": "reasoning:medmcqa",
-             "n_pubmedqa": "reasoning:pubmedqa", "n_mmlu_medical": "reasoning:mmlu_medical"}
+             "n_pubmedqa": "reasoning:pubmedqa", "n_mmlu_medical": "reasoning:mmlu_medical",
+             "n_dev_medqa": "reasoning:dev_medqa", "n_dev_medmcqa": "reasoning:dev_medmcqa"}
 # Run 1 predates the stage files: its evaluation JSON holds, per question,
 # a letter-choice prediction ("constrained") scored without a /no_think switch.
 V1_STAGES = {"eval_medqa.json": "letter:medqa", "eval_medmcqa.json": "letter:medmcqa"}
@@ -134,6 +139,10 @@ def train_loss(exp: dict, root: Path) -> float | None:
 
 
 def rows_for(exp: dict, root: Path, bench_dir: Path) -> list[dict]:
+    """`bench_dir` is the default; an experiment that was scored on other
+    files names them in evaluation.bench_dir (E2 adds the dev split)."""
+    own = (exp.get("evaluation") or {}).get("bench_dir")
+    bench_dir = root / own if own else bench_dir
     scores = score(exp, root, bench_dir) if (bench_dir / "eval_medqa.jsonl").exists() else {}
     training = exp.get("training") or {}
     ev = exp.get("evaluation") or {}

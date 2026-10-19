@@ -258,11 +258,25 @@ fetches and short reports.
       notebook's orchestration cells locally against stand-ins for the GPU
       processes.
 - [x] **e2t version 2 launched 2026-10-19 12:43 IST** (notebook ce5206d)
-- [ ] Download E2's output to `results/e2/`, run `training.eval_report` and
-      `training.experiments`, decide by the dev split (H1), and update the
-      knowledge base
-- [ ] If vLLM worked: measure H3 (majority vote of 5 samples) and H6 (agreement
-      between the two engines); then decide between E2 round 2 and a GRPO pilot
+- [x] **E2 complete (2026-10-19, 20:08 IST): a tie.** Base → E2:
+      | Stage | Base | E2 | p |
+      |---|---:|---:|---:|
+      | dev MedQA, reasoning | 70.0 | 69.0 | 0.76 |
+      | dev MedMCQA, reasoning | 69.0 | 67.7 | 0.64 |
+      | MedQA test, reasoning | 70.9 | 71.0 | 0.94 |
+      | MedQA test, letter | 57.0 | 58.4 | 0.14 |
+      - Median thinking fell 7–21%; run 3's fell 61%.
+      - Training on the model's own traces avoids run 3's damage, but adds
+        no accuracy.
+      - The base stays the best model (D11).
+      - Base at a 3,072-token budget: 70.9% vs 69.7% at 1,536 (p 0.24).
+      - vLLM and transformers agree on 99.6–100% of letter answers.
+      - Everything is in `results/e2/`; the adapter is in
+        `training/outputs/e2` (git-ignored).
+- [ ] **Next: H3, self-consistency.** Majority vote over 5 samples from the
+      base, on dev and then MedQA, with no training. About one session.
+- [ ] **Then H5, a GRPO pilot.** Binary gold-letter reward, on pool questions
+      the base solves sometimes but not always; Unsloth's T4 GRPO recipe.
 - [ ] **Rotate the Hugging Face token** pasted into chat on 2026-10-19. It is
       not written anywhere in the repo.
 

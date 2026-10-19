@@ -22,6 +22,10 @@
 | Thinking mode, run 3 adapter | MedQA | 9.0 s per question | run 3 meta |
 | Model load (fp16, from cache) | | 11.6–15.8 s | run 3 meta |
 | vLLM 0.32.0 on a T4 (fp16, chunks of 192, budget 4,096, Triton attention) | E2 pool generation, 2 GPUs | 4,608 completions in about 4.45 h, roughly 7 s per completion per GPU; median thinking 748 tokens, p90 1,923 | results/e2/attempt1 |
+| QLoRA training, rank 16 (E2) | 3,978 rows, max_seq 3,968, batch 1 × 16 | 249 steps in 1.86 h (6,707 s); probe 44 s/step; 33.0 M trainable parameters | results/e2/train_stats.json, e2_train.log |
+| vLLM thinking mode, base, budget 3,072 | MedQA test 1,273 | 10,312 s (8.1 s per question per GPU) | results/e2 base meta |
+| vLLM thinking mode, E2 adapter (LoRA in vLLM) | MedQA test 1,273 | 12,554 s (9.9 s per question) | results/e2 e2 meta |
+| vLLM letter mode | MedMCQA 4,183 | 137 s (base), 266 s (with LoRA) | results/e2 meta |
 | vLLM install (uv, `--torch-backend=auto`) and engine start | | install 209 s; engine start about 90 s, of which 33 s is compilation | results/e2/attempt1 log |
 
 ## Memory arithmetic ([code]/[measured] model config)

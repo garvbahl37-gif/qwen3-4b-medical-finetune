@@ -1,0 +1,756 @@
+{
+  "baseline": "base",
+  "stages": {
+    "letter:medqa": {
+      "models": {
+        "base": {
+          "n": 1273,
+          "accuracy": 0.5703063629222309,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 1273,
+          "accuracy": 0.5836606441476826,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 1273,
+        "accuracy": {
+          "base": 0.5703063629222309,
+          "e2": 0.5836606441476826
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 1273,
+          "base_accuracy": 0.5703063629222309,
+          "tuned_accuracy": 0.5836606441476826,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 67,
+            "regressions": 50,
+            "both_correct": 676,
+            "both_wrong": 480,
+            "discordant": 117,
+            "p_value": 0.138753
+          },
+          "diff_ci": {
+            "diff": 0.013354,
+            "low": -0.003283,
+            "high": 0.029992
+          }
+        }
+      }
+    },
+    "letter:medmcqa": {
+      "models": {
+        "base": {
+          "n": 4183,
+          "accuracy": 0.5472149175233086,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 4183,
+          "accuracy": 0.5390867798230935,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 4183,
+        "accuracy": {
+          "base": 0.5472149175233086,
+          "e2": 0.5390867798230935
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 4183,
+          "base_accuracy": 0.5472149175233086,
+          "tuned_accuracy": 0.5390867798230935,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 164,
+            "regressions": 198,
+            "both_correct": 2091,
+            "both_wrong": 1730,
+            "discordant": 362,
+            "p_value": 0.082697
+          },
+          "diff_ci": {
+            "diff": -0.008128,
+            "low": -0.01704,
+            "high": 0.000783
+          }
+        }
+      }
+    },
+    "letter:pubmedqa": {
+      "models": {
+        "base": {
+          "n": 1000,
+          "accuracy": 0.729,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 1000,
+          "accuracy": 0.722,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 1000,
+        "accuracy": {
+          "base": 0.729,
+          "e2": 0.722
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 1000,
+          "base_accuracy": 0.729,
+          "tuned_accuracy": 0.722,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 8,
+            "regressions": 15,
+            "both_correct": 714,
+            "both_wrong": 263,
+            "discordant": 23,
+            "p_value": 0.21004
+          },
+          "diff_ci": {
+            "diff": -0.007,
+            "low": -0.01639,
+            "high": 0.00239
+          }
+        }
+      }
+    },
+    "letter:mmlu_medical": {
+      "models": {
+        "base": {
+          "n": 1089,
+          "accuracy": 0.7337006427915519,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 1089,
+          "accuracy": 0.7318640955004592,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 1089,
+        "accuracy": {
+          "base": 0.7337006427915519,
+          "e2": 0.7318640955004592
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 1089,
+          "base_accuracy": 0.7337006427915519,
+          "tuned_accuracy": 0.7318640955004592,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 28,
+            "regressions": 30,
+            "both_correct": 769,
+            "both_wrong": 262,
+            "discordant": 58,
+            "p_value": 0.895683
+          },
+          "diff_ci": {
+            "diff": -0.001837,
+            "low": -0.015543,
+            "high": 0.01187
+          }
+        }
+      }
+    },
+    "reasoning:medqa": {
+      "models": {
+        "base": {
+          "n": 1273,
+          "accuracy": 0.7085624509033779,
+          "unparseable": 0,
+          "forced": 36,
+          "closed": 1237,
+          "median_new_tokens": 1007,
+          "think_tokens": {
+            "median": 879,
+            "mean": 1092.7,
+            "p90": 2113,
+            "p95": 2711
+          }
+        },
+        "e2": {
+          "n": 1273,
+          "accuracy": 0.7101335428122545,
+          "unparseable": 0,
+          "forced": 28,
+          "closed": 1245,
+          "median_new_tokens": 860,
+          "think_tokens": {
+            "median": 773,
+            "mean": 990.2,
+            "p90": 1916,
+            "p95": 2489
+          }
+        }
+      },
+      "common": {
+        "n": 1273,
+        "accuracy": {
+          "base": 0.7085624509033779,
+          "e2": 0.7101335428122545
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "reasoning",
+          "n": 1273,
+          "base_accuracy": 0.7085624509033779,
+          "tuned_accuracy": 0.7101335428122545,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 86,
+            "regressions": 84,
+            "both_correct": 818,
+            "both_wrong": 285,
+            "discordant": 170,
+            "p_value": 0.938895
+          },
+          "diff_ci": {
+            "diff": 0.001571,
+            "low": -0.018503,
+            "high": 0.021645
+          }
+        }
+      }
+    },
+    "letter:dev_medqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.6166666666666667,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 300,
+          "accuracy": 0.6133333333333333,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.6166666666666667,
+          "e2": 0.6133333333333333
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 300,
+          "base_accuracy": 0.6166666666666667,
+          "tuned_accuracy": 0.6133333333333333,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 12,
+            "regressions": 13,
+            "both_correct": 172,
+            "both_wrong": 103,
+            "discordant": 25,
+            "p_value": 1.0
+          },
+          "diff_ci": {
+            "diff": -0.003333,
+            "low": -0.035997,
+            "high": 0.029331
+          }
+        }
+      }
+    },
+    "reasoning:dev_medqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.7,
+          "unparseable": 0,
+          "forced": 5,
+          "closed": 295,
+          "median_new_tokens": 979,
+          "think_tokens": {
+            "median": 867,
+            "mean": 1033.1,
+            "p90": 2055,
+            "p95": 2397
+          }
+        },
+        "e2": {
+          "n": 300,
+          "accuracy": 0.69,
+          "unparseable": 0,
+          "forced": 5,
+          "closed": 295,
+          "median_new_tokens": 764,
+          "think_tokens": {
+            "median": 681,
+            "mean": 907.4,
+            "p90": 1850,
+            "p95": 2378
+          }
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.7,
+          "e2": 0.69
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "reasoning",
+          "n": 300,
+          "base_accuracy": 0.7,
+          "tuned_accuracy": 0.69,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 19,
+            "regressions": 22,
+            "both_correct": 188,
+            "both_wrong": 71,
+            "discordant": 41,
+            "p_value": 0.755229
+          },
+          "diff_ci": {
+            "diff": -0.01,
+            "low": -0.051818,
+            "high": 0.031818
+          }
+        }
+      }
+    },
+    "letter:dev_medmcqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.5933333333333334,
+          "unparseable": 0
+        },
+        "e2": {
+          "n": 300,
+          "accuracy": 0.5966666666666667,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.5933333333333334,
+          "e2": 0.5966666666666667
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "letter",
+          "n": 300,
+          "base_accuracy": 0.5933333333333334,
+          "tuned_accuracy": 0.5966666666666667,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 12,
+            "regressions": 11,
+            "both_correct": 167,
+            "both_wrong": 110,
+            "discordant": 23,
+            "p_value": 1.0
+          },
+          "diff_ci": {
+            "diff": 0.003333,
+            "low": -0.027997,
+            "high": 0.034663
+          }
+        }
+      }
+    },
+    "reasoning:dev_medmcqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.69,
+          "unparseable": 0,
+          "forced": 3,
+          "closed": 297,
+          "median_new_tokens": 606,
+          "think_tokens": {
+            "median": 517,
+            "mean": 741.5,
+            "p90": 1476,
+            "p95": 2092
+          }
+        },
+        "e2": {
+          "n": 300,
+          "accuracy": 0.6766666666666666,
+          "unparseable": 0,
+          "forced": 3,
+          "closed": 297,
+          "median_new_tokens": 544,
+          "think_tokens": {
+            "median": 480,
+            "mean": 654.5,
+            "p90": 1193,
+            "p95": 1715
+          }
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.69,
+          "e2": 0.6766666666666666
+        }
+      },
+      "vs_baseline": {
+        "e2": {
+          "mode": "reasoning",
+          "n": 300,
+          "base_accuracy": 0.69,
+          "tuned_accuracy": 0.6766666666666666,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 18,
+            "regressions": 22,
+            "both_correct": 185,
+            "both_wrong": 75,
+            "discordant": 40,
+            "p_value": 0.635828
+          },
+          "diff_ci": {
+            "diff": -0.013333,
+            "low": -0.054625,
+            "high": 0.027959
+          }
+        }
+      }
+    }
+  },
+  "models": {
+    "base": {
+      "dirs": [
+        "/kaggle/working/e2_base_eval_predictions/gpu1/base"
+      ],
+      "metas": [
+        {
+          "role": "base",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": null,
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "pool": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "pool": 2
+          },
+          "deadline": 1792431828.0,
+          "limit": 0,
+          "engine": "vllm",
+          "shard": "",
+          "started": 1792395267.3815806,
+          "status": "finished",
+          "stages": {
+            "reasoning:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 2280.6
+            },
+            "reasoning:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 1122.8
+            },
+            "letter:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 34.2
+            },
+            "letter:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 9.4
+            },
+            "letter:medqa": {
+              "planned": 1273,
+              "questions": 1273,
+              "samples": 1,
+              "scored": 1273,
+              "status": "done",
+              "seconds": 148.6
+            },
+            "letter:medmcqa": {
+              "planned": 4183,
+              "questions": 4183,
+              "samples": 1,
+              "scored": 4183,
+              "status": "done",
+              "seconds": 136.8
+            },
+            "letter:pubmedqa": {
+              "planned": 1000,
+              "questions": 1000,
+              "samples": 1,
+              "scored": 1000,
+              "status": "done",
+              "seconds": 204.4
+            },
+            "letter:mmlu_medical": {
+              "planned": 1089,
+              "questions": 1089,
+              "samples": 1,
+              "scored": 1089,
+              "status": "done",
+              "seconds": 58.4
+            },
+            "reasoning:medqa": {
+              "planned": 1273,
+              "questions": 1273,
+              "samples": 1,
+              "scored": 1273,
+              "status": "done",
+              "seconds": 10312.5
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 124.1,
+          "finished": 1792409699.096328
+        }
+      ]
+    },
+    "e2": {
+      "dirs": [
+        "/kaggle/working/e2_e2_eval_predictions/gpu0/e2",
+        "/kaggle/working/e2_e2_eval_predictions/gpu1/e2"
+      ],
+      "metas": [
+        {
+          "role": "e2",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": "outputs/e2_adapter",
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "pool": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "pool": 2
+          },
+          "deadline": 1792435428.0,
+          "limit": 0,
+          "engine": "vllm",
+          "shard": "",
+          "started": 1792402167.5962994,
+          "status": "finished",
+          "stages": {
+            "reasoning:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 2749.1
+            },
+            "reasoning:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 1368.5
+            },
+            "letter:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 63.6
+            },
+            "letter:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 18.8
+            },
+            "reasoning:medqa": {
+              "planned": 1273,
+              "questions": 1273,
+              "samples": 1,
+              "scored": 1273,
+              "status": "done",
+              "seconds": 12554.0
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 233.0,
+          "adapter_sha256": "6ab79274945d0a92bc9080fde174e53c7ad3eaaa7ead2131c64a34ebad49489d",
+          "finished": 1792419155.066746
+        },
+        {
+          "role": "e2",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": "outputs/e2_adapter",
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "pool": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "pool": 2
+          },
+          "deadline": 1792435428.0,
+          "limit": 0,
+          "engine": "vllm",
+          "shard": "",
+          "started": 1792409967.8953393,
+          "status": "finished",
+          "stages": {
+            "letter:medqa": {
+              "planned": 1273,
+              "questions": 1273,
+              "samples": 1,
+              "scored": 1273,
+              "status": "done",
+              "seconds": 267.0
+            },
+            "letter:medmcqa": {
+              "planned": 4183,
+              "questions": 4183,
+              "samples": 1,
+              "scored": 4183,
+              "status": "done",
+              "seconds": 265.8
+            },
+            "letter:pubmedqa": {
+              "planned": 1000,
+              "questions": 1000,
+              "samples": 1,
+              "scored": 1000,
+              "status": "done",
+              "seconds": 356.2
+            },
+            "letter:mmlu_medical": {
+              "planned": 1089,
+              "questions": 1089,
+              "samples": 1,
+              "scored": 1089,
+              "status": "done",
+              "seconds": 110.5
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 182.7,
+          "adapter_sha256": "6ab79274945d0a92bc9080fde174e53c7ad3eaaa7ead2131c64a34ebad49489d",
+          "finished": 1792411150.5424273
+        }
+      ]
+    }
+  }
+}
