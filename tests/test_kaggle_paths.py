@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from training.kaggle_paths import (DATA_FILES, EVAL_REQUIRED, REQUIRED, RUN2_REQUIRED,
+from training.kaggle_paths import (DATA_FILES, E2_DATA_FILES, EVAL_REQUIRED, REQUIRED, RUN2_REQUIRED,
                                    code_fingerprint, data_fingerprint, find_data_dir,
                                    find_adapter_dir, find_code_dir)
 
@@ -147,3 +147,14 @@ def test_data_fingerprint_changes_when_one_file_changes(tmp_path):
 def test_every_run2_module_exists():
     root = Path(__file__).resolve().parents[1] / "training"
     assert all((root / f"{name}.py").exists() for name in RUN2_REQUIRED)
+
+
+def test_find_data_dir_tells_the_e2_traces_from_the_v2_training_data(tmp_path):
+    from training.kaggle_paths import E2_DATA_FILES
+
+    v2, e2 = tmp_path / "v2", tmp_path / "e2"
+    for d, names in ((v2, DATA_FILES), (e2, E2_DATA_FILES)):
+        d.mkdir()
+        for name in names:
+            (d / name).write_text("x")
+    assert find_data_dir(tmp_path, E2_DATA_FILES) == e2

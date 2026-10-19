@@ -176,3 +176,11 @@ def test_a_missing_vllm_interpreter_falls_back_to_transformers(tmp_path, monkeyp
     code = rp.run_queue(E2, "gen", 0, out_dir=str(tmp_path), eval_dir="d", adapters={},
                         engine="vllm", vllm_python="/no/such/python")
     assert code == 0 and calls[0] == "/no/such/python" and calls[1] == rp.sys.executable
+
+
+def test_both_models_get_letter_choice_on_the_benchmarks_with_one_engine():
+    base = {s for q in E2["sessions"]["base_eval"].values() for e in q for s in e[1]}
+    e2 = {s for q in E2["sessions"]["e2_eval"].values() for e in q for s in e[1]}
+    letters = {"letter:medqa", "letter:medmcqa", "letter:pubmedqa", "letter:mmlu_medical"}
+    assert letters <= base and letters <= e2
+    assert "reasoning:medqa" in base and "reasoning:medqa" in e2

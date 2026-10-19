@@ -27,6 +27,10 @@ RUN2_REQUIRED = {"records", "prompts", "sources", "sources_v2", "format_v2",
 DATA_FILES = ("train.jsonl", "eval_medqa.jsonl", "eval_medmcqa.jsonl",
               "eval_pubmedqa.jsonl", "eval_mmlu_medical.jsonl", "data_report.json")
 
+# E2's training set as built from a finished generation (train.jsonl and the
+# self_traces report), so training can run without generating again.
+E2_DATA_FILES = ("train.jsonl", "e2_report.json")
+
 # E2's dataset: the question pool, the dev split and the four benchmarks.
 V3_DATA_FILES = ("eval_pool.jsonl", "eval_dev_medqa.jsonl", "eval_dev_medmcqa.jsonl",
                  "eval_medqa.jsonl", "eval_medmcqa.jsonl", "eval_pubmedqa.jsonl",

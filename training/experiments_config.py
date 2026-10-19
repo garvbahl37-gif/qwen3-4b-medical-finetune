@@ -105,9 +105,11 @@ E2 = {
                      {"shard": "0/2", "think_budget": 4096, "hf_reasoning_batch_size": 6}),),
                 1: (("base", ("reasoning:pool",),
                      {"shard": "1/2", "think_budget": 4096, "hf_reasoning_batch_size": 6}),)},
-        "base_eval": {1: (("base", DEV + ("reasoning:medqa",)),)},
-        "e2_eval": {0: (("e2", DEV),),
-                    1: (("e2", LETTER + ("reasoning:medqa",)),)},
+        # Letter choice is minutes with vLLM, so both models get it on every
+        # benchmark from the same engine; MedQA reasoning is the long stage.
+        "base_eval": {1: (("base", DEV + LETTER + ("reasoning:medqa",)),)},
+        "e2_eval": {0: (("e2", DEV + ("reasoning:medqa",)),),
+                    1: (("e2", LETTER),)},
     },
     "traces": {"max_think": 3500, "cap": 4096, "direct_fraction": 0.2, "seed": 42,
                "min_rows": 200},

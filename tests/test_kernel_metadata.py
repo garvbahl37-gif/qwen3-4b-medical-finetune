@@ -89,3 +89,12 @@ def test_the_e2_kernel_attaches_code_and_the_v3_data():
     assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3"]
     assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
     assert meta["code_file"] == "kaggle_e2.ipynb"
+
+
+def test_the_e2t_kernel_attaches_code_the_v3_data_and_the_saved_traces():
+    meta = json.loads(Path("e2t/kernel-metadata.json").read_text())
+    _owner, slug = meta["id"].split("/")
+    assert slug == slugify(meta["title"]) and meta["machine_shape"] == "NvidiaTeslaT4"
+    assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3",
+                                       "gb1105/medical-ft-data-e2"]
+    assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]

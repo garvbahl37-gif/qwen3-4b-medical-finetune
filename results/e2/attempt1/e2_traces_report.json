@@ -1,0 +1,34 @@
+{
+  "questions": 4608,
+  "samples_generated": 4608,
+  "samples_kept": 3182,
+  "acceptance_rate": 0.6905,
+  "rejected": {
+    "wrong_letter": 1388,
+    "unfinished_or_forced": 30,
+    "thinking_too_long": 8
+  },
+  "pass_rate_histogram": {
+    "1/1": 3182,
+    "0/1": 1426
+  },
+  "questions_with_a_kept_trace": 3182,
+  "dropped_over_cap": 0,
+  "reasoning_rows": 3182,
+  "direct_rows": 796,
+  "rows": 3978,
+  "think_tokens_all_samples": {
+    "median": 748,
+    "p90": 1923
+  },
+  "think_tokens_kept": {
+    "median": 625,
+    "p90": 1484
+  },
+  "max_rendered_tokens": 3924,
+  "max_think": 3500,
+  "cap": 4096,
+  "direct_fraction": 0.2,
+  "seed": 42,
+  "max_seq": 3968
+}
