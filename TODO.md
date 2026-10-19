@@ -288,6 +288,28 @@ fetches and short reports.
 - [x] **E3a launched 2026-10-19 20:36 IST**
       ([kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-e3-teacher-traces)):
       teacher pilot, then generation.
+- [x] **E3a version 1 sat queued for 53 minutes; version 2, pushed at 21:29,
+      started at once.** Setup passed: vLLM 0.32.0 installed, and its smoke
+      test on Qwen3-8B-AWQ passed.
+- [x] **E3a pilot.** Only the 30B MoE ran.
+      - Qwen3-30B-A3B-GPTQ, across both T4s: 120 weak questions in 350 s,
+        62 rescued (51.7%), 637 rescued per hour. Chosen by default.
+      - Qwen3-14B-AWQ (GPU 0) and Qwen3-8B-AWQ (GPU 1) **both failed to
+        start** ("Engine core initialization failed"). The 8B had passed its
+        short smoke test; the pilot differs in a 4,096-token budget at 0.95
+        GPU memory.
+      - The root cause is in their worker logs, which can only be downloaded
+        after the session.
+- [ ] **Check the other two teachers properly.**
+      1. When E3a ends, read `e3_pilot-gpu0.log` and `e3_pilot-gpu1.log` for
+         the root cause, and fix it (with a test if it is ours).
+      2. Run a short re-pilot (about 40 min): 8B and 14B on the same 120 weak
+         questions, with the 30B's exact settings, so all three rescue rates
+         and speeds are measured side by side.
+      3. If a smaller teacher rescues more per hour or more accurately, record
+         it and consider adding its verified traces. Otherwise the 30B choice
+         stands on evidence, not by default.
+      4. This does not block E3b, which trains on the 30B traces.
 - [ ] When E3a finishes:
       1. download it;
       2. upload `e3t/` as `medical-ft-data-e3t`;
