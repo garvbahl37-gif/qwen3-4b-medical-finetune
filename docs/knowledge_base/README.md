@@ -14,6 +14,7 @@ the document for your task before changing anything.
 | choosing the next experiment | [open_questions](open_questions.md), [experiment_registry](experiment_registry.md) |
 | finding the code | [project_architecture](project_architecture.md) |
 | citing a paper or doc | [research_sources](research_sources.md) |
+| what other medical fine-tunes did | [reference_models](reference_models.md) |
 | what tools and skills exist | [skill_inventory](skill_inventory.md) |
 
 ## Evidence tags

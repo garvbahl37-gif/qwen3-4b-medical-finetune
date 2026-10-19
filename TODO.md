@@ -273,7 +273,27 @@ fetches and short reports.
       - vLLM and transformers agree on 99.6–100% of letter answers.
       - Everything is in `results/e2/`; the adapter is in
         `training/outputs/e2` (git-ignored).
-- [ ] **Next: H3, self-consistency.** Majority vote over 5 samples from the
+- [x] **Studied seven public medical fine-tunes**
+      (`docs/knowledge_base/reference_models.md`).
+      - Only MMOPD shows a large thinking-mode gain: a 35B same-family
+        teacher's gold-verified traces, MedQA 69.8 → 80.7 as reported, with
+        general benchmarks down 10–13 points.
+      - Explanation SFT was neutral or harmful in the others.
+- [x] **E3 built (code 98f2ebd).** A stronger Qwen3's gold-verified reasoning
+      on the 1,418 pool questions the base got wrong, added to E2's set and
+      trained exactly as E2.
+      - Teacher by measured pilot: 8B-AWQ, 14B-AWQ or 30B-A3B-GPTQ.
+      - Selection on dev only; criteria pre-registered (H8).
+      - 313 tests, including notebook-cell runs of both sessions.
+- [x] **E3a launched 2026-10-19 20:36 IST**
+      ([kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-e3-teacher-traces)):
+      teacher pilot, then generation.
+- [ ] When E3a finishes:
+      1. download it;
+      2. upload `e3t/` as `medical-ft-data-e3t`;
+      3. build and push `e3b`;
+      4. compare base, E2 and E3 on dev.
+- [ ] **Then H3, self-consistency.** Majority vote over 5 samples from the
       base, on dev and then MedQA, with no training. About one session.
 - [ ] **Then H5, a GRPO pilot.** Binary gold-letter reward, on pool questions
       the base solves sometimes but not always; Unsloth's T4 GRPO recipe.
