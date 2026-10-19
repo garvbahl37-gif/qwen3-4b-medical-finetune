@@ -240,6 +240,19 @@ fetches and short reports.
       2. selects verified traces;
       3. trains (at most 4 h) while GPU 1 scores the base;
       4. scores E2.
+- [x] **E2 attempt 1**: generation and selection worked.
+      - vLLM 0.32.0 ran on the T4.
+      - 4,608 questions answered; 69% reached the gold letter.
+      - 3,182 verified traces plus 796 answer-only rows.
+      - Training died before step 1: Unsloth looked up a tokenizer
+        repository the offline mode blocked.
+      - Saved in `results/e2/attempt1`. The local rebuild of the training set
+        matches Kaggle's byte for byte.
+- [x] **E2 attempt 2 launched 2026-10-19 12:50 IST**
+      ([e2t kernel](https://www.kaggle.com/code/gb1105/qwen3-4b-medical-e2-train-and-evaluate),
+      code d60735e). It trains from the saved set (`medical-ft-data-e2`)
+      with the network allowed for training. GPU 1 scores the base model
+      meanwhile, then both GPUs score E2.
 - [ ] Download E2's output to `results/e2/`, run `training.eval_report` and
       `training.experiments`, decide by the dev split (H1), and update the
       knowledge base

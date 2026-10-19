@@ -1,36 +1,86 @@
 {
   "experiment_id": "E2",
-  "status": "launched 2026-10-19 on Kaggle (kernel version 1); results pending",
-  "git_commit": "d3ed0cd",
+  "status": "attempt 1 (2026-10-19, code d3ed0cd): generation and selection done, training failed before step 1 (offline tokenizer lookup). Attempt 2 launched 2026-10-19 from the saved training set (kernel gb1105/qwen3-4b-medical-e2-train-and-evaluate, code d60735e); results pending",
+  "git_commit": "d60735e",
   "dataset_version": "v3: 6,000-question pool (4,000 MedQA train, 2,000 MedMCQA train) and 600-question dev split, decontaminated against all four benchmarks, data fingerprint f102ed1e8991077c (data/v3/data_report.json)",
   "hypothesis": "Fine-tuning on the base model's own gold-verified reasoning keeps its native thinking (length within about 20% of the base) and does not lose accuracy, unlike run 3's foreign traces. Success: E2 >= base on dev_medqa thinking-mode accuracy (paired), with median thinking within 20% of the base. Failure: E2 below the base on dev, or thinking that collapses as in run 3.",
   "config": "training/experiments_config.py (E2)",
   "training": {
     "base_model": "unsloth/Qwen3-4B-unsloth-bnb-4bit",
     "quantization": "QLoRA 4-bit (Unsloth nf4)",
-    "lora_rank": 16, "lora_alpha": 16, "lora_dropout": 0.0,
-    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    "learning_rate": 5e-5, "epochs": 1, "batch_size": 1, "gradient_accumulation": 16,
+    "lora_rank": 16,
+    "lora_alpha": 16,
+    "lora_dropout": 0.0,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 16,
     "max_seq_length": "from the data (self_traces report, cap 4,096)",
-    "warmup_ratio": 0.03, "weight_decay": 0.01, "scheduler": "cosine",
-    "optimizer": "adamw_8bit", "seed": 42, "group_by_length": true,
+    "warmup_ratio": 0.03,
+    "weight_decay": 0.01,
+    "scheduler": "cosine",
+    "optimizer": "adamw_8bit",
+    "seed": 42,
+    "group_by_length": true,
     "data": "base model's own completions on the pool: 2 samples per question at a 4,096-token budget; kept only if closed, unforced, and on the gold letter; one random kept sample per question; 20% answer-only rows"
   },
   "artifacts": {
-    "kaggle_kernel": "gb1105/qwen3-4b-medical-e2-self-distillation",
+    "kaggle_kernel": "gb1105/qwen3-4b-medical-e2-train-and-evaluate",
     "kaggle_data": "gb1105/medical-ft-data-v3",
-    "download_to": "results/e2"
+    "download_to": "results/e2",
+    "generation_kernel": "gb1105/qwen3-4b-medical-e2-self-distillation",
+    "kaggle_traces": "gb1105/medical-ft-data-e2",
+    "generation": "results/e2/attempt1 (4,608 completions, traces report, logs)"
   },
   "evaluation": {
     "format": "v2_predictions",
     "protocol": "E2: thinking budget 3,072, seed 1234, Qwen thinking sampling; dev split (300 MedQA + 300 MedMCQA train questions) for selection; benchmarks reported, not tuned on. Engine: vLLM if its smoke test passed in the session, transformers otherwise (recorded in each meta.json).",
     "models": {
-      "base": {"label": "Qwen3-4B (base)", "quantization": "fp16",
-               "dirs": ["results/e2/e2_base_eval_predictions/gpu1/base"]},
-      "e2": {"label": "Qwen3-4B + E2 adapter (fp16 base)", "trained": true,
-             "dirs": ["results/e2/e2_eval_predictions/gpu0/e2",
-                      "results/e2/e2_eval_predictions/gpu1/e2"]}
+      "base": {
+        "label": "Qwen3-4B (base)",
+        "quantization": "fp16",
+        "dirs": [
+          "results/e2/e2_base_eval_predictions/gpu1/base"
+        ]
+      },
+      "e2": {
+        "label": "Qwen3-4B + E2 adapter (fp16 base)",
+        "trained": true,
+        "dirs": [
+          "results/e2/e2_eval_predictions/gpu0/e2",
+          "results/e2/e2_eval_predictions/gpu1/e2"
+        ]
+      }
     }
   },
-  "notes": "Training stops by a time guard (at most 4 h); if it stops before the end of the epoch, the cosine schedule is cut short. Gold-letter filtering cannot catch right answers reached by wrong reasoning."
+  "notes": "Training stops by a time guard (at most 4 h); if it stops before the end of the epoch, the cosine schedule is cut short. Gold-letter filtering cannot catch right answers reached by wrong reasoning.",
+  "git_commits": {
+    "generation": "d3ed0cd",
+    "training_and_evaluation": "d60735e"
+  },
+  "generation_result": {
+    "questions": 4608,
+    "samples_per_question_reached": 1,
+    "acceptance_rate": 0.6905,
+    "rejected": {
+      "wrong_letter": 1388,
+      "unfinished_or_forced": 30,
+      "thinking_too_long": 8
+    },
+    "reasoning_rows": 3182,
+    "direct_rows": 796,
+    "think_tokens_all_median": 748,
+    "think_tokens_kept_median": 625,
+    "max_seq": 3968,
+    "engine": "vLLM 0.32.0"
+  }
 }

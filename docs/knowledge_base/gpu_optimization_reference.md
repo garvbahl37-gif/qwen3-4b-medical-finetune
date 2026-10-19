@@ -21,7 +21,8 @@
 | Thinking mode, base (transformers, batch 16, budget 1,536) | MedQA | 22.9 s per question | run 3 meta |
 | Thinking mode, run 3 adapter | MedQA | 9.0 s per question | run 3 meta |
 | Model load (fp16, from cache) | | 11.6–15.8 s | run 3 meta |
-| vLLM on a T4 | | **[unknown]**: first measured in E2's smoke and generation | — |
+| vLLM 0.32.0 on a T4 (fp16, chunks of 192, budget 4,096, Triton attention) | E2 pool generation, 2 GPUs | 4,608 completions in about 4.45 h, roughly 7 s per completion per GPU; median thinking 748 tokens, p90 1,923 | results/e2/attempt1 |
+| vLLM install (uv, `--torch-backend=auto`) and engine start | | install 209 s; engine start about 90 s, of which 33 s is compilation | results/e2/attempt1 log |
 
 ## Memory arithmetic ([code]/[measured] model config)
 
