@@ -196,3 +196,18 @@ def test_counts_accept_the_pool_and_dev_benchmarks():
     from training.eval_worker import parse_counts
 
     assert parse_counts("pool=0,dev_medqa=50", minimum=0) == {"pool": 0, "dev_medqa": 50}
+
+
+def test_a_plain_model_like_a_teacher_may_run_without_an_adapter():
+    from training.eval_worker import check_role
+
+    assert check_role("t14b", None, plain=True) is None
+    with pytest.raises(SystemExit):
+        check_role("t14b", "outputs/x", plain=True)
+    with pytest.raises(SystemExit):
+        check_role("e3", None)
+
+
+def test_the_weak_question_stage_is_known_but_not_default():
+    assert parse_stages("reasoning:weak") == [("reasoning", "weak")]
+    assert ("reasoning", "weak") not in parse_stages("")

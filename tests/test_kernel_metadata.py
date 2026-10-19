@@ -98,3 +98,15 @@ def test_the_e2t_kernel_attaches_code_the_v3_data_and_the_saved_traces():
     assert meta["dataset_sources"] == ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3",
                                        "gb1105/medical-ft-data-e2"]
     assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]
+
+
+@pytest.mark.parametrize("name,sources", [
+    ("e3a", ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3", "gb1105/medical-ft-data-e3"]),
+    ("e3b", ["gb1105/medical-ft-code", "gb1105/medical-ft-data-v3", "gb1105/medical-ft-data-e2",
+             "gb1105/medical-ft-data-e3t"])])
+def test_the_e3_kernels(name, sources):
+    meta = json.loads(Path(f"{name}/kernel-metadata.json").read_text())
+    _owner, slug = meta["id"].split("/")
+    assert slug == slugify(meta["title"]) and meta["machine_shape"] == "NvidiaTeslaT4"
+    assert meta["dataset_sources"] == sources and meta["code_file"] == f"kaggle_{name}.ipynb"
+    assert meta["enable_gpu"] and meta["enable_internet"] and meta["is_private"]

@@ -158,3 +158,16 @@ def test_find_data_dir_tells_the_e2_traces_from_the_v2_training_data(tmp_path):
         for name in names:
             (d / name).write_text("x")
     assert find_data_dir(tmp_path, E2_DATA_FILES) == e2
+
+
+def test_find_data_dir_picks_the_copy_whose_fingerprint_matches(tmp_path):
+    from training.kaggle_paths import E2_DATA_FILES
+
+    a, b = tmp_path / "a-e2", tmp_path / "b-e3t"
+    for d, text in ((a, "e2 rows"), (b, "teacher rows")):
+        d.mkdir()
+        for name in E2_DATA_FILES:
+            (d / name).write_text(text)
+    want = data_fingerprint(b, E2_DATA_FILES)
+    assert find_data_dir(tmp_path, E2_DATA_FILES, fingerprint=want) == b
+    assert find_data_dir(tmp_path, E2_DATA_FILES) == a      # no fingerprint: the first

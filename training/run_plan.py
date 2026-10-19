@@ -67,9 +67,16 @@ def worker_args(cfg: dict, model: str, stages: tuple[str, ...], *, out_dir: str,
             "--eval-dir", eval_dir, "--out-dir", out_dir, "--device", "cuda",
             "--stages", ",".join(stages), "--seed", str(cfg["seed"]),
             "--sizes", ",".join(f"{b}={n}" for b, n in cfg["sizes"].items())]
-    samples = model_samples(cfg, model)
+    samples = {**model_samples(cfg, model), **extra.get("samples", {})}
     if samples:
         args += ["--samples", ",".join(f"{b}={n}" for b, n in samples.items())]
+    if extra.get("sizes"):
+        args += ["--sizes", ",".join(f"{b}={n}" for b, n in
+                                     {**cfg["sizes"], **extra["sizes"]}.items())]
+    if spec.get("plain"):
+        args.append("--no-adapter")
+    if spec.get("tensor_parallel", 1) > 1:
+        args += ["--tensor-parallel", str(spec["tensor_parallel"])]
     if spec["adapter"]:
         if spec["adapter"] not in adapters:
             raise SystemExit(f"\nSTOP. {model} needs --adapter {spec['adapter']}=DIR.")
@@ -80,7 +87,8 @@ def worker_args(cfg: dict, model: str, stages: tuple[str, ...], *, out_dir: str,
         args += ["--shard", extra["shard"]]
     if engine == "vllm":
         v = cfg["vllm"]
-        args += ["--engine", "vllm", "--gpu-memory-utilization", str(v["gpu_memory_utilization"])]
+        args += ["--engine", "vllm", "--gpu-memory-utilization",
+                 str(spec.get("gpu_memory_utilization", v["gpu_memory_utilization"]))]
         if enforce_eager:
             args.append("--enforce-eager")
         batch, reasoning_batch = v["batch_size"], v["reasoning_batch_size"]
@@ -179,6 +187,9 @@ def run_queue(cfg: dict, session: str, gpu: int, *, engine: str = "hf",
         model, stages, extra = unpack(entry)
         attempts = [("vllm", vllm_python), ("hf", sys.executable)] if engine == "vllm" else \
             [("hf", sys.executable)]
+        # A teacher too large for transformers on a T4 has no fallback.
+        if extra.get("no_fallback"):
+            attempts = attempts[:1]
         for eng, python in attempts:
             cmd = [python or sys.executable] + worker_args(cfg, model, stages, extra=extra,
                                                            engine=eng, **kw)

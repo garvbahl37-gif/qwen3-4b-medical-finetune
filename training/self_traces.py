@@ -61,17 +61,22 @@ def reject_reason(row: dict, gold: str, max_think: int) -> str | None:
     return None
 
 
-def trace_record(rec: Record, row: dict) -> Record:
+def trace_record(rec: Record, row: dict, *, row_id: str, source: str = "e2_self") -> Record:
     thinking, final = split_completion(row["text"])
     explanation = _ANSWER_LINE.sub("", final, count=1).strip()
-    return Record(**{**rec.to_dict(), "id": f"e2-{rec.id}", "source": "e2_self",
+    return Record(**{**rec.to_dict(), "id": row_id, "source": source,
                      "reasoning": thinking, "rationale": explanation or None})
 
 
 def build_e2(rows_by_q: dict[str, list[dict]], pool: dict[str, Record], *, measure,
-             max_think: int, cap: int, direct_fraction: float, seed: int):
+             max_think: int, cap: int, direct_fraction: float, seed: int,
+             max_per_question: int = 1, prefix: str = "e2", source: str = "e2_self"):
     """The training rows and a report. `measure(record)` is the rendered
-    training length in tokens, passed in so tests need no tokenizer."""
+    training length in tokens, passed in so tests need no tokenizer.
+
+    Up to `max_per_question` kept samples per question, chosen at random
+    (E2: 1, from the model itself; E3: 2, from a teacher, as MMOPD kept up to
+    3 per question)."""
     rng = random.Random(seed)
     rejected: Counter[str] = Counter()
     histogram: Counter[str] = Counter()
@@ -88,10 +93,16 @@ def build_e2(rows_by_q: dict[str, list[dict]], pool: dict[str, Record], *, measu
             else:
                 kept.append(row)
         histogram[f"{len(kept)}/{len(samples)}"] += 1
-        if kept:
-            pick = rng.choice(kept)
-            reasoning.append(trace_record(rec, pick))
-            chosen_think[f"e2-{qid}"] = pick.get("think_tokens", 0)
+        if kept and max_per_question == 1:
+            picks = {f"{prefix}-{qid}": rng.choice(kept)}
+        elif kept:
+            picks = {f"{prefix}-{qid}-{j}": row for j, row in
+                     enumerate(rng.sample(kept, min(max_per_question, len(kept))))}
+        else:
+            picks = {}
+        for row_id, pick in picks.items():
+            reasoning.append(trace_record(rec, pick, row_id=row_id, source=source))
+            chosen_think[row_id] = pick.get("think_tokens", 0)
     lengths = {r.id: measure(r) for r in reasoning}
     fitting = [r for r in reasoning if lengths[r.id] <= cap]
     n_direct = round(len(fitting) * direct_fraction / (1 - direct_fraction)) if fitting else 0
@@ -109,7 +120,9 @@ def build_e2(rows_by_q: dict[str, list[dict]], pool: dict[str, Record], *, measu
         "samples_kept": total - sum(rejected.values()),
         "acceptance_rate": round((total - sum(rejected.values())) / total, 4) if total else 0,
         "rejected": dict(rejected), "pass_rate_histogram": dict(histogram),
-        "questions_with_a_kept_trace": len(reasoning), "dropped_over_cap": len(reasoning) - len(fitting),
+        "questions_with_a_kept_trace": len({r.id.rsplit("-", 1)[0] if max_per_question > 1
+                                            else r.id for r in reasoning}),
+        "dropped_over_cap": len(reasoning) - len(fitting),
         "reasoning_rows": len(fitting), "direct_rows": len(direct), "rows": len(rows),
         "think_tokens_all_samples": ({"median": percentile(think, 0.5), "p90": percentile(think, 0.9)}
                                      if think else None),
@@ -120,10 +133,10 @@ def build_e2(rows_by_q: dict[str, list[dict]], pool: dict[str, Record], *, measu
     return rows, report
 
 
-def load_generation(dirs: list[Path]) -> dict[str, list[dict]]:
+def load_generation(dirs: list[Path], stage: str = "pool") -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {}
     for d in dirs:
-        for path in sorted(d.rglob("reasoning__pool.jsonl")):
+        for path in sorted(d.rglob(f"reasoning__{stage}.jsonl")):
             for row in read_all(path):
                 out.setdefault(row["id"], []).append(row)
     return out

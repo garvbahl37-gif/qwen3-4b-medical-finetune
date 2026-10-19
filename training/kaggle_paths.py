@@ -31,6 +31,11 @@ DATA_FILES = ("train.jsonl", "eval_medqa.jsonl", "eval_medmcqa.jsonl",
 # self_traces report), so training can run without generating again.
 E2_DATA_FILES = ("train.jsonl", "e2_report.json")
 
+# E3: the weak questions (pool questions the base got wrong), and the teacher's
+# verified traces built from them.
+E3_DATA_FILES = ("eval_weak.jsonl", "weak_report.json")
+E3T_DATA_FILES = ("train.jsonl", "e2_report.json", "pilot_report.json")
+
 # E2's dataset: the question pool, the dev split and the four benchmarks.
 V3_DATA_FILES = ("eval_pool.jsonl", "eval_dev_medqa.jsonl", "eval_dev_medmcqa.jsonl",
                  "eval_medqa.jsonl", "eval_medmcqa.jsonl", "eval_pubmedqa.jsonl",
@@ -107,14 +112,19 @@ def code_fingerprint(directory: Path) -> str:
     return digest.hexdigest()[:16]
 
 
-def find_data_dir(root: Path, files: tuple[str, ...] = DATA_FILES) -> Path:
-    """Locate the uploaded data by content, like find_code_dir."""
+def find_data_dir(root: Path, files: tuple[str, ...] = DATA_FILES,
+                  fingerprint: str | None = None) -> Path:
+    """Locate the uploaded data by content, like find_code_dir. Two attached
+    datasets can hold the same file names (E2's training set and the E3
+    teacher's); with `fingerprint`, the copy whose files match it wins."""
     if not root.exists():
         raise SystemExit(
             "\nSTOP. /kaggle/input does not exist -- no inputs are attached.\n"
             "FIX: sidebar -> + Add Input -> Datasets -> medical-ft-data.")
     found = sorted({p.parent for p in root.rglob(files[0])
                     if all((p.parent / name).exists() for name in files)})
+    if fingerprint:
+        found = [d for d in found if data_fingerprint(d, files) == fingerprint] or found
     if found:
         return found[0]
     tree = sorted(str(p.relative_to(root)) for p in root.rglob("*"))[:30]

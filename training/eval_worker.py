@@ -26,7 +26,7 @@ STAGES: tuple[tuple[str, str], ...] = (
 # Run only when asked for: E2's training-question pool and the dev split that
 # model selection uses instead of the benchmarks (data/v3).
 EXTRA_STAGES: tuple[tuple[str, str], ...] = (
-    ("reasoning", "pool"),
+    ("reasoning", "pool"), ("reasoning", "weak"),
     ("letter", "dev_medqa"), ("reasoning", "dev_medqa"),
     ("letter", "dev_medmcqa"), ("reasoning", "dev_medmcqa"),
 )
@@ -87,12 +87,15 @@ def parse_counts(text: str, *, minimum: int) -> dict[str, int]:
     return out
 
 
-def check_role(role: str, adapter: str | None) -> str | None:
-    """The adapter a worker loads. 'base' never loads one; any other role
-    is a fine-tune and must name its adapter."""
+def check_role(role: str, adapter: str | None, *, plain: bool = False) -> str | None:
+    """The adapter a worker loads. 'base', and a plain model such as a
+    teacher (--no-adapter), never load one; any other role is a fine-tune and
+    must name its adapter."""
     if not _ROLE.match(role):
         raise SystemExit(f"\nSTOP. --role {role!r}: use lower-case letters, digits and _.")
-    if role == "base":
+    if role == "base" or plain:
+        if adapter and plain:
+            raise SystemExit(f"\nSTOP. --role {role} is --no-adapter but was given --adapter.")
         return None
     if not adapter:
         raise SystemExit(f"\nSTOP. --role {role} needs --adapter.")
@@ -300,6 +303,10 @@ def main() -> None:
                    help="'base' (no adapter) or a name for the fine-tune, e.g. tuned, run3")
     p.add_argument("--adapter", default=None)
     p.add_argument("--base", default=DEFAULT_BASE)
+    p.add_argument("--no-adapter", action="store_true",
+                   help="a plain model under its own name, e.g. a teacher")
+    p.add_argument("--tensor-parallel", type=int, default=1,
+                   help="vLLM: split the model across this many GPUs")
     p.add_argument("--load-in-4bit", action="store_true",
                    help=f"load a pre-quantized base, e.g. {TRAINING_BASE_4BIT}")
     p.add_argument("--eval-dir", type=Path, required=True)
@@ -328,7 +335,7 @@ def main() -> None:
     import torch
     import transformers
 
-    adapter = check_role(args.role, args.adapter)
+    adapter = check_role(args.role, args.adapter, plain=args.no_adapter)
     sizes = parse_counts(args.sizes, minimum=0)
     samples = parse_counts(args.samples, minimum=1)
     reasoning_batch = args.reasoning_batch_size or args.batch_size
@@ -342,6 +349,7 @@ def main() -> None:
             "load_in_4bit": args.load_in_4bit, "sampling": SAMPLING,
             "sizes": {**REASONING_SIZES, **sizes}, "samples": samples,
             "deadline": args.deadline, "limit": args.limit, "engine": args.engine,
+            "tensor_parallel": args.tensor_parallel,
             "shard": args.shard, "started": time.time(), "status": "running", "stages": {}}
 
     def save_meta() -> None:
@@ -360,7 +368,7 @@ def main() -> None:
         llm = make_llm(args.base, adapter, budget=args.think_budget, seed=args.seed,
                        load_in_4bit=args.load_in_4bit,
                        gpu_memory_utilization=args.gpu_memory_utilization,
-                       enforce_eager=args.enforce_eager)
+                       enforce_eager=args.enforce_eager, tensor_parallel=args.tensor_parallel)
         lora = lora_request(adapter)
         # The stop tokens vLLM itself honours come from the same file.
         generation_eos = transformers.GenerationConfig.from_pretrained(args.base).eos_token_id

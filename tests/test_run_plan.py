@@ -184,3 +184,43 @@ def test_both_models_get_letter_choice_on_the_benchmarks_with_one_engine():
     letters = {"letter:medqa", "letter:medmcqa", "letter:pubmedqa", "letter:mmlu_medical"}
     assert letters <= base and letters <= e2
     assert "reasoning:medqa" in base and "reasoning:medqa" in e2
+
+
+from training.experiments_config import E3  # noqa: E402
+
+
+def test_teachers_run_as_plain_models_and_the_moe_spans_both_gpus():
+    pilot = E3["sessions"]["pilot"][0][0]
+    a = worker_args(E3, pilot[0], pilot[1], out_dir="o", eval_dir="d", adapters={},
+                    extra=pilot[2], engine="vllm")
+    j = " ".join(a)
+    assert "--no-adapter" in a and "--base Qwen/Qwen3-14B-AWQ" in j
+    assert "--sizes weak=120" in j and "--samples weak=1" in j and "--think-budget 4096" in j
+    assert "--gpu-memory-utilization 0.95" in j
+    tp = E3["sessions"]["pilot_tp"][0][0]
+    b = worker_args(E3, tp[0], tp[1], out_dir="o", eval_dir="d", adapters={}, extra=tp[2],
+                    engine="vllm")
+    assert b[b.index("--tensor-parallel") + 1] == "2"
+
+
+def test_e3_changes_only_the_data_against_e2():
+    assert E3["training"] == E2["training"]
+    assert E3["think_budget"] == E2["think_budget"] and E3["sampling"] == E2["sampling"]
+    dev = {"reasoning:dev_medqa", "reasoning:dev_medmcqa", "letter:dev_medqa", "letter:dev_medmcqa"}
+    for model, session in (("base", "base_dev"), ("e3", "e3_dev")):
+        stages = {s for q in E3["sessions"][session].values() for e in q if e[0] == model
+                  for s in e[1]}
+        assert stages == dev                                  # dev only: no benchmark tuning
+
+
+def test_teacher_entries_never_fall_back_to_transformers(tmp_path, monkeypatch):
+    import types
+
+    import training.run_plan as rp
+
+    calls = []
+    monkeypatch.setattr(rp.subprocess, "run",
+                        lambda cmd, env=None: calls.append(cmd) or types.SimpleNamespace(returncode=1))
+    code = rp.run_queue(E3, "pilot", 0, out_dir=str(tmp_path), eval_dir="d", adapters={},
+                        engine="vllm", vllm_python="/v/python")
+    assert code == 1 and len(calls) == 1 and calls[0][0] == "/v/python"

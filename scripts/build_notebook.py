@@ -11,7 +11,8 @@ from training.kaggle_paths import code_fingerprint, data_fingerprint
 # notebooks (a kernel directory name: training, evaluation, run3, eval3, e0s1,
 # e0s2); no names rebuilds them all. Rebuilding bakes in the current code
 # fingerprint, so a notebook that already ran is left alone unless asked for.
-NOTEBOOKS = ("training", "evaluation", "run3", "eval3", "e0s1", "e0s2", "e2", "e2t")
+NOTEBOOKS = ("training", "evaluation", "run3", "eval3", "e0s1", "e0s2", "e2", "e2t", "e3a",
+             "e3b")
 WANT = set(sys.argv[1:])
 if WANT - set(NOTEBOOKS):
     raise SystemExit(f"unknown notebook {sorted(WANT - set(NOTEBOOKS))}; known: {NOTEBOOKS}")
@@ -1070,24 +1071,33 @@ def step(cmd: str, env: dict | None = None):
     print("\\nok\\n", flush=True)''')
 
 
-E2_DOWNLOAD = '''# --- 4. Download both base models once, then work offline -----------------
-# The fp16 model generates and evaluates; Unsloth's 4-bit copy is the one
-# training.train fine-tunes (run 1-3's base).
+def download_cell(repos: tuple[tuple[str, tuple[str, ...] | None], ...],
+                  note: str) -> str:
+    """Download each repository once, then work offline. A pattern list
+    fetches only matching files (a tokenizer without its weights)."""
+    return ("""# --- 4. Download each model once, then work offline ------------------------
+""" + note + """
 from huggingface_hub import snapshot_download
 
-for repo in ("unsloth/Qwen3-4B", "unsloth/Qwen3-4B-unsloth-bnb-4bit"):
+for repo, patterns in """ + repr(repos) + """:
     for attempt in range(1, 5):
         try:
-            print(repo, "at", snapshot_download(repo))
+            print(repo, "at", snapshot_download(repo, allow_patterns=patterns))
             break
         except Exception as exc:
             print(f"{repo}: download attempt {attempt} failed: {type(exc).__name__}: {exc}")
             time.sleep(60)
     else:
         raise SystemExit(f"\\nSTOP. {repo} could not be downloaded from the Hub.")
-os.environ["HF_HUB_OFFLINE"] = "1"'''
+os.environ["HF_HUB_OFFLINE"] = "1\"""")
 
-E2_VLLM = '''# --- 5. vLLM in its own environment, then a smoke test --------------------
+
+E2_DOWNLOAD = download_cell(
+    (("unsloth/Qwen3-4B", None), ("unsloth/Qwen3-4B-unsloth-bnb-4bit", None)),
+    "# The fp16 model generates and evaluates; Unsloth's 4-bit copy is the one\n"
+    "# training.train fine-tunes (run 1-3's base).")
+
+VLLM_TEMPLATE = '''# --- 5. vLLM in its own environment, then a smoke test --------------------
 # vLLM pins its own torch and transformers, so it lives in a separate virtual
 # environment and the training stack above stays exactly as run 3 had it. If
 # it fails to install or to answer four questions, everything falls back to
@@ -1095,7 +1105,9 @@ E2_VLLM = '''# --- 5. vLLM in its own environment, then a smoke test -----------
 VENV = Path("/tmp/vllm-env")
 VLLM_PY = str(VENV / "bin" / "python")
 ENGINE, VLLM_EAGER = "hf", ""
-SMOKE_V = (f"{VLLM_PY} -m training.eval_worker --engine vllm --role base --device cuda "
+# The version that produced E2's numbers; a newer one could score differently.
+VLLM_VERSION = "0.32.0"
+SMOKE_V = (f"{VLLM_PY} -m training.eval_worker --engine vllm --role @ROLE@ --device cuda @MODEL@"
            "--eval-dir data/v3 --out-dir outputs/vllm_smoke --stages "
            "letter:dev_medqa,reasoning:dev_medqa --limit 4 --think-budget 256 "
            "--batch-size 4 --reasoning-batch-size 4")
@@ -1117,22 +1129,31 @@ ok = ok and run_logged([sys.executable, "-m", "uv", "venv", "--python", sys.exec
 # --torch-backend=auto picks the torch build that matches this machine's
 # CUDA driver, as vLLM's installation guide does.
 ok = ok and run_logged([sys.executable, "-m", "uv", "pip", "install", "--python", VLLM_PY,
-                        "vllm", "--torch-backend=auto"], 1500) == 0
+                        f"vllm=={VLLM_VERSION}", "--torch-backend=auto"], 1500) == 0
 print(f"vLLM install {'ok' if ok else 'FAILED'} in {time.time() - began:.0f}s")
 if ok:
     for extra in ("", " --enforce-eager"):
         code = run_logged(shlex.split(SMOKE_V + extra), 1200, env={"CUDA_VISIBLE_DEVICES": "0"})
-        rows = sum(1 for f in Path("outputs/vllm_smoke/base").glob("*.jsonl") for _ in open(f)) \\
-            if Path("outputs/vllm_smoke/base").exists() else 0
+        rows = sum(1 for f in Path("outputs/vllm_smoke/@ROLE@").glob("*.jsonl") for _ in open(f)) \\
+            if Path("outputs/vllm_smoke/@ROLE@").exists() else 0
         if code == 0 and rows >= 8:
             ENGINE = "vllm"
             VLLM_EAGER = extra
             break
         print(f"vLLM smoke{extra or ''} failed (exit {code}, {rows} rows)")
 if ENGINE == "vllm":
-    meta = json.loads(Path("outputs/vllm_smoke/base/meta.json").read_text())
+    meta = json.loads(Path("outputs/vllm_smoke/@ROLE@/meta.json").read_text())
     print("vLLM", meta["environment"].get("vllm"), "smoke passed:", meta["stages"])
 print("ENGINE =", ENGINE)'''
+
+
+def vllm_cell(role: str = "base", model_args: str = "") -> str:
+    """Install vLLM and smoke-test it on `role` (the base model by default)."""
+    return VLLM_TEMPLATE.replace("@ROLE@", role).replace(
+        "@MODEL@", (model_args + " ") if model_args else "")
+
+
+E2_VLLM = vllm_cell()
 
 
 def e2_phase_cell(smoke: tuple[str, ...] = ("gen", "base_eval")) -> str:
@@ -1168,8 +1189,15 @@ def stop(proc) -> None:
         except subprocess.TimeoutExpired:
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
 
-def wait(procs: dict, out: str, poll: int) -> dict:
+def wait(procs: dict, out: str, poll: int, until: float | None = None) -> dict:
+    """Wait for every process; past `until`, stop what is still running (a
+    model can hang while loading, before its own deadline check can act)."""
     while any(p.poll() is None for p in procs.values()):
+        if until and time.time() > until:
+            print(time.strftime("%H:%M"), "past the time limit; stopping", flush=True)
+            for p in procs.values():
+                stop(p)
+            break
         time.sleep(poll)
         written = sum(1 for f in Path(out).rglob("*.jsonl") for _ in open(f))
         print(time.strftime("%H:%M"), "answers written:", written, flush=True)
@@ -1178,10 +1206,11 @@ def wait(procs: dict, out: str, poll: int) -> dict:
         print("".join(open(f"{out}-gpu{g}.log").readlines()[-12:]))
     return {g: p.returncode for g, p in procs.items()}
 
-def run_phase(name: str, out: str, extra: str = "", poll: int = 600, gpus=None) -> dict:
+def run_phase(name: str, out: str, extra: str = "", poll: int = 600, gpus=None,
+              until: float | None = None) -> dict:
     Path(out).mkdir(parents=True, exist_ok=True)
     gpus = [g for g in (gpus or GPUS) if g in E2["sessions"][name]]
-    return wait({g: phase(name, g, out, extra) for g in gpus}, out, poll)
+    return wait({g: phase(name, g, out, extra) for g in gpus}, out, poll, until=until)
 
 # Every queue that can run before training, on two questions first: wiring
 # errors cost minutes here instead of hours later. (The E2 queues need the
@@ -1392,3 +1421,258 @@ if wanted("e2t"):
                        Path("e2t/kaggle_e2t.ipynb"))
     else:
         print("skipped e2t: needs data/v2, data/v3 and data/e2")
+
+
+# --- E3: corrective traces from a stronger Qwen3 teacher -------------------
+# Session a pilots three teachers on 120 of the base model's weak questions and
+# lets the best generate on all 1,418; session b adds the verified traces to
+# E2's training set, trains exactly as E2 did, and scores base and E3 on the
+# dev split only (the benchmarks are not tuned on). Settings: E3 in
+# training/experiments_config.py.
+from training.experiments_config import E3
+from training.kaggle_paths import E3_DATA_FILES, E3T_DATA_FILES
+
+E3_DATA, E3T_DATA = Path("data/e3"), Path("data/e3t")
+
+
+def data_fetch(fp: str, files: str, dest: str, slug: str) -> str:
+    """Copy one more attached dataset into `dest`, checked by fingerprint."""
+    return "\n".join([
+        "",
+        f'SRC_X = find_data_dir(INPUT, {files}, fingerprint="{fp}")',
+        f'if data_fingerprint(SRC_X, {files}) != "{fp}":',
+        "    raise SystemExit(",
+        f'        f"\\nSTOP. The attached {slug} ({{data_fingerprint(SRC_X, {files})}}) is "',
+        f'        "not the one this notebook was built for ({fp}).\\n"',
+        '        "FIX: run scripts/push_data.sh for it again.")',
+        f'Path("{dest}").mkdir(parents=True, exist_ok=True)',
+        f"for name in {files}:",
+        f'    shutil.copy(SRC_X / name, Path("{dest}") / name)',
+        f'print("{slug}:", SRC_X)',
+    ])
+
+
+def e3_fetch_cell(v3_fp: str, extras: list[tuple[str, str, str, str]]) -> str:
+    cell = e2_fetch_cell(v3_fp)
+    marker = "\ndef argv(cmd: str) -> list[str]:"
+    assert cell.count(marker) == 1
+    return cell.replace(marker, "".join(data_fetch(*x) for x in extras) + "\n" + marker)
+
+
+def e3_phase_cell(smoke: tuple[str, ...]) -> str:
+    cell = e2_phase_cell(smoke)
+    for old, new in (("from training.experiments_config import E2",
+                      "from training.experiments_config import E3"),
+                     ("--experiment E2 ", "--experiment E3 "),
+                     ('E2["sessions"]', 'E3["sessions"]')):
+        assert cell.count(old) == 1, old
+        cell = cell.replace(old, new)
+    return cell
+
+
+E3A_INTRO = """# Qwen3-4B medical fine-tune, E3a: teacher traces on the weak questions
+
+E2 trained Qwen3-4B on its own correct reasoning and changed nothing: it never
+saw the questions it gets wrong. This session collects **corrective**
+examples. A larger Qwen3 reasons through the 1,418 training-pool questions on
+which the base model was wrong (`medical-ft-data-e3`: decontaminated against
+every benchmark, disjoint from the dev split). Only answers that reach the gold
+letter are kept, up to 2 per question.
+
+1. **Pilot**: Qwen3-14B-AWQ (GPU 0) and Qwen3-8B-AWQ (GPU 1) on 120 weak
+   questions, then Qwen3-30B-A3B-GPTQ-Int4 across both GPUs. The teacher that
+   rescues the most questions per hour (at least 20% of them) wins.
+2. **Generate**: the winner answers every weak question three times.
+3. **Select**: the verified traces go to the Output panel. Session E3b trains
+   on them.
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`,
+`medical-ft-data-v3` and `medical-ft-data-e3`."""
+
+E3A_PILOT = r'''# --- 7. Pilot: which teacher rescues the most weak questions per hour -------
+OUT = Path("/kaggle/working")
+if ENGINE != "vllm":
+    raise SystemExit("\nSTOP. vLLM failed its smoke test, and the teachers need it.")
+PILOT_END = time.time() + 50 * 60
+codes = run_phase("pilot", "outputs/e3/pilot", f"--deadline {PILOT_END:.0f}", poll=120,
+                  until=PILOT_END + 900)
+print("pilot exit codes (Qwen3-14B-AWQ on GPU 0, Qwen3-8B-AWQ on GPU 1):", codes)
+TP_END = time.time() + 45 * 60
+tp = {0: phase("pilot_tp", 0, "outputs/e3/pilot_tp", f"--deadline {TP_END:.0f}", device="0,1")}
+print("pilot exit code (Qwen3-30B-A3B on both GPUs):",
+      wait(tp, "outputs/e3/pilot_tp", 120, until=TP_END + 900))
+for d in ("pilot", "pilot_tp"):
+    if Path(f"outputs/e3/{d}").exists():
+        shutil.copytree(f"outputs/e3/{d}", OUT / f"e3_{d}", dirs_exist_ok=True)
+for log in Path("outputs/e3").glob("pilot*-gpu*.log"):
+    shutil.copy(log, OUT / f"e3_{log.name}")
+step("python -m training.teacher_traces pilot --root outputs/e3/pilot --root outputs/e3/pilot_tp "
+     f"--weak data/v3/eval_weak.jsonl --out {OUT / 'e3_pilot_report.json'}")
+PILOT = json.loads((OUT / "e3_pilot_report.json").read_text())
+TEACHER = PILOT["chosen"]
+print("teacher:", TEACHER, PILOT["stats"][TEACHER])'''
+
+E3A_TEACH = r'''# --- 8. The teacher answers every weak question; keep the verified ---------
+session = f"teach_{TEACHER}"
+if TEACHER == "t30b":
+    procs = {0: phase(session, 0, "outputs/e3/teach", f"--deadline {DEADLINE:.0f}", device="0,1")}
+else:
+    procs = {g: phase(session, g, "outputs/e3/teach", f"--deadline {DEADLINE:.0f}") for g in GPUS}
+print("generation exit codes:", wait(procs, "outputs/e3/teach", 900, until=DEADLINE + 900))
+shutil.copytree("outputs/e3/teach", OUT / "e3_teacher_generation", dirs_exist_ok=True)
+for log in Path("outputs/e3").glob("teach-gpu*.log"):
+    shutil.copy(log, OUT / f"e3_{log.name}")
+# The pilot's answers from the same teacher are extra samples of the same questions.
+pilot_dirs = " ".join(f"--gen {d}" for d in sorted(Path("outputs/e3").glob(f"pilot*/gpu*/{TEACHER}")))
+T = E3["traces"]
+step(f"python -m training.teacher_traces traces --gen outputs/e3/teach {pilot_dirs} "
+     f"--weak data/v3/eval_weak.jsonl --out data/e3t --max-think {T['max_think']} "
+     f"--cap {T['cap']} --max-per-question {T['max_per_question']} --seed {T['seed']} "
+     f"--min-rows {T['min_rows']}")
+shutil.copy(OUT / "e3_pilot_report.json", "data/e3t/pilot_report.json")
+shutil.copytree("data/e3t", OUT / "e3t", dirs_exist_ok=True)
+os.chdir(OUT)
+shutil.rmtree(WORK)
+print("Done. The verified traces are in e3t/ in the Output panel.")'''
+
+E3A_DONE = """## Done
+
+In the **Output** panel:
+- `e3_pilot_report.json`: each teacher's rescue rate and speed, and the choice.
+- `e3_pilot/`, `e3_pilot_tp/`, `e3_teacher_generation/`: every teacher answer.
+- `e3t/`: the verified traces (`train.jsonl`), their report, and the pilot
+  report. Upload it as `medical-ft-data-e3t` for session E3b."""
+
+
+def e3_train_eval_cell() -> str:
+    """E2's train-and-evaluate cell for E3: the merged training set, the E3
+    adapter, and the dev-only sessions."""
+    cell = E2_TRAIN_EVAL
+    for old, new in (
+            ("then score E2 ---------", "then score E3 ---------"),
+            ('Path("data/e2/e2_report.json")', 'Path("data/e3/e2_report.json")'),
+            ('E2["training"]', 'E3["training"]'),
+            ('train_args(E2, data_dir="data/e2", out_dir="outputs/e2_adapter",',
+             'train_args(E3, data_dir="data/e3", out_dir="outputs/e3_adapter",'),
+            ("outputs/e2-train.log", "outputs/e3-train.log"),
+            ('OUT / "e2_train.log"', 'OUT / "e3_train.log"'),
+            ('phase("base_eval", 1, "outputs/e2/base_eval",', 'phase("base_dev", 1, "outputs/e3/base_dev",'),
+            ("outputs/e2/base_eval", "outputs/e3/base_dev"),
+            ('"e2_base_eval_predictions"', '"e3_base_dev_predictions"'),
+            ('"outputs/e2_adapter", OUT / "e2-adapter"', '"outputs/e3_adapter", OUT / "e3-adapter"'),
+            ('(OUT / "e2-adapter")', '(OUT / "e3-adapter")'),
+            ("--adapter e2=outputs/e2_adapter", "--adapter e3=outputs/e3_adapter"),
+            ('"e2_eval", 0, "outputs/e2/e2_eval"', '"e3_dev", 0, "outputs/e3/e3_dev"'),
+            ('"e2_eval", 1, "outputs/e2/e2_eval"', '"e3_dev", 1, "outputs/e3/e3_dev"'),
+            ("outputs/e2/e2_eval", "outputs/e3/e3_dev"),
+            ('("base_eval", "e2_eval")', '("base_dev", "e3_dev")'),
+            ('f"outputs/e2/{name}"', 'f"outputs/e3/{name}"'),
+            ('f"e2_{name}_predictions"', 'f"e3_{name}_predictions"'),
+            ('Path("outputs/e2").glob("*_eval-gpu*.log")', 'Path("outputs/e3").glob("*_dev-gpu*.log")'),
+            ('OUT / f"e2_{log.name}"', 'OUT / f"e3_{log.name}"'),
+            ("f'e2_{n}_predictions'", "f'e3_{n}_predictions'"),
+            ('f"e2_{n}_predictions"', 'f"e3_{n}_predictions"'),
+            ("'e2_report.json'", "'e3_report.json'"),
+            ("'e2_per_question.jsonl'", "'e3_per_question.jsonl'"),
+            ("E2_ARGS", "E3_ARGS"), ("e2_procs", "e3_procs"),
+            ('"e2 evaluation exit codes:"', '"e3 evaluation exit codes:"')):
+        assert old in cell, old
+        cell = cell.replace(old, new)
+    for leftover in ("outputs/e2", "e2_eval", "base_eval", "e2_adapter", "E2[", "e2_{",
+                     "'e2_", '"e2_', "e2-adapter"):
+        assert leftover not in cell, leftover
+    merge = ("\n# E3 = E2's training set + the teacher's verified corrective traces.\n"
+             'step("python -m training.teacher_traces merge --sets data/e2 data/e3t --out data/e3")\n')
+    head, sep, rest = cell.partition('OUT = Path("/kaggle/working")\n')
+    assert sep
+    return head + sep + merge + rest
+
+
+E3B_INTRO = """# Qwen3-4B medical fine-tune, E3b: train and evaluate
+
+E3 = E2's training set (3,182 of Qwen3-4B's own verified traces + 796
+answer-only rows) **plus** a stronger Qwen3's verified reasoning on the
+questions the base model got wrong (session E3a). It trains exactly as E2 did
+(LoRA rank 16, lr 5e-5, one epoch), so the corrective examples are the one
+change. GPU 1 re-scores the base model on the dev split while GPU 0 trains;
+then both GPUs score E3 on the dev split. The benchmarks are not used: E3 is
+compared with the base and E2 on the same 600 dev questions with the same
+settings (vLLM 0.32.0, a 3,072-token budget, seed 1234).
+
+**Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`,
+`medical-ft-data-v3`, `medical-ft-data-e2` and `medical-ft-data-e3t`."""
+
+E3B_DONE = """## Done
+
+In the **Output** panel:
+- `e3-adapter/`: the adapter, `train_stats.json` and `loss_curve.json`.
+- `e3_base_dev_predictions/` and `e3_e3_dev_predictions/`: every dev answer.
+- `e3_report.json` and `e3_per_question.jsonl`: base against E3 on the dev
+  split.
+- `e3_train.log` and the queue logs."""
+
+
+def _hardware(cells: dict, line: str) -> tuple[str, str]:
+    hardware = cells[1][1]
+    if E0_PLAN_LINE not in hardware:
+        raise SystemExit("the hardware cell's plan line changed; update E0_PLAN_LINE")
+    return ("code", hardware.replace(E0_PLAN_LINE, 'print(f"\\n{N_GPUS} GPU(s). ' + line + '")'))
+
+
+def e3a_cells(v3_fp: str, weak_fp: str) -> list[tuple[str, str]]:
+    cells = dict(enumerate(run3_cells(data_fingerprint(RUN2_DATA))))
+    teachers = tuple((E3["models"][t]["base"], None) for t in ("t8b", "t14b", "t30b"))
+    return [
+        ("markdown", E3A_INTRO),
+        _hardware(cells, "E3a pilots teachers, then generates on all of them."),
+        cells[2], cells[3],
+        ("code", e3_fetch_cell(v3_fp, [(weak_fp, "E3_DATA_FILES", "data/v3",
+                                        "medical-ft-data-e3")])),
+        ("code", download_cell(
+            teachers + (("unsloth/Qwen3-4B", ("*.json", "*.txt", "*.jinja")),),
+            "# The three teachers, and only the tokenizer of the student (it measures\n"
+            "# the training rows; the student itself does not run in this session).")),
+        ("code", vllm_cell("t8b", f"--no-adapter --base {E3['models']['t8b']['base']} "
+                                  "--gpu-memory-utilization 0.95")),
+        ("code", e3_phase_cell(())),
+        ("code", E3A_PILOT),
+        ("code", E3A_TEACH),
+        ("markdown", E3A_DONE),
+    ]
+
+
+def e3b_cells(v3_fp: str, e2_fp: str, e3t_fp: str) -> list[tuple[str, str]]:
+    cells = dict(enumerate(run3_cells(data_fingerprint(RUN2_DATA))))
+    return [
+        ("markdown", E3B_INTRO),
+        _hardware(cells, "E3 trains on GPU 0 and is scored on all of them."),
+        cells[2], cells[3],
+        ("code", e3_fetch_cell(v3_fp, [(e2_fp, "E2_DATA_FILES", "data/e2", "medical-ft-data-e2"),
+                                       (e3t_fp, "E3T_DATA_FILES", "data/e3t",
+                                        "medical-ft-data-e3t")])),
+        ("code", E2_DOWNLOAD),
+        ("code", E2_VLLM),
+        ("code", e3_phase_cell(("base_dev",))),
+        ("code", e3_train_eval_cell()),
+        ("markdown", E3B_DONE),
+    ]
+
+
+if wanted("e3a"):
+    if all((d / "data_report.json").exists() for d in (V3_DATA, RUN2_DATA)) and \
+            (E3_DATA / "weak_report.json").exists():
+        write_notebook(e3a_cells(data_fingerprint(V3_DATA, V3_DATA_FILES),
+                                 data_fingerprint(E3_DATA, E3_DATA_FILES)),
+                       Path("e3a/kaggle_e3a.ipynb"))
+    else:
+        print("skipped e3a: needs data/v2, data/v3 and data/e3 (training.teacher_traces weak)")
+
+if wanted("e3b"):
+    if all((d / "data_report.json").exists() for d in (V3_DATA, RUN2_DATA)) and \
+            (E2_DATA / "e2_report.json").exists() and (E3T_DATA / "pilot_report.json").exists():
+        write_notebook(e3b_cells(data_fingerprint(V3_DATA, V3_DATA_FILES),
+                                 data_fingerprint(E2_DATA, E2_DATA_FILES),
+                                 data_fingerprint(E3T_DATA, E3T_DATA_FILES)),
+                       Path("e3b/kaggle_e3b.ipynb"))
+    else:
+        print("skipped e3b: needs data/e3t from session E3a")

@@ -11,7 +11,11 @@ cd "$(dirname "$0")/.."
 
 DATA="${1:-data/v2}"
 SLUG="${2:-medical-ft-data}"
-if [ -f "$DATA/e2_report.json" ]; then
+if [ -f "$DATA/pilot_report.json" ]; then
+  FILES=(train.jsonl e2_report.json pilot_report.json)
+elif [ -f "$DATA/eval_weak.jsonl" ]; then
+  FILES=(eval_weak.jsonl weak_report.json)
+elif [ -f "$DATA/e2_report.json" ]; then
   FILES=(train.jsonl e2_report.json)
 elif [ -f "$DATA/eval_pool.jsonl" ]; then
   FILES=(eval_pool.jsonl eval_dev_medqa.jsonl eval_dev_medmcqa.jsonl eval_medqa.jsonl

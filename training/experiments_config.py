@@ -121,3 +121,59 @@ E2 = {
 }
 
 EXPERIMENTS = {"E0": E0, "E2": E2}
+
+
+# E3: corrective traces from a stronger Qwen3 teacher on the questions the base
+# gets wrong ("weak": data/e3/eval_weak.jsonl, 1,418 pool questions on which the
+# base's E2 sample was wrong or unfinished). E3's training set is E2's plus the
+# teacher's verified traces, trained exactly as E2 was, so the corrective
+# examples are the one change. Session 1 pilots three teachers on 120 weak
+# questions and lets the one with the most rescued questions per hour
+# generate; session 2 trains and scores on the dev split only.
+TEACHERS = {"t8b": "Qwen/Qwen3-8B-AWQ", "t14b": "Qwen/Qwen3-14B-AWQ",
+            "t30b": "Qwen/Qwen3-30B-A3B-GPTQ-Int4"}
+WEAK = ("reasoning:weak",)
+PILOT = {"think_budget": 4096, "sizes": {"weak": 120}, "samples": {"weak": 1},
+         "no_fallback": True}
+TEACH = {"think_budget": 4096, "no_fallback": True}
+E3 = {
+    "experiment_id": "E3",
+    "purpose": "Teacher-generated, gold-verified reasoning on the base model's weak "
+               "questions, added to E2's training set; selection on the dev split.",
+    "seed": 1234,
+    "think_budget": E2["think_budget"],
+    "batch_size": E2["batch_size"],
+    "reasoning_batch_size": E2["reasoning_batch_size"],
+    "vllm": E2["vllm"],
+    "sizes": {"weak": 0, "dev_medqa": 0, "dev_medmcqa": 0},
+    # Three teacher samples per weak question; up to two verified ones are kept.
+    "samples": {"weak": 3},
+    "sampling": SAMPLING,
+    "models": {
+        "base": {"label": "A", "base": DEFAULT_BASE, "adapter": None, "load_in_4bit": False},
+        "e3": {"label": "E3", "base": DEFAULT_BASE, "adapter": "e3", "load_in_4bit": False},
+        **{name: {"label": name, "base": repo, "adapter": None, "load_in_4bit": False,
+                  "plain": True, "gpu_memory_utilization": 0.95,
+                  **({"tensor_parallel": 2} if name == "t30b" else {})}
+           for name, repo in TEACHERS.items()},
+    },
+    "sessions": {
+        "pilot": {0: (("t14b", WEAK, {**PILOT, "shard": ""}),),
+                  1: (("t8b", WEAK, {**PILOT, "shard": ""}),)},
+        "pilot_tp": {0: (("t30b", WEAK, PILOT),)},
+        **{f"teach_{t}": ({0: ((t, WEAK, TEACH),)} if t == "t30b" else
+                          {0: ((t, WEAK, {**TEACH, "shard": "0/2"}),),
+                           1: ((t, WEAK, {**TEACH, "shard": "1/2"}),)})
+           for t in TEACHERS},
+        "base_dev": {1: (("base", DEV),)},
+        "e3_dev": {0: (("e3", ("reasoning:dev_medqa", "letter:dev_medqa")),),
+                   1: (("e3", ("reasoning:dev_medmcqa", "letter:dev_medmcqa")),)},
+    },
+    "traces": {"max_think": 3500, "cap": 4096, "max_per_question": 2, "seed": 42,
+               "min_rows": 100},
+    "training": E2["training"],
+    "kaggle": {"e3a": "gb1105/qwen3-4b-medical-e3-teacher-traces",
+               "e3b": "gb1105/qwen3-4b-medical-e3-train-and-evaluate"},
+}
+
+EXPERIMENTS = {"E0": E0, "E2": E2, "E3": E3}

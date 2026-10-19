@@ -1,0 +1,21 @@
+{
+  "id": "gb1105/qwen3-4b-medical-e3-train-and-evaluate",
+  "title": "Qwen3-4B Medical E3 Train and Evaluate",
+  "code_file": "kaggle_e3b.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "gb1105/medical-ft-code",
+    "gb1105/medical-ft-data-v3",
+    "gb1105/medical-ft-data-e2",
+    "gb1105/medical-ft-data-e3t"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

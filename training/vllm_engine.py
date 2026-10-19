@@ -32,11 +32,13 @@ def lora_rank(adapter: str) -> int:
 
 
 def make_llm(base: str, adapter: str | None, *, budget: int, seed: int, load_in_4bit: bool,
-             gpu_memory_utilization: float, enforce_eager: bool):
+             gpu_memory_utilization: float, enforce_eager: bool, tensor_parallel: int = 1):
+    """AWQ and GPTQ checkpoints (the teachers) carry their quantization in
+    their config, which vLLM reads; only bitsandbytes is named here."""
     from vllm import LLM
 
     kw = dict(model=base, tokenizer=base, dtype="half", seed=seed,
-              max_model_len=budget + PROMPT_ROOM,
+              max_model_len=budget + PROMPT_ROOM, tensor_parallel_size=tensor_parallel,
               gpu_memory_utilization=gpu_memory_utilization, enforce_eager=enforce_eager)
     if adapter:
         kw.update(enable_lora=True, max_lora_rank=lora_rank(adapter), max_loras=1)

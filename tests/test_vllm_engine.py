@@ -96,3 +96,15 @@ def test_lora_rank_comes_from_the_adapter_config(tmp_path):
 
     (tmp_path / "adapter_config.json").write_text('{"r": 16}')
     assert lora_rank(str(tmp_path)) == 16
+
+
+def test_make_llm_splits_a_large_teacher_across_gpus(monkeypatch):
+    from training.vllm_engine import make_llm
+
+    seen = {}
+    monkeypatch.setitem(sys.modules, "vllm", types.SimpleNamespace(
+        LLM=lambda **kw: seen.update(kw) or "llm", SamplingParams=Params))
+    make_llm("Qwen/Qwen3-30B-A3B-GPTQ-Int4", None, budget=4096, seed=1, load_in_4bit=False,
+             gpu_memory_utilization=0.9, enforce_eager=False, tensor_parallel=2)
+    assert seen["tensor_parallel_size"] == 2 and seen["dtype"] == "half"
+    assert "quantization" not in seen      # GPTQ/AWQ are read from the checkpoint's config
