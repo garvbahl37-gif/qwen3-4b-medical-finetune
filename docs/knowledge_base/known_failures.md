@@ -20,7 +20,12 @@
 | 16 | E2 attempt 1 died before training step 1: Unsloth's tokenizer loader looked up a repository the download cell had not fetched, and `HF_HUB_OFFLINE=1` blocked it | [measured] `results/e2/attempt1/e2_train_failed.log` | training runs with the network allowed; only the vLLM workers stay offline. The generation was kept and reused (e2t). |
 | 17 | e2t version 1 died 10 minutes in: the train-and-evaluate cell opened a log in `outputs/e2/` before anything had created it | [measured] `results/e2/attempt2/kaggle_e2t_v1_output.log` | `phase()` creates its folder. `tests/test_notebook_cells.py` now executes the notebook's orchestration cells against stand-ins for the GPU processes, the check the module tests could not make. |
 
-| 18 | E3a pilot: Qwen3-14B-AWQ and Qwen3-8B-AWQ failed vLLM engine start-up ("Engine core initialization failed") with a 4,096-token budget at 0.95 GPU memory; the 8B had passed a 256-token smoke test; Qwen3-30B-A3B-GPTQ across both GPUs worked | [measured] `results/e3/e3a/e3_pilot-gpu*.log` | **cause:** a GPU out-of-memory during vLLM's start-up passes. Weights were 5.7 GiB (8B) and 9.3 GiB (14B); at 0.95 GPU memory, free memory fell to 5–15 MB, and the failed allocation surfaced as "illegal memory access". The 30B fit because its weights are split over two GPUs (7.8 GiB each). **Fix:** single-GPU teachers run at 0.90 (E2's setting). They rerun the pilot on GPU 1 during E3b's training. |
+| 18 | E3a pilot: Qwen3-14B-AWQ and Qwen3-8B-AWQ failed vLLM engine start-up ("Engine core initialization failed") with a 4,096-token budget at 0.95 GPU memory; the 8B had passed a 256-token smoke test; Qwen3-30B-A3B-GPTQ across both GPUs worked | [measured] `results/e3/e3a/e3_pilot-gpu*.log` | **First diagnosis (wrong):** plain out-of-memory at 0.95. E3b's smoke failed the same way at 0.90 with a 64-token budget. **Actual pattern:**
+- the AWQ engines crash ("illegal memory access") right after PyTorch's `expandable_segments` allocator fails to map memory during vLLM's start-up passes;
+- the fp16 base logs the same mapping failures but survives;
+- the only AWQ run that worked (E3a's standalone smoke) had `expandable_segments` off.
+
+**Fix:** AWQ teachers run with it off (model flag `expandable_segments: False`), and their re-pilot entries are optional, so a teacher can no longer block the experiment. This is a hypothesis until the re-pilot runs. The failed E3b log is in `results/e3/e3b_attempt1/`. |
 
 Approaches that have been tried and did not beat the base in thinking mode:
 the run 2 and run 3 data mixes (external traces, 75/25), at rank 64 and

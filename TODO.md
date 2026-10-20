@@ -311,7 +311,15 @@ fetches and short reports.
       during vLLM's start-up passes at 0.95 GPU memory, which surfaced as
       "illegal memory access". The 30B fit only because its weights are split
       over two GPUs. Fixed: single-GPU teachers run at 0.90.
-- [ ] **Check the other two teachers properly.** Now folded into E3b:
+- [x] **E3b version 1 (2026-10-20 11:28) stopped at its smoke test.** The
+      14B and 8B re-pilot failed again (at 0.90, 64-token budget), and every
+      smoke entry had to pass. Training never started.
+      - Real pattern: AWQ engines crash right after PyTorch's
+        `expandable_segments` allocator fails to map memory. The only AWQ run
+        that worked had it off.
+      - Fixed: AWQ teachers run without it, and the re-pilot entries are
+        optional, so they can never block training again (with a test).
+- [ ] **Check the other two teachers properly.** Folded into E3b:
       GPU 1 reruns the 120-question pilot for the 14B and 8B at 0.90, with the
       same questions and seeds, while GPU 0 trains.
       1. When E3a ends, read `e3_pilot-gpu0.log` and `e3_pilot-gpu1.log` for

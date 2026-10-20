@@ -185,6 +185,9 @@ def run_queue(cfg: dict, session: str, gpu: int, *, engine: str = "hf",
     failed = []
     for entry in cfg["sessions"][session][gpu]:
         model, stages, extra = unpack(entry)
+        env = os.environ.copy()
+        if cfg["models"][model].get("expandable_segments") is False:
+            env.pop("PYTORCH_CUDA_ALLOC_CONF", None)
         attempts = [("vllm", vllm_python), ("hf", sys.executable)] if engine == "vllm" else \
             [("hf", sys.executable)]
         # A teacher too large for transformers on a T4 has no fallback.
@@ -195,14 +198,16 @@ def run_queue(cfg: dict, session: str, gpu: int, *, engine: str = "hf",
                                                            engine=eng, **kw)
             print("$", " ".join(cmd), flush=True)
             try:
-                code = subprocess.run(cmd, env=os.environ.copy()).returncode
+                code = subprocess.run(cmd, env=env).returncode
             except OSError as exc:              # e.g. the vLLM environment never installed
                 print(f"could not start: {exc}", flush=True)
                 code = 127
             print(f"{model} ({eng}): exit {code}", flush=True)
             if code == 0 or entry_wrote_rows(kw["out_dir"], model, stages):
                 break
-        if code:
+        if code and extra.get("optional"):
+            print(f"{model}: optional, so the queue still counts as passed", flush=True)
+        elif code:
             failed.append(model)
     if failed:
         print("failed:", ", ".join(failed), flush=True)

@@ -235,3 +235,26 @@ def test_single_gpu_teachers_leave_memory_headroom_and_get_a_re_pilot_in_e3b():
     repilot = [(e[0], e[2]) for e in queue[1:]]
     assert [m for m, _ in repilot] == ["t14b", "t8b"]
     assert all(x["sizes"] == {"weak": 120} and x["samples"] == {"weak": 1} for _, x in repilot)
+
+
+def test_awq_teachers_run_without_expandable_segments_and_optional_entries_never_fail_a_queue(
+        tmp_path, monkeypatch):
+    import types
+
+    import training.run_plan as rp
+
+    monkeypatch.setenv("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    runs = []
+
+    def fake_run(cmd, env=None):
+        role = cmd[cmd.index("--role") + 1]
+        runs.append((role, env.get("PYTORCH_CUDA_ALLOC_CONF")))
+        return types.SimpleNamespace(returncode=0 if role == "base" else 1)
+
+    monkeypatch.setattr(rp.subprocess, "run", fake_run)
+    code = rp.run_queue(E3, "base_dev", 1, out_dir=str(tmp_path), eval_dir="d", adapters={},
+                        engine="vllm", vllm_python="/v/python")
+    # E3b's smoke died because the optional 14B/8B re-pilot failed: it must not.
+    assert code == 0
+    assert runs[0] == ("base", "expandable_segments:True")     # the base runs as in E2
+    assert ("t14b", None) in runs and ("t8b", None) in runs      # AWQ crashed with it set
