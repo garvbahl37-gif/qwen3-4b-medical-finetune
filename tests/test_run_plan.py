@@ -196,7 +196,7 @@ def test_teachers_run_as_plain_models_and_the_moe_spans_both_gpus():
     j = " ".join(a)
     assert "--no-adapter" in a and "--base Qwen/Qwen3-14B-AWQ" in j
     assert "--sizes weak=120" in j and "--samples weak=1" in j and "--think-budget 4096" in j
-    assert "--gpu-memory-utilization 0.95" in j
+    assert "--gpu-memory-utilization 0.9 " in j          # 0.95 OOMed the 14B at start-up (E3a)
     tp = E3["sessions"]["pilot_tp"][0][0]
     b = worker_args(E3, tp[0], tp[1], out_dir="o", eval_dir="d", adapters={}, extra=tp[2],
                     engine="vllm")
@@ -224,3 +224,14 @@ def test_teacher_entries_never_fall_back_to_transformers(tmp_path, monkeypatch):
     code = rp.run_queue(E3, "pilot", 0, out_dir=str(tmp_path), eval_dir="d", adapters={},
                         engine="vllm", vllm_python="/v/python")
     assert code == 1 and len(calls) == 1 and calls[0][0] == "/v/python"
+
+
+def test_single_gpu_teachers_leave_memory_headroom_and_get_a_re_pilot_in_e3b():
+    # 0.95 ran the 8B and 14B AWQ engines out of memory during start-up (E3a).
+    for t in ("t8b", "t14b"):
+        assert E3["models"][t]["gpu_memory_utilization"] <= 0.90
+    queue = E3["sessions"]["base_dev"][1]
+    assert queue[0][0] == "base"                         # the base's dev scores come first
+    repilot = [(e[0], e[2]) for e in queue[1:]]
+    assert [m for m, _ in repilot] == ["t14b", "t8b"]
+    assert all(x["sizes"] == {"weak": 120} and x["samples"] == {"weak": 1} for _, x in repilot)

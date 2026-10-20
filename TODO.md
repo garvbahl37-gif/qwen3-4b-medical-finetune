@@ -300,7 +300,20 @@ fetches and short reports.
         GPU memory.
       - The root cause is in their worker logs, which can only be downloaded
         after the session.
-- [ ] **Check the other two teachers properly.**
+- [x] **E3a complete (2026-10-20 02:05).**
+      - The 30B teacher answered all 1,418 weak questions three times
+        (4,374 answers); 55.6% reached the gold letter.
+      - 953 questions (67%) have a verified trace, giving 1,749 corrective
+        rows (1,215 MedQA, 534 MedMCQA). 465 questions were never solved,
+        possibly some bad answer keys.
+      - The set rebuilds locally byte for byte. Saved in `results/e3/e3a`.
+- [x] **Root cause of the 8B and 14B pilot failures:** a GPU out-of-memory
+      during vLLM's start-up passes at 0.95 GPU memory, which surfaced as
+      "illegal memory access". The 30B fit only because its weights are split
+      over two GPUs. Fixed: single-GPU teachers run at 0.90.
+- [ ] **Check the other two teachers properly.** Now folded into E3b:
+      GPU 1 reruns the 120-question pilot for the 14B and 8B at 0.90, with the
+      same questions and seeds, while GPU 0 trains.
       1. When E3a ends, read `e3_pilot-gpu0.log` and `e3_pilot-gpu1.log` for
          the root cause, and fix it (with a test if it is ours).
       2. Run a short re-pilot (about 40 min): 8B and 14B on the same 120 weak

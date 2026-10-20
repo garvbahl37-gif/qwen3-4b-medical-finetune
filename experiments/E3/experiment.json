@@ -1,6 +1,6 @@
 {
   "experiment_id": "E3",
-  "status": "E3a version 2 running since 2026-10-19 21:29 (version 1 sat queued 53 min). Pilot: t30b chosen; t14b and t8b failed to start (root cause pending). Generation with t30b in progress.",
+  "status": "E3a complete 2026-10-20 02:05 (t30b teacher). E3b (train and evaluate, with a re-pilot of t14b and t8b at 0.90 GPU memory on GPU 1) next",
   "git_commit": "98f2ebd",
   "dataset_version": "v3 pool and dev split (fingerprint f102ed1e8991077c); weak set data/e3 (1,418 pool questions the base got wrong in E2's generation: 952 MedQA, 466 MedMCQA)",
   "hypothesis": "Gold-verified reasoning from a stronger Qwen3 teacher on the base model's weak questions, added to E2's training set, corrects errors that E2's self-traces could not. Success: E3 > base on pooled dev reasoning accuracy (dev_medqa + dev_medmcqa, 600 paired questions), McNemar p < 0.05, with E3 >= E2 and median thinking within 20% of the base. Failure: no significant gain over the base; the base stays champion.",
@@ -28,7 +28,8 @@
     "kaggle_data": [
       "gb1105/medical-ft-data-e3",
       "gb1105/medical-ft-data-e3t"
-    ]
+    ],
+    "teacher_generation": "results/e3/e3a"
   },
   "evaluation": {
     "format": "v2_predictions",
@@ -46,8 +47,28 @@
       "rescued_per_hour": 636.8,
       "setup": "Qwen/Qwen3-30B-A3B-GPTQ-Int4, tensor parallel 2"
     },
-    "t14b": "failed: vLLM engine core initialization failed (GPU 0)",
-    "t8b": "failed: vLLM engine core initialization failed (GPU 1)",
+    "t14b": "failed in E3a: CUDA out of memory at vLLM start-up at 0.95 GPU memory; re-pilot in E3b at 0.90",
+    "t8b": "failed in E3a: CUDA out of memory at vLLM start-up at 0.95 GPU memory; re-pilot in E3b at 0.90",
     "note": "the choice of t30b is by default until a re-pilot measures 8B and 14B"
+  },
+  "teacher_traces": {
+    "teacher": "Qwen/Qwen3-30B-A3B-GPTQ-Int4 (tensor parallel 2, vLLM 0.32.0)",
+    "weak_questions": 1418,
+    "samples": 4374,
+    "kept_samples": 2431,
+    "acceptance_rate": 0.5558,
+    "questions_with_a_verified_trace": 953,
+    "never_solved": 465,
+    "training_rows": 1749,
+    "rows_by_source": {
+      "medqa": 1215,
+      "medmcqa": 534
+    },
+    "think_tokens_kept": {
+      "median": 907,
+      "p90": 1915
+    },
+    "rebuilt_locally": "byte-identical",
+    "artifacts": "results/e3/e3a"
   }
 }

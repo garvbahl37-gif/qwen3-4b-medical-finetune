@@ -275,7 +275,9 @@ def test_e3b_merges_trains_and_scores_on_dev_only(tmp_path, monkeypatch):
     train = next(args for args, env in launched if "training.train" in args)
     assert train[train.index("--data") + 1] == "data/e3"
     report = json.loads((out / "e3_report.json").read_text())
-    assert set(report["models"]) == {"base", "e3"}
-    assert set(report["stages"]) == {"reasoning:dev_medqa", "letter:dev_medqa",
-                                     "reasoning:dev_medmcqa", "letter:dev_medmcqa"}
+    # the base and E3, plus the 14B and 8B teachers' re-pilot on GPU 1
+    assert set(report["models"]) == {"base", "e3", "t14b", "t8b"}
+    assert (out / "e3_base_dev_predictions" / "gpu1" / "t14b" / "reasoning__weak.jsonl").exists()
+    assert {"reasoning:dev_medqa", "letter:dev_medqa", "reasoning:dev_medmcqa",
+            "letter:dev_medmcqa"} <= set(report["stages"])
     assert (out / "e3-adapter" / "adapter_model.safetensors").exists() and not work.exists()

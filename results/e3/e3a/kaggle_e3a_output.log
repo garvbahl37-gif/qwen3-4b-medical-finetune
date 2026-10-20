@@ -1,0 +1,410 @@
+[{"stream_name":"stderr","time":6.825183098,"data":"/usr/local/lib/python3.13/dist-packages/nbformat/validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":6.825233598,"data":"  _validate(nbdict, ref, version, version_minor, relax_add_props)\n"}
+,{"stream_name":"stderr","time":7.839969649,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.840012563,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.840019553,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.84002387,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.546688548,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.546731001,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.546737871,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.546742695,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":17.061278359,"data":"GPU 0      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":17.061318666,"data":"GPU 1      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":17.06132545,"data":"capability : 7.5\n"}
+,{"stream_name":"stdout","time":17.061329843,"data":"torch      : 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":17.06133417,"data":"\n"}
+,{"stream_name":"stdout","time":17.061338301,"data":"2 GPU(s). E3a pilots teachers, then generates on all of them.\n"}
+,{"stream_name":"stdout","time":59.223368845,"data":"ok | unsloth 2026.9.7 | transformers 5.5.0 | trl 0.24.0 | peft 0.19.1 | torch 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":90.99893533,"data":"ok | peft can wrap a layer on this image\n"}
+,{"stream_name":"stdout","time":118.89940833,"data":"ok | SFTConfig accepts train_sampling_strategy\n"}
+,{"stream_name":"stdout","time":120.349507563,"data":"code: /kaggle/input/datasets/gb1105/medical-ft-code\n"}
+,{"stream_name":"stdout","time":120.349537324,"data":"data: /kaggle/input/datasets/gb1105/medical-ft-data-v3\n"}
+,{"stream_name":"stdout","time":120.349543567,"data":"{\"dev_medqa\": 300, \"dev_medmcqa\": 300, \"pool\": 6000}\n"}
+,{"stream_name":"stdout","time":120.349549187,"data":"medical-ft-data-e3: /kaggle/input/datasets/gb1105/medical-ft-data-e3\n"}
+,{"stream_name":"stderr","time":121.188256326,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":121.18830036,"data":"\n"}
+,{"stream_name":"stderr","time":121.188308173,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":143.691726267,"data":"Qwen/Qwen3-8B-AWQ at /root/.cache/huggingface/hub/models--Qwen--Qwen3-8B-AWQ/snapshots/4da05a8edb55c6046cce958586c33b61da07bb79\n"}
+,{"stream_name":"stdout","time":190.852836558,"data":"Qwen/Qwen3-14B-AWQ at /root/.cache/huggingface/hub/models--Qwen--Qwen3-14B-AWQ/snapshots/31c69efc29464b6bb0aee1398b5a7b50a99340c3\n"}
+,{"stream_name":"stdout","time":272.163362409,"data":"Qwen/Qwen3-30B-A3B-GPTQ-Int4 at /root/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-GPTQ-Int4/snapshots/9b534e4318b7ebc3c961a839f13eb18b1833f441\n"}
+,{"stream_name":"stdout","time":274.997408957,"data":"unsloth/Qwen3-4B at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B/snapshots/64033659d5caf1b8ed7f929b29de705e93a4d468\n"}
+,{"stream_name":"stdout","time":287.753128431,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.3/17.3 MB 82.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":287.75318915,"data":"\n"}
+,{"stream_name":"stdout","time":287.753207982,"data":"warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?\n"}
+,{"stream_name":"stdout","time":287.753214529,"data":"Using CPython 3.13.15 interpreter at: /usr/bin/python3\n"}
+,{"stream_name":"stdout","time":287.753219556,"data":"Creating virtual environment at: /tmp/vllm-env\n"}
+,{"stream_name":"stdout","time":287.753224689,"data":"Activate with: source /tmp/vllm-env/bin/activate\n"}
+,{"stream_name":"stdout","time":287.753230211,"data":"\n"}
+,{"stream_name":"stdout","time":487.358173985,"data":"=0.65.0\n"}
+,{"stream_name":"stdout","time":487.358224978,"data":" + numpy==2.4.6\n"}
+,{"stream_name":"stdout","time":487.358230154,"data":" + nvidia-cublas==13.4.0.1\n"}
+,{"stream_name":"stdout","time":487.358233748,"data":" + nvidia-cuda-cccl==13.3.4.3.1\n"}
+,{"stream_name":"stdout","time":487.358237262,"data":" + nvidia-cuda-crt==13.4.92\n"}
+,{"stream_name":"stdout","time":487.358240602,"data":" + nvidia-cuda-cupti==13.2.75\n"}
+,{"stream_name":"stdout","time":487.358244071,"data":" + nvidia-cuda-nvcc==13.4.92\n"}
+,{"stream_name":"stdout","time":487.358270225,"data":" + nvidia-cuda-nvrtc==13.2.78\n"}
+,{"stream_name":"stdout","time":487.358276402,"data":" + nvidia-cuda-runtime==13.2.75\n"}
+,{"stream_name":"stdout","time":487.358281804,"data":" + nvidia-cudnn-cu13==9.20.0.48\n"}
+,{"stream_name":"stdout","time":487.358286467,"data":" + nvidia-cudnn-frontend==1.31.0\n"}
+,{"stream_name":"stdout","time":487.358291932,"data":" + nvidia-cufft==12.2.0.46\n"}
+,{"stream_name":"stdout","time":487.358297518,"data":" + nvidia-cufile==1.17.1.22\n"}
+,{"stream_name":"stdout","time":487.358303045,"data":" + nvidia-curand==10.4.2.55\n"}
+,{"stream_name":"stdout","time":487.358308568,"data":" + nvidia-cusolver==12.2.0.1\n"}
+,{"stream_name":"stdout","time":487.358313538,"data":" + nvidia-cusparse==12.7.10.1\n"}
+,{"stream_name":"stdout","time":487.358324961,"data":" + nvidia-cusparselt-cu13==0.8.1\n"}
+,{"stream_name":"stdout","time":487.358328783,"data":" + nvidia-cutlass-dsl==4.8.0\n"}
+,{"stream_name":"stdout","time":487.358332189,"data":" + nvidia-cutlass-dsl-libs-base==4.8.0\n"}
+,{"stream_name":"stdout","time":487.358335706,"data":" + nvidia-cutlass-dsl-libs-core==4.8.0\n"}
+,{"stream_name":"stdout","time":487.358339137,"data":" + nvidia-cutlass-dsl-libs-cu12==4.8.0\n"}
+,{"stream_name":"stdout","time":487.358342742,"data":" + nvidia-cutlass-dsl-libs-cu13==4.8.0\n"}
+,{"stream_name":"stdout","time":487.358345985,"data":" + nvidia-ml-py==13.615.71\n"}
+,{"stream_name":"stdout","time":487.358349198,"data":" + nvidia-nccl-cu13==2.29.7\n"}
+,{"stream_name":"stdout","time":487.358368086,"data":" + nvidia-nvjitlink==13.4.92\n"}
+,{"stream_name":"stdout","time":487.358373826,"data":" + nvidia-nvshmem-cu13==3.4.5\n"}
+,{"stream_name":"stdout","time":487.358387347,"data":" + nvidia-nvtx==13.2.75\n"}
+,{"stream_name":"stdout","time":487.358401646,"data":" + nvidia-nvvm==13.4.92\n"}
+,{"stream_name":"stdout","time":487.358405722,"data":" + nvtx==0.2.15\n"}
+,{"stream_name":"stdout","time":487.358409589,"data":" + openai==3.35.1\n"}
+,{"stream_name":"stdout","time":487.358415397,"data":" + opencv-python-headless==5.0.0.93\n"}
+,{"stream_name":"stdout","time":487.358422519,"data":" + opentelemetry-api==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358425215,"data":" + opentelemetry-exporter-http-transport==0.66b1\n"}
+,{"stream_name":"stdout","time":487.358427886,"data":" + opentelemetry-exporter-otlp==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358430436,"data":" + opentelemetry-exporter-otlp-common==0.66b1\n"}
+,{"stream_name":"stdout","time":487.358434055,"data":" + opentelemetry-exporter-otlp-proto-common==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358451912,"data":" + opentelemetry-exporter-otlp-proto-grpc==1.45.1\n"}
+,{"stream_name":"stdout","time":487.35845646,"data":" + opentelemetry-exporter-otlp-proto-http==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358461031,"data":" + opentelemetry-proto==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358465505,"data":" + opentelemetry-sdk==1.45.1\n"}
+,{"stream_name":"stdout","time":487.358469513,"data":" + opentelemetry-semantic-conventions==0.66b1\n"}
+,{"stream_name":"stdout","time":487.358474272,"data":" + opentelemetry-semantic-conventions-ai==0.5.1\n"}
+,{"stream_name":"stdout","time":487.358478852,"data":" + oss-harmony==0.0.11\n"}
+,{"stream_name":"stdout","time":487.358483019,"data":" + outlines-core==0.2.14\n"}
+,{"stream_name":"stdout","time":487.358487704,"data":" + packaging==26.3\n"}
+,{"stream_name":"stdout","time":487.358491186,"data":" + partial-json-parser==0.2.1.1.post7\n"}
+,{"stream_name":"stdout","time":487.358495263,"data":" + pillow==13.0.0\n"}
+,{"stream_name":"stdout","time":487.358498785,"data":" + prometheus-client==0.26.0\n"}
+,{"stream_name":"stdout","time":487.358503126,"data":" + prometheus-fastapi-instrumentator==8.1.0\n"}
+,{"stream_name":"stdout","time":487.358506878,"data":" + propcache==0.5.4\n"}
+,{"stream_name":"stdout","time":487.358510785,"data":" + protobuf==7.36.2\n"}
+,{"stream_name":"stdout","time":487.358514786,"data":" + psutil==7.2.2\n"}
+,{"stream_name":"stdout","time":487.358518278,"data":" + py-cpuinfo==9.0.0\n"}
+,{"stream_name":"stdout","time":487.358522094,"data":" + pybase64==1.5.1\n"}
+,{"stream_name":"stdout","time":487.358525925,"data":" + pycountry==26.2.16\n"}
+,{"stream_name":"stdout","time":487.358529798,"data":" + pycparser==3.11\n"}
+,{"stream_name":"stdout","time":487.358534019,"data":" + pydantic==2.14.1\n"}
+,{"stream_name":"stdout","time":487.358538081,"data":" + pydantic-core==2.50.1\n"}
+,{"stream_name":"stdout","time":487.358542141,"data":" + pydantic-extra-types==2.11.1\n"}
+,{"stream_name":"stdout","time":487.35854676,"data":" + pydantic-settings==2.16.0\n"}
+,{"stream_name":"stdout","time":487.358551364,"data":" + pygments==2.21.0\n"}
+,{"stream_name":"stdout","time":487.358555419,"data":" + pyjwt==2.15.1\n"}
+,{"stream_name":"stdout","time":487.358559783,"data":" + pynvvideocodec==2.0.4\n"}
+,{"stream_name":"stdout","time":487.358564049,"data":" + python-dotenv==1.2.4\n"}
+,{"stream_name":"stdout","time":487.358568266,"data":" + python-json-logger==4.2.0\n"}
+,{"stream_name":"stdout","time":487.358572476,"data":" + python-multipart==0.0.32\n"}
+,{"stream_name":"stdout","time":487.358576698,"data":" + pyyaml==6.0.3\n"}
+,{"stream_name":"stdout","time":487.358581079,"data":" + pyzmq==27.2.0\n"}
+,{"stream_name":"stdout","time":487.358585671,"data":" + quack-kernels==0.6.5\n"}
+,{"stream_name":"stdout","time":487.358596145,"data":" + referencing==0.37.0\n"}
+,{"stream_name":"stdout","time":487.358601386,"data":" + regex==2026.9.29\n"}
+,{"stream_name":"stdout","time":487.358609003,"data":" + requests==2.34.2\n"}
+,{"stream_name":"stdout","time":487.358613478,"data":" + rich==15.0.0\n"}
+,{"stream_name":"stdout","time":487.358618055,"data":" + rich-toolkit==0.20.6\n"}
+,{"stream_name":"stdout","time":487.358621889,"data":" + rignore==0.8.1\n"}
+,{"stream_name":"stdout","time":487.358625831,"data":" + rpds-py==2026.9.1\n"}
+,{"stream_name":"stdout","time":487.358630399,"data":" + safetensors==0.8.0\n"}
+,{"stream_name":"stdout","time":487.358634772,"data":" + sentencepiece==0.2.2\n"}
+,{"stream_name":"stdout","time":487.358639245,"data":" + sentry-sdk==2.72.0\n"}
+,{"stream_name":"stdout","time":487.358643964,"data":" + setproctitle==1.3.8\n"}
+,{"stream_name":"stdout","time":487.358648115,"data":" + setuptools==80.10.2\n"}
+,{"stream_name":"stdout","time":487.35865256,"data":" + shellingham==1.5.4\n"}
+,{"stream_name":"stdout","time":487.358656872,"data":" + six==1.17.0\n"}
+,{"stream_name":"stdout","time":487.3586614,"data":" + sniffio==1.3.1\n"}
+,{"stream_name":"stdout","time":487.358666289,"data":" + sse-starlette==3.5.0\n"}
+,{"stream_name":"stdout","time":487.358670872,"data":" + starlette==1.9.0\n"}
+,{"stream_name":"stdout","time":487.358675118,"data":" + supervisor==4.3.0\n"}
+,{"stream_name":"stdout","time":487.358695141,"data":" + sympy==1.14.0\n"}
+,{"stream_name":"stdout","time":487.358703626,"data":" + tabulate==0.10.0\n"}
+,{"stream_name":"stdout","time":487.358707852,"data":" + tiktoken==0.14.0\n"}
+,{"stream_name":"stdout","time":487.358712536,"data":" + tilelang==0.1.12\n"}
+,{"stream_name":"stdout","time":487.358716981,"data":" + tokenizers==0.23.3\n"}
+,{"stream_name":"stdout","time":487.358721468,"data":" + tokenspeed-mla==0.2.15\n"}
+,{"stream_name":"stdout","time":487.358726129,"data":" + tokenspeed-triton==3.9.10.post20261008\n"}
+,{"stream_name":"stdout","time":487.358730448,"data":" + torch==2.13.0+cu132\n"}
+,{"stream_name":"stdout","time":487.358735093,"data":" + torch-c-dlpack-ext==0.1.5\n"}
+,{"stream_name":"stdout","time":487.358739539,"data":" + torchaudio==2.11.0+cpu\n"}
+,{"stream_name":"stdout","time":487.358743927,"data":" + torchcodec==0.17.0+cu132\n"}
+,{"stream_name":"stdout","time":487.358748243,"data":" + torchvision==0.28.0+cu132\n"}
+,{"stream_name":"stdout","time":487.358752334,"data":" + tqdm==4.70.1\n"}
+,{"stream_name":"stdout","time":487.358756509,"data":" + transformers==5.19.0\n"}
+,{"stream_name":"stdout","time":487.358760999,"data":" + triton==3.7.1\n"}
+,{"stream_name":"stdout","time":487.358765224,"data":" + truststore==0.10.5\n"}
+,{"stream_name":"stdout","time":487.358769783,"data":" + typer==0.27.3\n"}
+,{"stream_name":"stdout","time":487.358773988,"data":" + typing-extensions==4.16.0\n"}
+,{"stream_name":"stdout","time":487.358778578,"data":" + typing-inspection==0.4.4\n"}
+,{"stream_name":"stdout","time":487.358782952,"data":" + urllib3==2.8.0\n"}
+,{"stream_name":"stdout","time":487.35878731,"data":" + uvicorn==0.54.0\n"}
+,{"stream_name":"stdout","time":487.35879172,"data":" + uvloop==0.23.0\n"}
+,{"stream_name":"stdout","time":487.358796149,"data":" + vllm==0.32.0\n"}
+,{"stream_name":"stdout","time":487.358800163,"data":" + watchfiles==1.3.0\n"}
+,{"stream_name":"stdout","time":487.358804448,"data":" + websockets==17.2\n"}
+,{"stream_name":"stdout","time":487.358809054,"data":" + xgrammar==0.2.8\n"}
+,{"stream_name":"stdout","time":487.358813535,"data":" + yarl==1.25.1\n"}
+,{"stream_name":"stdout","time":487.358823969,"data":" + z3-solver==4.15.4.0\n"}
+,{"stream_name":"stdout","time":487.358828866,"data":"\n"}
+,{"stream_name":"stdout","time":487.358833322,"data":"vLLM install ok in 212s\n"}
+,{"stream_name":"stdout","time":720.214043332,"data":"00:00,  8.61it/s]\n"}
+,{"stream_name":"stdout","time":720.214091484,"data":"Capturing CUDA graphs (PIECEWISE):  90%|█████████ | 46/51 [00:10\u003c00:00,  8.71it/s]\n"}
+,{"stream_name":"stdout","time":720.214100419,"data":"Capturing CUDA graphs (PIECEWISE):  92%|█████████▏| 47/51 [00:10\u003c00:00,  8.68it/s]\n"}
+,{"stream_name":"stdout","time":720.214106411,"data":"Capturing CUDA graphs (PIECEWISE):  94%|█████████▍| 48/51 [00:10\u003c00:00,  8.68it/s]\n"}
+,{"stream_name":"stdout","time":720.214113229,"data":"Capturing CUDA graphs (PIECEWISE):  96%|█████████▌| 49/51 [00:10\u003c00:00,  8.73it/s]\n"}
+,{"stream_name":"stdout","time":720.214118536,"data":"Capturing CUDA graphs (PIECEWISE):  98%|█████████▊| 50/51 [00:11\u003c00:00,  8.86it/s]\n"}
+,{"stream_name":"stdout","time":720.214123566,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:11\u003c00:00,  8.93it/s]\n"}
+,{"stream_name":"stdout","time":720.214128406,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:11\u003c00:00,  4.56it/s]\n"}
+,{"stream_name":"stdout","time":720.214133744,"data":"\n"}
+,{"stream_name":"stdout","time":720.214139295,"data":"Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":720.214144186,"data":"Capturing CUDA graphs (FULL):   3%|▎         | 1/35 [00:00\u003c00:06,  4.87it/s]\n"}
+,{"stream_name":"stdout","time":720.21414928,"data":"Capturing CUDA graphs (FULL):   6%|▌         | 2/35 [00:00\u003c00:07,  4.68it/s]\n"}
+,{"stream_name":"stdout","time":720.214154443,"data":"Capturing CUDA graphs (FULL):   9%|▊         | 3/35 [00:00\u003c00:06,  4.71it/s]\n"}
+,{"stream_name":"stdout","time":720.214159499,"data":"Capturing CUDA graphs (FULL):  11%|█▏        | 4/35 [00:00\u003c00:06,  4.72it/s]\n"}
+,{"stream_name":"stdout","time":720.214164391,"data":"Capturing CUDA graphs (FULL):  14%|█▍        | 5/35 [00:01\u003c00:06,  4.77it/s]\n"}
+,{"stream_name":"stdout","time":720.214169073,"data":"Capturing CUDA graphs (FULL):  17%|█▋        | 6/35 [00:01\u003c00:06,  4.81it/s]\n"}
+,{"stream_name":"stdout","time":720.214174625,"data":"Capturing CUDA graphs (FULL):  20%|██        | 7/35 [00:01\u003c00:05,  4.89it/s]\n"}
+,{"stream_name":"stdout","time":720.214180421,"data":"Capturing CUDA graphs (FULL):  23%|██▎       | 8/35 [00:01\u003c00:05,  4.97it/s]\n"}
+,{"stream_name":"stdout","time":720.214188028,"data":"Capturing CUDA graphs (FULL):  26%|██▌       | 9/35 [00:01\u003c00:05,  5.20it/s]\n"}
+,{"stream_name":"stdout","time":720.214249906,"data":"Capturing CUDA graphs (FULL):  29%|██▊       | 10/35 [00:01\u003c00:04,  5.37it/s]\n"}
+,{"stream_name":"stdout","time":720.214259579,"data":"Capturing CUDA graphs (FULL):  31%|███▏      | 11/35 [00:02\u003c00:04,  5.52it/s]\n"}
+,{"stream_name":"stdout","time":720.214265375,"data":"Capturing CUDA graphs (FULL):  34%|███▍      | 12/35 [00:02\u003c00:04,  5.69it/s]\n"}
+,{"stream_name":"stdout","time":720.214270836,"data":"Capturing CUDA graphs (FULL):  37%|███▋      | 13/35 [00:02\u003c00:03,  5.86it/s]\n"}
+,{"stream_name":"stdout","time":720.214276056,"data":"Capturing CUDA graphs (FULL):  40%|████      | 14/35 [00:02\u003c00:03,  6.02it/s]\n"}
+,{"stream_name":"stdout","time":720.214292705,"data":"Capturing CUDA graphs (FULL):  43%|████▎     | 15/35 [00:02\u003c00:03,  6.19it/s]\n"}
+,{"stream_name":"stdout","time":720.214308235,"data":"Capturing CUDA graphs (FULL):  46%|████▌     | 16/35 [00:02\u003c00:02,  6.35it/s]\n"}
+,{"stream_name":"stdout","time":720.214313095,"data":"Capturing CUDA graphs (FULL):  49%|████▊     | 17/35 [00:03\u003c00:02,  6.79it/s]\n"}
+,{"stream_name":"stdout","time":720.21431745,"data":"Capturing CUDA graphs (FULL):  51%|█████▏    | 18/35 [00:03\u003c00:02,  7.05it/s]\n"}
+,{"stream_name":"stdout","time":720.214321942,"data":"Capturing CUDA graphs (FULL):  54%|█████▍    | 19/35 [00:03\u003c00:02,  7.38it/s]\n"}
+,{"stream_name":"stdout","time":720.21432625,"data":"Capturing CUDA graphs (FULL):  57%|█████▋    | 20/35 [00:03\u003c00:01,  7.63it/s]\n"}
+,{"stream_name":"stdout","time":720.214330616,"data":"Capturing CUDA graphs (FULL):  60%|██████    | 21/35 [00:03\u003c00:01,  7.91it/s]\n"}
+,{"stream_name":"stdout","time":720.214335035,"data":"Capturing CUDA graphs (FULL):  63%|██████▎   | 22/35 [00:03\u003c00:01,  8.15it/s]\n"}
+,{"stream_name":"stdout","time":720.214339457,"data":"Capturing CUDA graphs (FULL):  66%|██████▌   | 23/35 [00:03\u003c00:01,  8.45it/s]\n"}
+,{"stream_name":"stdout","time":720.214343837,"data":"Capturing CUDA graphs (FULL):  69%|██████▊   | 24/35 [00:03\u003c00:01,  8.72it/s]\n"}
+,{"stream_name":"stdout","time":720.214348483,"data":"Capturing CUDA graphs (FULL):  74%|███████▍  | 26/35 [00:04\u003c00:00,  9.95it/s]\n"}
+,{"stream_name":"stdout","time":720.214353095,"data":"Capturing CUDA graphs (FULL):  80%|████████  | 28/35 [00:04\u003c00:00, 10.65it/s]\n"}
+,{"stream_name":"stdout","time":720.21435758,"data":"Capturing CUDA graphs (FULL):  86%|████████▌ | 30/35 [00:04\u003c00:00, 11.19it/s]\n"}
+,{"stream_name":"stdout","time":720.214362752,"data":"Capturing CUDA graphs (FULL):  91%|█████████▏| 32/35 [00:04\u003c00:00, 11.35it/s]\n"}
+,{"stream_name":"stdout","time":720.214367548,"data":"Capturing CUDA graphs (FULL):  97%|█████████▋| 34/35 [00:04\u003c00:00, 11.54it/s]\n"}
+,{"stream_name":"stdout","time":720.214372067,"data":"Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:04\u003c00:00,  7.29it/s]\n"}
+,{"stream_name":"stdout","time":720.214376523,"data":"\n"}
+,{"stream_name":"stdout","time":720.214380645,"data":"vLLM 0.32.0 smoke passed: {'letter:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 1.9}, 'reasoning:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 10.9}}\n"}
+,{"stream_name":"stdout","time":720.214387666,"data":"ENGINE = vllm\n"}
+,{"stream_name":"stdout","time":720.254504788,"data":"smoke runs passed: {}\n"}
+,{"stream_name":"stdout","time":840.281277007,"data":"16:19 answers written: 0\n"}
+,{"stream_name":"stdout","time":960.280548502,"data":"16:21 answers written: 0\n"}
+,{"stream_name":"stdout","time":960.477023919,"data":"--- outputs/e3/pilot GPU 0 log tail ---\n"}
+,{"stream_name":"stdout","time":960.477063968,"data":"    ...\u003c4 lines\u003e...\n"}
+,{"stream_name":"stdout","time":960.477069623,"data":"        launch,\n"}
+,{"stream_name":"stdout","time":960.477073202,"data":"        ^^^^^^^\n"}
+,{"stream_name":"stdout","time":960.477076657,"data":"    )\n"}
+,{"stream_name":"stdout","time":960.477079965,"data":"    ^\n"}
+,{"stream_name":"stdout","time":960.477083311,"data":"  File \"/tmp/vllm-env/lib/python3.13/site-packages/vllm/v1/engine/utils.py\", line 1431, in wait_for_engine_startup\n"}
+,{"stream_name":"stdout","time":960.477100105,"data":"    raise RuntimeError(\n"}
+,{"stream_name":"stdout","time":960.477102966,"data":"    ...\u003c8 lines\u003e...\n"}
+,{"stream_name":"stdout","time":960.47710568,"data":"    )\n"}
+,{"stream_name":"stdout","time":960.47710824,"data":"RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}\n"}
+,{"stream_name":"stdout","time":960.477111003,"data":"t14b (vllm): exit 1\n"}
+,{"stream_name":"stdout","time":960.477113644,"data":"failed: t14b\n"}
+,{"stream_name":"stdout","time":960.477116184,"data":"\n"}
+,{"stream_name":"stdout","time":960.477118762,"data":"--- outputs/e3/pilot GPU 1 log tail ---\n"}
+,{"stream_name":"stdout","time":960.477121365,"data":"    ...\u003c4 lines\u003e...\n"}
+,{"stream_name":"stdout","time":960.477124016,"data":"        launch,\n"}
+,{"stream_name":"stdout","time":960.477126556,"data":"        ^^^^^^^\n"}
+,{"stream_name":"stdout","time":960.477129106,"data":"    )\n"}
+,{"stream_name":"stdout","time":960.477131763,"data":"    ^\n"}
+,{"stream_name":"stdout","time":960.477134374,"data":"  File \"/tmp/vllm-env/lib/python3.13/site-packages/vllm/v1/engine/utils.py\", line 1431, in wait_for_engine_startup\n"}
+,{"stream_name":"stdout","time":960.477137171,"data":"    raise RuntimeError(\n"}
+,{"stream_name":"stdout","time":960.477139744,"data":"    ...\u003c8 lines\u003e...\n"}
+,{"stream_name":"stdout","time":960.477142405,"data":"    )\n"}
+,{"stream_name":"stdout","time":960.477144919,"data":"RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}\n"}
+,{"stream_name":"stdout","time":960.477147603,"data":"t8b (vllm): exit 1\n"}
+,{"stream_name":"stdout","time":960.477150151,"data":"failed: t8b\n"}
+,{"stream_name":"stdout","time":960.477152686,"data":"\n"}
+,{"stream_name":"stdout","time":960.477155244,"data":"pilot exit codes (Qwen3-14B-AWQ on GPU 0, Qwen3-8B-AWQ on GPU 1): {0: 1, 1: 1}\n"}
+,{"stream_name":"stdout","time":1080.297036096,"data":"16:23 answers written: 0\n"}
+,{"stream_name":"stdout","time":1200.295531871,"data":"16:25 answers written: 0\n"}
+,{"stream_name":"stdout","time":1320.299805075,"data":"16:27 answers written: 0\n"}
+,{"stream_name":"stdout","time":1440.301563328,"data":"16:29 answers written: 0\n"}
+,{"stream_name":"stdout","time":1560.303390655,"data":"16:31 answers written: 0\n"}
+,{"stream_name":"stdout","time":1680.301523102,"data":"16:33 answers written: 120\n"}
+,{"stream_name":"stdout","time":1680.310130873,"data":"--- outputs/e3/pilot_tp GPU 0 log tail ---\n"}
+,{"stream_name":"stdout","time":1680.310167127,"data":"(EngineCore pid=934) INFO 10-19 16:31:59 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":1680.310172409,"data":"(EngineCore pid=934) INFO 10-19 16:31:59 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":1680.3101765,"data":"(EngineCore pid=934) INFO 10-19 16:31:59 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":1680.310180513,"data":"(EngineCore pid=934) INFO 10-19 16:31:59 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":1680.310184247,"data":"(EngineCore pid=934) INFO 10-19 16:31:59 [multiproc_executor.py:479] [shutdown] Executor: waiting for worker exit count=2\n"}
+,{"stream_name":"stdout","time":1680.310188048,"data":"(Worker_TP0 pid=942) INFO 10-19 16:31:59 [multiproc_executor.py:843] Parent process exited, terminating worker queues\n"}
+,{"stream_name":"stdout","time":1680.310191917,"data":"(MainProcess pid=882) WARNING 10-19 16:32:04 [utils.py:648] [shutdown] Process manager: force killing remaining processes count=1\n"}
+,{"stream_name":"stdout","time":1680.310210253,"data":"(MainProcess pid=882) WARNING 10-19 16:32:04 [utils.py:653] [shutdown] Process manager: force killing remaining process EngineCore pid 934\n"}
+,{"stream_name":"stdout","time":1680.310213627,"data":"(MainProcess pid=882) WARNING 10-19 16:32:04 [system_utils.py:225] [shutdown] force killing sub process python pid 939\n"}
+,{"stream_name":"stdout","time":1680.310216689,"data":"(MainProcess pid=882) WARNING 10-19 16:32:04 [system_utils.py:225] [shutdown] force killing sub process VLLM::Worker_TP0 pid 942\n"}
+,{"stream_name":"stdout","time":1680.310219838,"data":"(MainProcess pid=882) WARNING 10-19 16:32:04 [system_utils.py:225] [shutdown] force killing sub process VLLM::Worker_TP1 pid 943\n"}
+,{"stream_name":"stdout","time":1680.310222917,"data":"t30b (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":1680.310225761,"data":"\n"}
+,{"stream_name":"stdout","time":1680.310228548,"data":"pilot exit code (Qwen3-30B-A3B on both GPUs): {0: 0}\n"}
+,{"stream_name":"stdout","time":1680.310231661,"data":"$ python -m training.teacher_traces pilot --root outputs/e3/pilot --root outputs/e3/pilot_tp --weak data/v3/eval_weak.jsonl --out /kaggle/working/e3_pilot_report.json\n"}
+,{"stream_name":"stdout","time":1680.310234825,"data":"\n"}
+,{"stream_name":"stdout","time":1680.803125827,"data":"{\n"}
+,{"stream_name":"stdout","time":1680.803156304,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":1680.803175396,"data":"    \"t30b\": {\n"}
+,{"stream_name":"stdout","time":1680.803180074,"data":"      \"answered\": 120,\n"}
+,{"stream_name":"stdout","time":1680.803184194,"data":"      \"rescued\": 62,\n"}
+,{"stream_name":"stdout","time":1680.803188269,"data":"      \"rescue_rate\": 0.5167,\n"}
+,{"stream_name":"stdout","time":1680.803192123,"data":"      \"seconds\": 350.5,\n"}
+,{"stream_name":"stdout","time":1680.803195914,"data":"      \"rescued_per_hour\": 636.8\n"}
+,{"stream_name":"stdout","time":1680.803200024,"data":"    }\n"}
+,{"stream_name":"stdout","time":1680.803203689,"data":"  },\n"}
+,{"stream_name":"stdout","time":1680.803207444,"data":"  \"chosen\": \"t30b\",\n"}
+,{"stream_name":"stdout","time":1680.803211525,"data":"  \"min_rescue\": 0.2\n"}
+,{"stream_name":"stdout","time":1680.803215485,"data":"}\n"}
+,{"stream_name":"stdout","time":1680.814630572,"data":"{\n"}
+,{"stream_name":"stdout","time":1680.814658336,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":1680.814664024,"data":"    \"t30b\": {\n"}
+,{"stream_name":"stdout","time":1680.814682627,"data":"      \"answered\": 120,\n"}
+,{"stream_name":"stdout","time":1680.814690238,"data":"      \"rescued\": 62,\n"}
+,{"stream_name":"stdout","time":1680.814694502,"data":"      \"rescue_rate\": 0.5167,\n"}
+,{"stream_name":"stdout","time":1680.814699321,"data":"      \"seconds\": 350.5,\n"}
+,{"stream_name":"stdout","time":1680.814703971,"data":"      \"rescued_per_hour\": 636.8\n"}
+,{"stream_name":"stdout","time":1680.814708055,"data":"    }\n"}
+,{"stream_name":"stdout","time":1680.814711859,"data":"  },\n"}
+,{"stream_name":"stdout","time":1680.814715551,"data":"  \"chosen\": \"t30b\",\n"}
+,{"stream_name":"stdout","time":1680.814719639,"data":"  \"min_rescue\": 0.2\n"}
+,{"stream_name":"stdout","time":1680.814723543,"data":"}\n"}
+,{"stream_name":"stdout","time":1680.814727228,"data":"\n"}
+,{"stream_name":"stdout","time":1680.814730904,"data":"ok\n"}
+,{"stream_name":"stdout","time":1680.814734593,"data":"\n"}
+,{"stream_name":"stdout","time":1680.815500446,"data":"teacher: t30b {'answered': 120, 'rescued': 62, 'rescue_rate': 0.5167, 'seconds': 350.5, 'rescued_per_hour': 636.8}\n"}
+,{"stream_name":"stdout","time":2580.849625071,"data":"16:48 answers written: 192\n"}
+,{"stream_name":"stdout","time":3480.853880317,"data":"17:03 answers written: 384\n"}
+,{"stream_name":"stdout","time":4380.862931307,"data":"17:18 answers written: 576\n"}
+,{"stream_name":"stdout","time":5280.876918699,"data":"17:33 answers written: 960\n"}
+,{"stream_name":"stdout","time":6180.894385872,"data":"17:48 answers written: 1152\n"}
+,{"stream_name":"stdout","time":7080.91079888,"data":"18:03 answers written: 1610\n"}
+,{"stream_name":"stdout","time":7980.934893319,"data":"18:18 answers written: 1802\n"}
+,{"stream_name":"stdout","time":8880.955698296,"data":"18:33 answers written: 1994\n"}
+,{"stream_name":"stdout","time":9780.983293871,"data":"18:48 answers written: 2378\n"}
+,{"stream_name":"stdout","time":10681.013228604,"data":"19:03 answers written: 2570\n"}
+,{"stream_name":"stdout","time":11581.043911635,"data":"19:18 answers written: 2836\n"}
+,{"stream_name":"stdout","time":12481.093339754,"data":"19:33 answers written: 3220\n"}
+,{"stream_name":"stdout","time":13381.120628384,"data":"19:48 answers written: 3412\n"}
+,{"stream_name":"stdout","time":14281.161938312,"data":"20:03 answers written: 3604\n"}
+,{"stream_name":"stdout","time":15181.209349782,"data":"20:18 answers written: 3988\n"}
+,{"stream_name":"stdout","time":16081.22749004,"data":"20:33 answers written: 4254\n"}
+,{"stream_name":"stdout","time":16081.245609341,"data":"--- outputs/e3/teach GPU 0 log tail ---\n"}
+,{"stream_name":"stdout","time":16081.245640799,"data":"(EngineCore pid=1327) INFO 10-19 20:29:26 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":16081.245648779,"data":"(EngineCore pid=1327) INFO 10-19 20:29:26 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":16081.24565549,"data":"(EngineCore pid=1327) INFO 10-19 20:29:26 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":16081.245662297,"data":"(EngineCore pid=1327) INFO 10-19 20:29:26 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":16081.245668341,"data":"(EngineCore pid=1327) INFO 10-19 20:29:26 [multiproc_executor.py:479] [shutdown] Executor: waiting for worker exit count=2\n"}
+,{"stream_name":"stdout","time":16081.245692832,"data":"(Worker_TP0 pid=1335) INFO 10-19 20:29:26 [multiproc_executor.py:843] Parent process exited, terminating worker queues\n"}
+,{"stream_name":"stdout","time":16081.245699605,"data":"(MainProcess pid=1292) WARNING 10-19 20:29:31 [utils.py:648] [shutdown] Process manager: force killing remaining processes count=1\n"}
+,{"stream_name":"stdout","time":16081.245705939,"data":"(MainProcess pid=1292) WARNING 10-19 20:29:31 [utils.py:653] [shutdown] Process manager: force killing remaining process EngineCore pid 1327\n"}
+,{"stream_name":"stdout","time":16081.245711853,"data":"(MainProcess pid=1292) WARNING 10-19 20:29:31 [system_utils.py:225] [shutdown] force killing sub process python pid 1332\n"}
+,{"stream_name":"stdout","time":16081.245717264,"data":"(MainProcess pid=1292) WARNING 10-19 20:29:31 [system_utils.py:225] [shutdown] force killing sub process VLLM::Worker_TP0 pid 1335\n"}
+,{"stream_name":"stdout","time":16081.245723087,"data":"(MainProcess pid=1292) WARNING 10-19 20:29:31 [system_utils.py:225] [shutdown] force killing sub process VLLM::Worker_TP1 pid 1336\n"}
+,{"stream_name":"stdout","time":16081.245729096,"data":"t30b (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":16081.245734244,"data":"\n"}
+,{"stream_name":"stdout","time":16081.245739212,"data":"generation exit codes: {0: 0}\n"}
+,{"stream_name":"stdout","time":16081.245763136,"data":"$ python -m training.teacher_traces traces --gen outputs/e3/teach --gen outputs/e3/pilot_tp/gpu0/t30b --weak data/v3/eval_weak.jsonl --out data/e3t --max-think 3500 --cap 4096 --max-per-question 2 --seed 42 --min-rows 100\n"}
+,{"stream_name":"stdout","time":16081.245768983,"data":"\n"}
+,{"stream_name":"stdout","time":16117.545181541,"data":"{\n"}
+,{"stream_name":"stdout","time":16117.545228544,"data":"  \"questions\": 1418,\n"}
+,{"stream_name":"stdout","time":16117.545234761,"data":"  \"samples_generated\": 4374,\n"}
+,{"stream_name":"stdout","time":16117.54524014,"data":"  \"samples_kept\": 2431,\n"}
+,{"stream_name":"stdout","time":16117.545244837,"data":"  \"acceptance_rate\": 0.5558,\n"}
+,{"stream_name":"stdout","time":16117.545249857,"data":"  \"rejected\": {\n"}
+,{"stream_name":"stdout","time":16117.545255162,"data":"    \"wrong_letter\": 1900,\n"}
+,{"stream_name":"stdout","time":16117.545259991,"data":"    \"unfinished_or_forced\": 32,\n"}
+,{"stream_name":"stdout","time":16117.545265202,"data":"    \"thinking_too_long\": 11\n"}
+,{"stream_name":"stdout","time":16117.545270211,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.545274926,"data":"  \"pass_rate_histogram\": {\n"}
+,{"stream_name":"stdout","time":16117.545280609,"data":"    \"2/3\": 158,\n"}
+,{"stream_name":"stdout","time":16117.545285917,"data":"    \"1/4\": 12,\n"}
+,{"stream_name":"stdout","time":16117.54529054,"data":"    \"3/3\": 567,\n"}
+,{"stream_name":"stdout","time":16117.545295356,"data":"    \"0/4\": 37,\n"}
+,{"stream_name":"stdout","time":16117.545300206,"data":"    \"0/3\": 428,\n"}
+,{"stream_name":"stdout","time":16117.545305112,"data":"    \"1/3\": 145,\n"}
+,{"stream_name":"stdout","time":16117.545310417,"data":"    \"4/4\": 50,\n"}
+,{"stream_name":"stdout","time":16117.545316,"data":"    \"2/4\": 6,\n"}
+,{"stream_name":"stdout","time":16117.54532117,"data":"    \"3/4\": 15\n"}
+,{"stream_name":"stdout","time":16117.545326062,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.545330445,"data":"  \"questions_with_a_kept_trace\": 953,\n"}
+,{"stream_name":"stdout","time":16117.545335579,"data":"  \"dropped_over_cap\": 0,\n"}
+,{"stream_name":"stdout","time":16117.545340418,"data":"  \"reasoning_rows\": 1749,\n"}
+,{"stream_name":"stdout","time":16117.545345782,"data":"  \"direct_rows\": 0,\n"}
+,{"stream_name":"stdout","time":16117.545351273,"data":"  \"rows\": 1749,\n"}
+,{"stream_name":"stdout","time":16117.545357044,"data":"  \"think_tokens_all_samples\": {\n"}
+,{"stream_name":"stdout","time":16117.545362217,"data":"    \"median\": 940,\n"}
+,{"stream_name":"stdout","time":16117.545367162,"data":"    \"p90\": 2166\n"}
+,{"stream_name":"stdout","time":16117.545380438,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.545384699,"data":"  \"think_tokens_kept\": {\n"}
+,{"stream_name":"stdout","time":16117.54538816,"data":"    \"median\": 907,\n"}
+,{"stream_name":"stdout","time":16117.54539148,"data":"    \"p90\": 1915\n"}
+,{"stream_name":"stdout","time":16117.5453952,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.545398742,"data":"  \"max_rendered_tokens\": 3741,\n"}
+,{"stream_name":"stdout","time":16117.545402075,"data":"  \"max_think\": 3500,\n"}
+,{"stream_name":"stdout","time":16117.545405327,"data":"  \"cap\": 4096,\n"}
+,{"stream_name":"stdout","time":16117.545408582,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":16117.545411838,"data":"  \"max_per_question\": 2,\n"}
+,{"stream_name":"stdout","time":16117.545415139,"data":"  \"max_seq\": 3776\n"}
+,{"stream_name":"stdout","time":16117.545418542,"data":"}\n"}
+,{"stream_name":"stdout","time":16117.752292177,"data":"{\n"}
+,{"stream_name":"stdout","time":16117.75233598,"data":"  \"questions\": 1418,\n"}
+,{"stream_name":"stdout","time":16117.752341505,"data":"  \"samples_generated\": 4374,\n"}
+,{"stream_name":"stdout","time":16117.752344472,"data":"  \"samples_kept\": 2431,\n"}
+,{"stream_name":"stdout","time":16117.752347482,"data":"  \"acceptance_rate\": 0.5558,\n"}
+,{"stream_name":"stdout","time":16117.752350287,"data":"  \"rejected\": {\n"}
+,{"stream_name":"stdout","time":16117.752353026,"data":"    \"wrong_letter\": 1900,\n"}
+,{"stream_name":"stdout","time":16117.752355809,"data":"    \"unfinished_or_forced\": 32,\n"}
+,{"stream_name":"stdout","time":16117.752358766,"data":"    \"thinking_too_long\": 11\n"}
+,{"stream_name":"stdout","time":16117.752361381,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.752363944,"data":"  \"pass_rate_histogram\": {\n"}
+,{"stream_name":"stdout","time":16117.752366596,"data":"    \"2/3\": 158,\n"}
+,{"stream_name":"stdout","time":16117.752369181,"data":"    \"1/4\": 12,\n"}
+,{"stream_name":"stdout","time":16117.752371706,"data":"    \"3/3\": 567,\n"}
+,{"stream_name":"stdout","time":16117.752374329,"data":"    \"0/4\": 37,\n"}
+,{"stream_name":"stdout","time":16117.752376837,"data":"    \"0/3\": 428,\n"}
+,{"stream_name":"stdout","time":16117.752379344,"data":"    \"1/3\": 145,\n"}
+,{"stream_name":"stdout","time":16117.752381838,"data":"    \"4/4\": 50,\n"}
+,{"stream_name":"stdout","time":16117.752384424,"data":"    \"2/4\": 6,\n"}
+,{"stream_name":"stdout","time":16117.752386939,"data":"    \"3/4\": 15\n"}
+,{"stream_name":"stdout","time":16117.752389437,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.752391912,"data":"  \"questions_with_a_kept_trace\": 953,\n"}
+,{"stream_name":"stdout","time":16117.752394606,"data":"  \"dropped_over_cap\": 0,\n"}
+,{"stream_name":"stdout","time":16117.752397201,"data":"  \"reasoning_rows\": 1749,\n"}
+,{"stream_name":"stdout","time":16117.752399797,"data":"  \"direct_rows\": 0,\n"}
+,{"stream_name":"stdout","time":16117.752402395,"data":"  \"rows\": 1749,\n"}
+,{"stream_name":"stdout","time":16117.752404969,"data":"  \"think_tokens_all_samples\": {\n"}
+,{"stream_name":"stdout","time":16117.752407637,"data":"    \"median\": 940,\n"}
+,{"stream_name":"stdout","time":16117.752410187,"data":"    \"p90\": 2166\n"}
+,{"stream_name":"stdout","time":16117.752412685,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.75241512,"data":"  \"think_tokens_kept\": {\n"}
+,{"stream_name":"stdout","time":16117.752417669,"data":"    \"median\": 907,\n"}
+,{"stream_name":"stdout","time":16117.752420189,"data":"    \"p90\": 1915\n"}
+,{"stream_name":"stdout","time":16117.752422688,"data":"  },\n"}
+,{"stream_name":"stdout","time":16117.752425112,"data":"  \"max_rendered_tokens\": 3741,\n"}
+,{"stream_name":"stdout","time":16117.752427713,"data":"  \"max_think\": 3500,\n"}
+,{"stream_name":"stdout","time":16117.752430254,"data":"  \"cap\": 4096,\n"}
+,{"stream_name":"stdout","time":16117.75243278,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":16117.752435329,"data":"  \"max_per_question\": 2,\n"}
+,{"stream_name":"stdout","time":16117.752437926,"data":"  \"max_seq\": 3776\n"}
+,{"stream_name":"stdout","time":16117.752440476,"data":"}\n"}
+,{"stream_name":"stdout","time":16121.629608332,"data":"\n"}
+,{"stream_name":"stdout","time":16121.629643232,"data":"ok\n"}
+,{"stream_name":"stdout","time":16121.629649257,"data":"\n"}
+,{"stream_name":"stdout","time":16121.646450648,"data":"Done. The verified traces are in e3t/ in the Output panel.\n"}
+,{"stream_name":"stderr","time":16125.64103193,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":16125.641074078,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":16125.896936834,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":16125.896966419,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":16126.818483024,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":16126.940385164,"data":"[NbConvertApp] Writing 194369 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":16129.904328627,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":16130.965998508,"data":"[NbConvertApp] Writing 510127 bytes to __results__.html\n"}
+]

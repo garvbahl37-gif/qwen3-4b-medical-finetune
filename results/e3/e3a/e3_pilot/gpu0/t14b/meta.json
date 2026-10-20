@@ -1,0 +1,36 @@
+{
+  "role": "t14b",
+  "base": "Qwen/Qwen3-14B-AWQ",
+  "adapter": null,
+  "seed": 1234,
+  "think_budget": 4096,
+  "batch_size": 512,
+  "reasoning_batch_size": 192,
+  "load_in_4bit": false,
+  "sampling": {
+    "do_sample": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+  },
+  "sizes": {
+    "medqa": 0,
+    "mmlu_medical": 0,
+    "pubmedqa": 500,
+    "medmcqa": 1000,
+    "weak": 120,
+    "dev_medqa": 0,
+    "dev_medmcqa": 0
+  },
+  "samples": {
+    "weak": 1
+  },
+  "deadline": 1792429662.0,
+  "limit": 0,
+  "engine": "vllm",
+  "tensor_parallel": 1,
+  "shard": "",
+  "started": 1792426665.6396024,
+  "status": "running",
+  "stages": {}
+}

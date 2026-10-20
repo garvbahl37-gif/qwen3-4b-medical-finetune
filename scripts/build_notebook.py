@@ -1594,13 +1594,15 @@ E3 = E2's training set (3,182 of Qwen3-4B's own verified traces + 796
 answer-only rows) **plus** a stronger Qwen3's verified reasoning on the
 questions the base model got wrong (session E3a). It trains exactly as E2 did
 (LoRA rank 16, lr 5e-5, one epoch), so the corrective examples are the one
-change. GPU 1 re-scores the base model on the dev split while GPU 0 trains;
-then both GPUs score E3 on the dev split. The benchmarks are not used: E3 is
+change. GPU 1 re-scores the base model on the dev split while GPU 0 trains, then
+reruns E3a's teacher pilot for Qwen3-14B-AWQ and Qwen3-8B-AWQ (which failed to
+start in E3a at 0.95 GPU memory); then both GPUs score E3 on the dev split. The benchmarks are not used: E3 is
 compared with the base and E2 on the same 600 dev questions with the same
 settings (vLLM 0.32.0, a 3,072-token budget, seed 1234).
 
 **Sidebar: Accelerator `GPU T4 x2`, Internet `On`.** Attach `medical-ft-code`,
-`medical-ft-data-v3`, `medical-ft-data-e2` and `medical-ft-data-e3t`."""
+`medical-ft-data-v3`, `medical-ft-data-e2`, `medical-ft-data-e3t` and
+`medical-ft-data-e3`."""
 
 E3B_DONE = """## Done
 
@@ -1633,7 +1635,8 @@ def e3a_cells(v3_fp: str, weak_fp: str) -> list[tuple[str, str]]:
             "# The three teachers, and only the tokenizer of the student (it measures\n"
             "# the training rows; the student itself does not run in this session).")),
         ("code", vllm_cell("t8b", f"--no-adapter --base {E3['models']['t8b']['base']} "
-                                  "--gpu-memory-utilization 0.95")),
+                                  f"--gpu-memory-utilization "
+                                  f"{E3['models']['t8b']['gpu_memory_utilization']}")),
         ("code", e3_phase_cell(())),
         ("code", E3A_PILOT),
         ("code", E3A_TEACH),
@@ -1641,7 +1644,7 @@ def e3a_cells(v3_fp: str, weak_fp: str) -> list[tuple[str, str]]:
     ]
 
 
-def e3b_cells(v3_fp: str, e2_fp: str, e3t_fp: str) -> list[tuple[str, str]]:
+def e3b_cells(v3_fp: str, e2_fp: str, e3t_fp: str, weak_fp: str) -> list[tuple[str, str]]:
     cells = dict(enumerate(run3_cells(data_fingerprint(RUN2_DATA))))
     return [
         ("markdown", E3B_INTRO),
@@ -1649,8 +1652,14 @@ def e3b_cells(v3_fp: str, e2_fp: str, e3t_fp: str) -> list[tuple[str, str]]:
         cells[2], cells[3],
         ("code", e3_fetch_cell(v3_fp, [(e2_fp, "E2_DATA_FILES", "data/e2", "medical-ft-data-e2"),
                                        (e3t_fp, "E3T_DATA_FILES", "data/e3t",
-                                        "medical-ft-data-e3t")])),
-        ("code", E2_DOWNLOAD),
+                                        "medical-ft-data-e3t"),
+                                       (weak_fp, "E3_DATA_FILES", "data/v3",
+                                        "medical-ft-data-e3")])),
+        ("code", download_cell(
+            (("unsloth/Qwen3-4B", None), ("unsloth/Qwen3-4B-unsloth-bnb-4bit", None),
+             (E3["models"]["t14b"]["base"], None), (E3["models"]["t8b"]["base"], None)),
+            "# The student (fp16 to score, 4-bit to train) and the 14B and 8B teachers,\n"
+            "# which rerun E3a's pilot on GPU 1 while GPU 0 trains.")),
         ("code", E2_VLLM),
         ("code", e3_phase_cell(("base_dev",))),
         ("code", e3_train_eval_cell()),
@@ -1672,7 +1681,8 @@ if wanted("e3b"):
             (E2_DATA / "e2_report.json").exists() and (E3T_DATA / "pilot_report.json").exists():
         write_notebook(e3b_cells(data_fingerprint(V3_DATA, V3_DATA_FILES),
                                  data_fingerprint(E2_DATA, E2_DATA_FILES),
-                                 data_fingerprint(E3T_DATA, E3T_DATA_FILES)),
+                                 data_fingerprint(E3T_DATA, E3T_DATA_FILES),
+                                 data_fingerprint(E3_DATA, E3_DATA_FILES)),
                        Path("e3b/kaggle_e3b.ipynb"))
     else:
         print("skipped e3b: needs data/e3t from session E3a")

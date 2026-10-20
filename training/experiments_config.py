@@ -152,8 +152,11 @@ E3 = {
     "models": {
         "base": {"label": "A", "base": DEFAULT_BASE, "adapter": None, "load_in_4bit": False},
         "e3": {"label": "E3", "base": DEFAULT_BASE, "adapter": "e3", "load_in_4bit": False},
+        # 0.95 suits the 30B MoE split over two GPUs (7.8 GiB each), but ran the
+        # single-GPU 8B and 14B AWQ engines out of memory during start-up in E3a;
+        # 0.90 is what E2's engines used for hours.
         **{name: {"label": name, "base": repo, "adapter": None, "load_in_4bit": False,
-                  "plain": True, "gpu_memory_utilization": 0.95,
+                  "plain": True, "gpu_memory_utilization": 0.95 if name == "t30b" else 0.90,
                   **({"tensor_parallel": 2} if name == "t30b" else {})}
            for name, repo in TEACHERS.items()},
     },
@@ -165,7 +168,10 @@ E3 = {
                           {0: ((t, WEAK, {**TEACH, "shard": "0/2"}),),
                            1: ((t, WEAK, {**TEACH, "shard": "1/2"}),)})
            for t in TEACHERS},
-        "base_dev": {1: (("base", DEV),)},
+        # GPU 1 is free while GPU 0 trains: after the base's dev scores, the
+        # 14B and 8B teachers rerun E3a's pilot (same 120 questions and seeds)
+        # so all three teachers are measured side by side.
+        "base_dev": {1: (("base", DEV), ("t14b", WEAK, PILOT), ("t8b", WEAK, PILOT))},
         "e3_dev": {0: (("e3", ("reasoning:dev_medqa", "letter:dev_medqa")),),
                    1: (("e3", ("reasoning:dev_medmcqa", "letter:dev_medmcqa")),)},
     },
