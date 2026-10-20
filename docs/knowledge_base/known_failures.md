@@ -25,7 +25,7 @@
 - the fp16 base logs the same mapping failures but survives;
 - the only AWQ run that worked (E3a's standalone smoke) had `expandable_segments` off.
 
-**Fix:** AWQ teachers run with it off (model flag `expandable_segments: False`), and their re-pilot entries are optional, so a teacher can no longer block the experiment. This is a hypothesis until the re-pilot runs. The failed E3b log is in `results/e3/e3b_attempt1/`. |
+**Fix:** AWQ teachers run with it off (model flag `expandable_segments: False`), and their re-pilot entries are optional, so a teacher can no longer block the experiment. **Confirmed by the re-pilot:** both AWQ teachers ran 120/120 in E3b with it off. The failed E3b log is in `results/e3/e3b_attempt1/`. |
 
 Approaches that have been tried and did not beat the base in thinking mode:
 the run 2 and run 3 data mixes (external traces, 75/25), at rank 64 and

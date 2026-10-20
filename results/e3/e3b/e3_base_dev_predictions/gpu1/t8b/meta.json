@@ -1,0 +1,55 @@
+{
+  "role": "t8b",
+  "base": "Qwen/Qwen3-8B-AWQ",
+  "adapter": null,
+  "seed": 1234,
+  "think_budget": 4096,
+  "batch_size": 512,
+  "reasoning_batch_size": 192,
+  "load_in_4bit": false,
+  "sampling": {
+    "do_sample": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+  },
+  "sizes": {
+    "medqa": 0,
+    "mmlu_medical": 0,
+    "pubmedqa": 500,
+    "medmcqa": 1000,
+    "weak": 120,
+    "dev_medqa": 0,
+    "dev_medmcqa": 0
+  },
+  "samples": {
+    "weak": 1
+  },
+  "deadline": 1792514524.0,
+  "limit": 0,
+  "engine": "vllm",
+  "tensor_parallel": 1,
+  "shard": "",
+  "started": 1792483959.9572136,
+  "status": "finished",
+  "stages": {
+    "reasoning:weak": {
+      "planned": 120,
+      "questions": 120,
+      "samples": 1,
+      "scored": 120,
+      "status": "done",
+      "seconds": 1522.0
+    }
+  },
+  "environment": {
+    "torch": "2.13.0+cu132",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "device": "cuda",
+    "dtype": "float16",
+    "device_name": "Tesla T4"
+  },
+  "load_seconds": 158.2,
+  "finished": 1792485640.187999
+}

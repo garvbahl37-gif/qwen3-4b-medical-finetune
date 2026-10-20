@@ -14,7 +14,7 @@ numbers come from that CSV.
 | E1 | gentle SFT: lr 2e-5, rank 16, same v2 data | not built | — | — | lower priority than E2 (decisions D2) |
 | E2 | SFT on the base model's own gold-verified reasoning (v3 pool; 3,182 traces + 796 answer-only rows), rank 16, lr 5e-5 | **done 2026-10-19** (generation d3ed0cd; training and evaluation e2t v2, ce5206d) | **70.9 → 71.0** (1,273 questions, budget 3,072, vLLM; p 0.94). Dev MedQA 70.0 → 69.0 (p 0.76) | 57.0 → 58.4 (p 0.14) | **tie**: repairs run 3's damage but adds no accuracy; thinking −7% to −21%. The base stays the best model. |
 
-| E3 | E2's set + a stronger Qwen3's gold-verified traces on the base's 1,418 weak pool questions; trained as E2 | **E3a launched 2026-10-19 20:36** (code 98f2ebd): teacher pilot and generation | pending | dev only | pre-registered criteria in open_questions H8 |
+| E3 | E2's set + 1,749 gold-verified traces from Qwen3-30B-A3B on 953 of the base's 1,418 weak questions; trained as E2 (5,727 rows, 3.2 h) | **done 2026-10-20** (teacher traces 98f2ebd; train and score 42b7b18) | dev only: pooled dev reasoning **68.0 → 67.0** (same-session base; p 0.57); E2 68.3 | dev MedQA 61.7 → 61.7 | **fail**: corrective teacher data did not help at this scale; thinking −21% on dev MedQA. The base stays the best model. |
 
 Model selection rule: a candidate must beat the base on the dev split, with
 no meaningful loss on any benchmark and no collapse in thinking length,

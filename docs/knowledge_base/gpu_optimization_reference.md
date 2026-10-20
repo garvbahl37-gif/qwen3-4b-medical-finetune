@@ -26,6 +26,9 @@
 | vLLM thinking mode, base, budget 3,072 | MedQA test 1,273 | 10,312 s (8.1 s per question per GPU) | results/e2 base meta |
 | vLLM thinking mode, E2 adapter (LoRA in vLLM) | MedQA test 1,273 | 12,554 s (9.9 s per question) | results/e2 e2 meta |
 | vLLM letter mode | MedMCQA 4,183 | 137 s (base), 266 s (with LoRA) | results/e2 meta |
+| Teacher pilot, budget 4,096, 120 weak questions | Qwen3-30B-A3B-GPTQ (TP 2) / 14B-AWQ / 8B-AWQ | 350 s / 1,867 s / 1,522 s | results/e3/teacher_pilot_3way.json |
+| Teacher generation, Qwen3-30B-A3B-GPTQ, TP 2 | 4,374 answers | about 4 h (about 920 answers per hour) | results/e3/e3a |
+| QLoRA training, rank 16 (E3) | 5,727 rows, max_seq 3,968, batch 1 × 16 | 358 steps in 3.17 h | results/e3/e3b/train_stats.json |
 | vLLM install (uv, `--torch-backend=auto`) and engine start | | install 209 s; engine start about 90 s, of which 33 s is compilation | results/e2/attempt1 log |
 
 ## Memory arithmetic ([code]/[measured] model config)

@@ -1,0 +1,27 @@
+{
+  "stats": {
+    "t30b": {
+      "answered": 120,
+      "rescued": 62,
+      "rescue_rate": 0.5167,
+      "seconds": 350.5,
+      "rescued_per_hour": 636.8
+    },
+    "t14b": {
+      "answered": 120,
+      "rescued": 61,
+      "rescue_rate": 0.5083,
+      "seconds": 1866.6,
+      "rescued_per_hour": 117.6
+    },
+    "t8b": {
+      "answered": 120,
+      "rescued": 54,
+      "rescue_rate": 0.45,
+      "seconds": 1522.0,
+      "rescued_per_hour": 127.7
+    }
+  },
+  "chosen": "t30b",
+  "min_rescue": 0.2
+}

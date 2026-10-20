@@ -1,0 +1,604 @@
+{
+  "baseline": "base",
+  "stages": {
+    "reasoning:weak": {
+      "models": {
+        "t14b": {
+          "n": 120,
+          "accuracy": 0.5083333333333333,
+          "unparseable": 0,
+          "forced": 1,
+          "closed": 119,
+          "median_new_tokens": 902,
+          "think_tokens": {
+            "median": 764,
+            "mean": 1104.9,
+            "p90": 1973,
+            "p95": 3077
+          }
+        },
+        "t8b": {
+          "n": 120,
+          "accuracy": 0.4666666666666667,
+          "unparseable": 0,
+          "forced": 3,
+          "closed": 117,
+          "median_new_tokens": 1437,
+          "think_tokens": {
+            "median": 1309,
+            "mean": 1643.2,
+            "p90": 3160,
+            "p95": 3546
+          }
+        }
+      },
+      "common": {
+        "n": 120,
+        "accuracy": {
+          "t14b": 0.5083333333333333,
+          "t8b": 0.4666666666666667
+        }
+      }
+    },
+    "letter:dev_medqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.6166666666666667,
+          "unparseable": 0
+        },
+        "e3": {
+          "n": 300,
+          "accuracy": 0.6166666666666667,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.6166666666666667,
+          "e3": 0.6166666666666667
+        }
+      },
+      "vs_baseline": {
+        "e3": {
+          "mode": "letter",
+          "n": 300,
+          "base_accuracy": 0.6166666666666667,
+          "tuned_accuracy": 0.6166666666666667,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 8,
+            "regressions": 8,
+            "both_correct": 177,
+            "both_wrong": 107,
+            "discordant": 16,
+            "p_value": 1.0
+          },
+          "diff_ci": {
+            "diff": 0.0,
+            "low": -0.026133,
+            "high": 0.026133
+          }
+        }
+      }
+    },
+    "reasoning:dev_medqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.6833333333333333,
+          "unparseable": 0,
+          "forced": 5,
+          "closed": 295,
+          "median_new_tokens": 992,
+          "think_tokens": {
+            "median": 872,
+            "mean": 1050.0,
+            "p90": 2047,
+            "p95": 2412
+          }
+        },
+        "e3": {
+          "n": 300,
+          "accuracy": 0.6633333333333333,
+          "unparseable": 0,
+          "forced": 7,
+          "closed": 293,
+          "median_new_tokens": 765,
+          "think_tokens": {
+            "median": 690,
+            "mean": 925.2,
+            "p90": 1863,
+            "p95": 2448
+          }
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.6833333333333333,
+          "e3": 0.6633333333333333
+        }
+      },
+      "vs_baseline": {
+        "e3": {
+          "mode": "reasoning",
+          "n": 300,
+          "base_accuracy": 0.6833333333333333,
+          "tuned_accuracy": 0.6633333333333333,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 18,
+            "regressions": 24,
+            "both_correct": 181,
+            "both_wrong": 77,
+            "discordant": 42,
+            "p_value": 0.440799
+          },
+          "diff_ci": {
+            "diff": -0.02,
+            "low": -0.06228,
+            "high": 0.02228
+          }
+        }
+      }
+    },
+    "letter:dev_medmcqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.59,
+          "unparseable": 0
+        },
+        "e3": {
+          "n": 300,
+          "accuracy": 0.5933333333333334,
+          "unparseable": 0
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.59,
+          "e3": 0.5933333333333334
+        }
+      },
+      "vs_baseline": {
+        "e3": {
+          "mode": "letter",
+          "n": 300,
+          "base_accuracy": 0.59,
+          "tuned_accuracy": 0.5933333333333334,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 7,
+            "regressions": 6,
+            "both_correct": 171,
+            "both_wrong": 116,
+            "discordant": 13,
+            "p_value": 1.0
+          },
+          "diff_ci": {
+            "diff": 0.003333,
+            "low": -0.020219,
+            "high": 0.026886
+          }
+        }
+      }
+    },
+    "reasoning:dev_medmcqa": {
+      "models": {
+        "base": {
+          "n": 300,
+          "accuracy": 0.6766666666666666,
+          "unparseable": 0,
+          "forced": 5,
+          "closed": 295,
+          "median_new_tokens": 604,
+          "think_tokens": {
+            "median": 508,
+            "mean": 732.0,
+            "p90": 1432,
+            "p95": 1968
+          }
+        },
+        "e3": {
+          "n": 300,
+          "accuracy": 0.6766666666666666,
+          "unparseable": 0,
+          "forced": 5,
+          "closed": 295,
+          "median_new_tokens": 537,
+          "think_tokens": {
+            "median": 486,
+            "mean": 700.3,
+            "p90": 1327,
+            "p95": 1984
+          }
+        }
+      },
+      "common": {
+        "n": 300,
+        "accuracy": {
+          "base": 0.6766666666666666,
+          "e3": 0.6766666666666666
+        }
+      },
+      "vs_baseline": {
+        "e3": {
+          "mode": "reasoning",
+          "n": 300,
+          "base_accuracy": 0.6766666666666666,
+          "tuned_accuracy": 0.6766666666666666,
+          "base_unparseable": 0,
+          "tuned_unparseable": 0,
+          "mcnemar": {
+            "wins": 17,
+            "regressions": 17,
+            "both_correct": 186,
+            "both_wrong": 80,
+            "discordant": 34,
+            "p_value": 1.0
+          },
+          "diff_ci": {
+            "diff": 0.0,
+            "low": -0.038095,
+            "high": 0.038095
+          }
+        }
+      }
+    }
+  },
+  "models": {
+    "base": {
+      "dirs": [
+        "/kaggle/working/e3_base_dev_predictions/gpu1/base"
+      ],
+      "metas": [
+        {
+          "role": "base",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": null,
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "weak": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "weak": 3
+          },
+          "deadline": 1792514524.0,
+          "limit": 0,
+          "engine": "vllm",
+          "tensor_parallel": 1,
+          "shard": "",
+          "started": 1792478337.653152,
+          "status": "finished",
+          "stages": {
+            "reasoning:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 2284.0
+            },
+            "reasoning:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 1092.3
+            },
+            "letter:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 34.1
+            },
+            "letter:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 9.4
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 125.1,
+          "finished": 1792481882.6568093
+        }
+      ]
+    },
+    "t14b": {
+      "dirs": [
+        "/kaggle/working/e3_base_dev_predictions/gpu1/t14b"
+      ],
+      "metas": [
+        {
+          "role": "t14b",
+          "base": "Qwen/Qwen3-14B-AWQ",
+          "adapter": null,
+          "seed": 1234,
+          "think_budget": 4096,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "weak": 120,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "weak": 1
+          },
+          "deadline": 1792514524.0,
+          "limit": 0,
+          "engine": "vllm",
+          "tensor_parallel": 1,
+          "shard": "",
+          "started": 1792481889.606234,
+          "status": "finished",
+          "stages": {
+            "reasoning:weak": {
+              "planned": 120,
+              "questions": 120,
+              "samples": 1,
+              "scored": 120,
+              "status": "done",
+              "seconds": 1866.6
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 196.3,
+          "finished": 1792483952.5535154
+        }
+      ]
+    },
+    "t8b": {
+      "dirs": [
+        "/kaggle/working/e3_base_dev_predictions/gpu1/t8b"
+      ],
+      "metas": [
+        {
+          "role": "t8b",
+          "base": "Qwen/Qwen3-8B-AWQ",
+          "adapter": null,
+          "seed": 1234,
+          "think_budget": 4096,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "weak": 120,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "weak": 1
+          },
+          "deadline": 1792514524.0,
+          "limit": 0,
+          "engine": "vllm",
+          "tensor_parallel": 1,
+          "shard": "",
+          "started": 1792483959.9572136,
+          "status": "finished",
+          "stages": {
+            "reasoning:weak": {
+              "planned": 120,
+              "questions": 120,
+              "samples": 1,
+              "scored": 120,
+              "status": "done",
+              "seconds": 1522.0
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 158.2,
+          "finished": 1792485640.187999
+        }
+      ]
+    },
+    "e3": {
+      "dirs": [
+        "/kaggle/working/e3_e3_dev_predictions/gpu0/e3",
+        "/kaggle/working/e3_e3_dev_predictions/gpu1/e3"
+      ],
+      "metas": [
+        {
+          "role": "e3",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": "outputs/e3_adapter",
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "weak": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "weak": 3
+          },
+          "deadline": 1792518124.0,
+          "limit": 0,
+          "engine": "vllm",
+          "tensor_parallel": 1,
+          "shard": "",
+          "started": 1792490037.6405895,
+          "status": "finished",
+          "stages": {
+            "reasoning:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 2776.0
+            },
+            "letter:dev_medqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 63.9
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 242.7,
+          "adapter_sha256": "5c04eca5e44a141a40685e598b01c8065535c821920b70d9bc6ff2fea829e4ca",
+          "finished": 1792493120.6910973
+        },
+        {
+          "role": "e3",
+          "base": "unsloth/Qwen3-4B",
+          "adapter": "outputs/e3_adapter",
+          "seed": 1234,
+          "think_budget": 3072,
+          "batch_size": 512,
+          "reasoning_batch_size": 192,
+          "load_in_4bit": false,
+          "sampling": {
+            "do_sample": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20
+          },
+          "sizes": {
+            "medqa": 0,
+            "mmlu_medical": 0,
+            "pubmedqa": 500,
+            "medmcqa": 1000,
+            "weak": 0,
+            "dev_medqa": 0,
+            "dev_medmcqa": 0
+          },
+          "samples": {
+            "weak": 3
+          },
+          "deadline": 1792518124.0,
+          "limit": 0,
+          "engine": "vllm",
+          "tensor_parallel": 1,
+          "shard": "",
+          "started": 1792490037.6673136,
+          "status": "finished",
+          "stages": {
+            "reasoning:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 1587.8
+            },
+            "letter:dev_medmcqa": {
+              "planned": 300,
+              "questions": 300,
+              "samples": 1,
+              "scored": 300,
+              "status": "done",
+              "seconds": 17.8
+            }
+          },
+          "environment": {
+            "torch": "2.13.0+cu132",
+            "transformers": "5.19.0",
+            "vllm": "0.32.0",
+            "device": "cuda",
+            "dtype": "float16",
+            "device_name": "Tesla T4"
+          },
+          "load_seconds": 242.4,
+          "adapter_sha256": "5c04eca5e44a141a40685e598b01c8065535c821920b70d9bc6ff2fea829e4ca",
+          "finished": 1792491886.0568883
+        }
+      ]
+    }
+  }
+}

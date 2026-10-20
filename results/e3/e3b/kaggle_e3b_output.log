@@ -1,0 +1,458 @@
+[{"stream_name":"stderr","time":6.586866206,"data":"/usr/local/lib/python3.13/dist-packages/nbformat/validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":6.586910377,"data":"  _validate(nbdict, ref, version, version_minor, relax_add_props)\n"}
+,{"stream_name":"stderr","time":7.513514769,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.513551881,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.513556197,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.513558863,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.12864019,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.128669041,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.128674462,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.128678826,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":15.897727163,"data":"GPU 0      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":15.897764632,"data":"GPU 1      : Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":15.89776831,"data":"capability : 7.5\n"}
+,{"stream_name":"stdout","time":15.897770668,"data":"torch      : 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":15.897772925,"data":"\n"}
+,{"stream_name":"stdout","time":15.897775202,"data":"2 GPU(s). E3 trains on GPU 0 and is scored on all of them.\n"}
+,{"stream_name":"stdout","time":51.518014491,"data":"ok | unsloth 2026.9.7 | transformers 5.5.0 | trl 0.24.0 | peft 0.19.1 | torch 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":84.688378195,"data":"ok | peft can wrap a layer on this image\n"}
+,{"stream_name":"stdout","time":109.206883086,"data":"ok | SFTConfig accepts train_sampling_strategy\n"}
+,{"stream_name":"stdout","time":112.576345756,"data":"code: /kaggle/input/datasets/gb1105/medical-ft-code\n"}
+,{"stream_name":"stdout","time":112.576397824,"data":"data: /kaggle/input/datasets/gb1105/medical-ft-data-v3\n"}
+,{"stream_name":"stdout","time":112.576403253,"data":"{\"dev_medqa\": 300, \"dev_medmcqa\": 300, \"pool\": 6000}\n"}
+,{"stream_name":"stdout","time":113.506252628,"data":"medical-ft-data-e2: /kaggle/input/datasets/gb1105/medical-ft-data-e2\n"}
+,{"stream_name":"stdout","time":113.733078421,"data":"medical-ft-data-e3t: /kaggle/input/datasets/gb1105/medical-ft-data-e3t\n"}
+,{"stream_name":"stdout","time":114.034799267,"data":"medical-ft-data-e3: /kaggle/input/datasets/gb1105/medical-ft-data-e3\n"}
+,{"stream_name":"stderr","time":114.775692795,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":114.775720604,"data":"\n"}
+,{"stream_name":"stderr","time":114.775726138,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":141.271746347,"data":"unsloth/Qwen3-4B at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B/snapshots/64033659d5caf1b8ed7f929b29de705e93a4d468\n"}
+,{"stream_name":"stdout","time":159.783457068,"data":"unsloth/Qwen3-4B-unsloth-bnb-4bit at /root/.cache/huggingface/hub/models--unsloth--Qwen3-4B-unsloth-bnb-4bit/snapshots/bbe12ebf9362b3bcbf44e826e4c98910f2c02e72\n"}
+,{"stream_name":"stdout","time":211.105644954,"data":"Qwen/Qwen3-14B-AWQ at /root/.cache/huggingface/hub/models--Qwen--Qwen3-14B-AWQ/snapshots/31c69efc29464b6bb0aee1398b5a7b50a99340c3\n"}
+,{"stream_name":"stdout","time":237.257922856,"data":"Qwen/Qwen3-8B-AWQ at /root/.cache/huggingface/hub/models--Qwen--Qwen3-8B-AWQ/snapshots/4da05a8edb55c6046cce958586c33b61da07bb79\n"}
+,{"stream_name":"stdout","time":249.410182743,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.3/17.3 MB 76.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":249.410217846,"data":"\n"}
+,{"stream_name":"stdout","time":249.41023056,"data":"warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?\n"}
+,{"stream_name":"stdout","time":249.410235039,"data":"Using CPython 3.13.15 interpreter at: /usr/bin/python3\n"}
+,{"stream_name":"stdout","time":249.410239306,"data":"Creating virtual environment at: /tmp/vllm-env\n"}
+,{"stream_name":"stdout","time":249.410259183,"data":"Activate with: source /tmp/vllm-env/bin/activate\n"}
+,{"stream_name":"stdout","time":249.410265269,"data":"\n"}
+,{"stream_name":"stdout","time":293.452612363,"data":"=0.65.0\n"}
+,{"stream_name":"stdout","time":293.452644622,"data":" + numpy==2.4.6\n"}
+,{"stream_name":"stdout","time":293.452648768,"data":" + nvidia-cublas==13.4.0.1\n"}
+,{"stream_name":"stdout","time":293.452651792,"data":" + nvidia-cuda-cccl==13.3.4.3.1\n"}
+,{"stream_name":"stdout","time":293.452654746,"data":" + nvidia-cuda-crt==13.4.92\n"}
+,{"stream_name":"stdout","time":293.452657664,"data":" + nvidia-cuda-cupti==13.2.75\n"}
+,{"stream_name":"stdout","time":293.452660482,"data":" + nvidia-cuda-nvcc==13.4.92\n"}
+,{"stream_name":"stdout","time":293.45267543,"data":" + nvidia-cuda-nvrtc==13.2.78\n"}
+,{"stream_name":"stdout","time":293.452680511,"data":" + nvidia-cuda-runtime==13.2.75\n"}
+,{"stream_name":"stdout","time":293.452685507,"data":" + nvidia-cudnn-cu13==9.20.0.48\n"}
+,{"stream_name":"stdout","time":293.452689784,"data":" + nvidia-cudnn-frontend==1.31.0\n"}
+,{"stream_name":"stdout","time":293.452694732,"data":" + nvidia-cufft==12.2.0.46\n"}
+,{"stream_name":"stdout","time":293.452699462,"data":" + nvidia-cufile==1.17.1.22\n"}
+,{"stream_name":"stdout","time":293.452703657,"data":" + nvidia-curand==10.4.2.55\n"}
+,{"stream_name":"stdout","time":293.452707711,"data":" + nvidia-cusolver==12.2.0.1\n"}
+,{"stream_name":"stdout","time":293.452711778,"data":" + nvidia-cusparse==12.7.10.1\n"}
+,{"stream_name":"stdout","time":293.452715861,"data":" + nvidia-cusparselt-cu13==0.8.1\n"}
+,{"stream_name":"stdout","time":293.45272354,"data":" + nvidia-cutlass-dsl==4.8.0\n"}
+,{"stream_name":"stdout","time":293.452727717,"data":" + nvidia-cutlass-dsl-libs-base==4.8.0\n"}
+,{"stream_name":"stdout","time":293.45273188,"data":" + nvidia-cutlass-dsl-libs-core==4.8.0\n"}
+,{"stream_name":"stdout","time":293.45273599,"data":" + nvidia-cutlass-dsl-libs-cu12==4.8.0\n"}
+,{"stream_name":"stdout","time":293.452740172,"data":" + nvidia-cutlass-dsl-libs-cu13==4.8.0\n"}
+,{"stream_name":"stdout","time":293.452749443,"data":" + nvidia-ml-py==13.615.71\n"}
+,{"stream_name":"stdout","time":293.452752562,"data":" + nvidia-nccl-cu13==2.29.7\n"}
+,{"stream_name":"stdout","time":293.452773683,"data":" + nvidia-nvjitlink==13.4.92\n"}
+,{"stream_name":"stdout","time":293.452777927,"data":" + nvidia-nvshmem-cu13==3.4.5\n"}
+,{"stream_name":"stdout","time":293.452781879,"data":" + nvidia-nvtx==13.2.75\n"}
+,{"stream_name":"stdout","time":293.452785626,"data":" + nvidia-nvvm==13.4.92\n"}
+,{"stream_name":"stdout","time":293.45278963,"data":" + nvtx==0.2.15\n"}
+,{"stream_name":"stdout","time":293.452793332,"data":" + openai==3.35.1\n"}
+,{"stream_name":"stdout","time":293.452796495,"data":" + opencv-python-headless==5.0.0.93\n"}
+,{"stream_name":"stdout","time":293.452799866,"data":" + opentelemetry-api==1.45.1\n"}
+,{"stream_name":"stdout","time":293.45280312,"data":" + opentelemetry-exporter-http-transport==0.66b1\n"}
+,{"stream_name":"stdout","time":293.452806475,"data":" + opentelemetry-exporter-otlp==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452809739,"data":" + opentelemetry-exporter-otlp-common==0.66b1\n"}
+,{"stream_name":"stdout","time":293.452813077,"data":" + opentelemetry-exporter-otlp-proto-common==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452816396,"data":" + opentelemetry-exporter-otlp-proto-grpc==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452819675,"data":" + opentelemetry-exporter-otlp-proto-http==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452823013,"data":" + opentelemetry-proto==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452826315,"data":" + opentelemetry-sdk==1.45.1\n"}
+,{"stream_name":"stdout","time":293.452829514,"data":" + opentelemetry-semantic-conventions==0.66b1\n"}
+,{"stream_name":"stdout","time":293.452832823,"data":" + opentelemetry-semantic-conventions-ai==0.5.1\n"}
+,{"stream_name":"stdout","time":293.452836076,"data":" + oss-harmony==0.0.11\n"}
+,{"stream_name":"stdout","time":293.452839295,"data":" + outlines-core==0.2.14\n"}
+,{"stream_name":"stdout","time":293.4528425,"data":" + packaging==26.3\n"}
+,{"stream_name":"stdout","time":293.452845872,"data":" + partial-json-parser==0.2.1.1.post7\n"}
+,{"stream_name":"stdout","time":293.452854302,"data":" + pillow==13.0.0\n"}
+,{"stream_name":"stdout","time":293.4528571,"data":" + prometheus-client==0.26.0\n"}
+,{"stream_name":"stdout","time":293.452870568,"data":" + prometheus-fastapi-instrumentator==8.1.0\n"}
+,{"stream_name":"stdout","time":293.4528748,"data":" + propcache==0.5.4\n"}
+,{"stream_name":"stdout","time":293.452878827,"data":" + protobuf==7.36.2\n"}
+,{"stream_name":"stdout","time":293.452882752,"data":" + psutil==7.2.2\n"}
+,{"stream_name":"stdout","time":293.452886555,"data":" + py-cpuinfo==9.0.0\n"}
+,{"stream_name":"stdout","time":293.452889841,"data":" + pybase64==1.5.1\n"}
+,{"stream_name":"stdout","time":293.452893022,"data":" + pycountry==26.2.16\n"}
+,{"stream_name":"stdout","time":293.452896231,"data":" + pycparser==3.11\n"}
+,{"stream_name":"stdout","time":293.452899519,"data":" + pydantic==2.14.1\n"}
+,{"stream_name":"stdout","time":293.452902678,"data":" + pydantic-core==2.50.1\n"}
+,{"stream_name":"stdout","time":293.452905893,"data":" + pydantic-extra-types==2.11.1\n"}
+,{"stream_name":"stdout","time":293.452909159,"data":" + pydantic-settings==2.16.0\n"}
+,{"stream_name":"stdout","time":293.452912367,"data":" + pygments==2.21.0\n"}
+,{"stream_name":"stdout","time":293.452915539,"data":" + pyjwt==2.15.1\n"}
+,{"stream_name":"stdout","time":293.452918784,"data":" + pynvvideocodec==2.0.4\n"}
+,{"stream_name":"stdout","time":293.452921984,"data":" + python-dotenv==1.2.4\n"}
+,{"stream_name":"stdout","time":293.452925204,"data":" + python-json-logger==4.2.0\n"}
+,{"stream_name":"stdout","time":293.452928508,"data":" + python-multipart==0.0.32\n"}
+,{"stream_name":"stdout","time":293.452935333,"data":" + pyyaml==6.0.3\n"}
+,{"stream_name":"stdout","time":293.452938578,"data":" + pyzmq==27.2.0\n"}
+,{"stream_name":"stdout","time":293.452946686,"data":" + quack-kernels==0.6.5\n"}
+,{"stream_name":"stdout","time":293.452949706,"data":" + referencing==0.37.0\n"}
+,{"stream_name":"stdout","time":293.452952785,"data":" + regex==2026.9.29\n"}
+,{"stream_name":"stdout","time":293.452968548,"data":" + requests==2.34.2\n"}
+,{"stream_name":"stdout","time":293.452972807,"data":" + rich==15.0.0\n"}
+,{"stream_name":"stdout","time":293.452976637,"data":" + rich-toolkit==0.20.6\n"}
+,{"stream_name":"stdout","time":293.452980483,"data":" + rignore==0.8.1\n"}
+,{"stream_name":"stdout","time":293.452984239,"data":" + rpds-py==2026.9.1\n"}
+,{"stream_name":"stdout","time":293.452987504,"data":" + safetensors==0.8.0\n"}
+,{"stream_name":"stdout","time":293.452990699,"data":" + sentencepiece==0.2.2\n"}
+,{"stream_name":"stdout","time":293.452993918,"data":" + sentry-sdk==2.72.0\n"}
+,{"stream_name":"stdout","time":293.452997109,"data":" + setproctitle==1.3.8\n"}
+,{"stream_name":"stdout","time":293.453000411,"data":" + setuptools==80.10.2\n"}
+,{"stream_name":"stdout","time":293.453003632,"data":" + shellingham==1.5.4\n"}
+,{"stream_name":"stdout","time":293.453006776,"data":" + six==1.17.0\n"}
+,{"stream_name":"stdout","time":293.45300997,"data":" + sniffio==1.3.1\n"}
+,{"stream_name":"stdout","time":293.453013161,"data":" + sse-starlette==3.5.0\n"}
+,{"stream_name":"stdout","time":293.453016362,"data":" + starlette==1.9.0\n"}
+,{"stream_name":"stdout","time":293.453019552,"data":" + supervisor==4.3.0\n"}
+,{"stream_name":"stdout","time":293.453022739,"data":" + sympy==1.14.0\n"}
+,{"stream_name":"stdout","time":293.45302592,"data":" + tabulate==0.10.0\n"}
+,{"stream_name":"stdout","time":293.453029168,"data":" + tiktoken==0.14.0\n"}
+,{"stream_name":"stdout","time":293.453032327,"data":" + tilelang==0.1.12\n"}
+,{"stream_name":"stdout","time":293.453035514,"data":" + tokenizers==0.23.3\n"}
+,{"stream_name":"stdout","time":293.453040433,"data":" + tokenspeed-mla==0.2.15\n"}
+,{"stream_name":"stdout","time":293.453046829,"data":" + tokenspeed-triton==3.9.10.post20261008\n"}
+,{"stream_name":"stdout","time":293.453049864,"data":" + torch==2.13.0+cu132\n"}
+,{"stream_name":"stdout","time":293.453062788,"data":" + torch-c-dlpack-ext==0.1.5\n"}
+,{"stream_name":"stdout","time":293.453066669,"data":" + torchaudio==2.11.0+cpu\n"}
+,{"stream_name":"stdout","time":293.453070553,"data":" + torchcodec==0.17.0+cu132\n"}
+,{"stream_name":"stdout","time":293.453074524,"data":" + torchvision==0.28.0+cu132\n"}
+,{"stream_name":"stdout","time":293.453078311,"data":" + tqdm==4.70.1\n"}
+,{"stream_name":"stdout","time":293.453081539,"data":" + transformers==5.19.0\n"}
+,{"stream_name":"stdout","time":293.453084759,"data":" + triton==3.7.1\n"}
+,{"stream_name":"stdout","time":293.453087962,"data":" + truststore==0.10.5\n"}
+,{"stream_name":"stdout","time":293.453091147,"data":" + typer==0.27.3\n"}
+,{"stream_name":"stdout","time":293.453094381,"data":" + typing-extensions==4.16.0\n"}
+,{"stream_name":"stdout","time":293.453097673,"data":" + typing-inspection==0.4.4\n"}
+,{"stream_name":"stdout","time":293.453100886,"data":" + urllib3==2.8.0\n"}
+,{"stream_name":"stdout","time":293.453104104,"data":" + uvicorn==0.54.0\n"}
+,{"stream_name":"stdout","time":293.453107283,"data":" + uvloop==0.23.0\n"}
+,{"stream_name":"stdout","time":293.453110536,"data":" + vllm==0.32.0\n"}
+,{"stream_name":"stdout","time":293.453117528,"data":" + watchfiles==1.3.0\n"}
+,{"stream_name":"stdout","time":293.453120829,"data":" + websockets==17.3\n"}
+,{"stream_name":"stdout","time":293.453124009,"data":" + xgrammar==0.2.8\n"}
+,{"stream_name":"stdout","time":293.453127214,"data":" + yarl==1.25.1\n"}
+,{"stream_name":"stdout","time":293.453130414,"data":" + z3-solver==4.15.4.0\n"}
+,{"stream_name":"stdout","time":293.453138579,"data":"\n"}
+,{"stream_name":"stdout","time":293.453141286,"data":"vLLM install ok in 56s\n"}
+,{"stream_name":"stdout","time":499.061585324,"data":"pturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:06\u003c00:01,  8.87it/s]\n"}
+,{"stream_name":"stdout","time":499.061632292,"data":"Capturing CUDA graphs (PIECEWISE):  73%|███████▎  | 37/51 [00:06\u003c00:01,  9.10it/s]\n"}
+,{"stream_name":"stdout","time":499.061638972,"data":"Capturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:06\u003c00:01,  9.35it/s]\n"}
+,{"stream_name":"stdout","time":499.061644333,"data":"Capturing CUDA graphs (PIECEWISE):  76%|███████▋  | 39/51 [00:06\u003c00:01,  9.27it/s]\n"}
+,{"stream_name":"stdout","time":499.061654254,"data":"Capturing CUDA graphs (PIECEWISE):  80%|████████  | 41/51 [00:06\u003c00:01,  9.79it/s]\n"}
+,{"stream_name":"stdout","time":499.061658234,"data":"Capturing CUDA graphs (PIECEWISE):  84%|████████▍ | 43/51 [00:06\u003c00:00, 10.22it/s]\n"}
+,{"stream_name":"stdout","time":499.061661684,"data":"Capturing CUDA graphs (PIECEWISE):  88%|████████▊ | 45/51 [00:06\u003c00:00, 10.57it/s]\n"}
+,{"stream_name":"stdout","time":499.061665157,"data":"Capturing CUDA graphs (PIECEWISE):  92%|█████████▏| 47/51 [00:07\u003c00:00, 10.95it/s]\n"}
+,{"stream_name":"stdout","time":499.061668932,"data":"Capturing CUDA graphs (PIECEWISE):  96%|█████████▌| 49/51 [00:07\u003c00:00, 11.42it/s]\n"}
+,{"stream_name":"stdout","time":499.061672743,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:07\u003c00:00, 11.80it/s]\n"}
+,{"stream_name":"stdout","time":499.061676174,"data":"Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:07\u003c00:00,  6.82it/s]\n"}
+,{"stream_name":"stdout","time":499.061679556,"data":"\n"}
+,{"stream_name":"stdout","time":499.06168275,"data":"Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":499.061686247,"data":"Capturing CUDA graphs (FULL):   3%|▎         | 1/35 [00:00\u003c00:04,  7.91it/s]\n"}
+,{"stream_name":"stdout","time":499.061689724,"data":"Capturing CUDA graphs (FULL):   6%|▌         | 2/35 [00:00\u003c00:04,  7.98it/s]\n"}
+,{"stream_name":"stdout","time":499.061693008,"data":"Capturing CUDA graphs (FULL):   9%|▊         | 3/35 [00:00\u003c00:03,  8.04it/s]\n"}
+,{"stream_name":"stdout","time":499.061696304,"data":"Capturing CUDA graphs (FULL):  11%|█▏        | 4/35 [00:00\u003c00:03,  7.99it/s]\n"}
+,{"stream_name":"stdout","time":499.061699615,"data":"Capturing CUDA graphs (FULL):  14%|█▍        | 5/35 [00:00\u003c00:03,  8.04it/s]\n"}
+,{"stream_name":"stdout","time":499.061702878,"data":"Capturing CUDA graphs (FULL):  17%|█▋        | 6/35 [00:00\u003c00:03,  8.22it/s]\n"}
+,{"stream_name":"stdout","time":499.061706143,"data":"Capturing CUDA graphs (FULL):  20%|██        | 7/35 [00:00\u003c00:03,  8.35it/s]\n"}
+,{"stream_name":"stdout","time":499.061709529,"data":"Capturing CUDA graphs (FULL):  23%|██▎       | 8/35 [00:00\u003c00:03,  8.35it/s]\n"}
+,{"stream_name":"stdout","time":499.061713534,"data":"Capturing CUDA graphs (FULL):  26%|██▌       | 9/35 [00:01\u003c00:03,  8.55it/s]\n"}
+,{"stream_name":"stdout","time":499.061726527,"data":"Capturing CUDA graphs (FULL):  29%|██▊       | 10/35 [00:01\u003c00:02,  8.73it/s]\n"}
+,{"stream_name":"stdout","time":499.061730893,"data":"Capturing CUDA graphs (FULL):  31%|███▏      | 11/35 [00:01\u003c00:02,  8.91it/s]\n"}
+,{"stream_name":"stdout","time":499.061733643,"data":"Capturing CUDA graphs (FULL):  34%|███▍      | 12/35 [00:01\u003c00:02,  9.09it/s]\n"}
+,{"stream_name":"stdout","time":499.061736192,"data":"Capturing CUDA graphs (FULL):  37%|███▋      | 13/35 [00:01\u003c00:02,  9.26it/s]\n"}
+,{"stream_name":"stdout","time":499.061738746,"data":"Capturing CUDA graphs (FULL):  40%|████      | 14/35 [00:01\u003c00:02,  9.43it/s]\n"}
+,{"stream_name":"stdout","time":499.061741281,"data":"Capturing CUDA graphs (FULL):  43%|████▎     | 15/35 [00:01\u003c00:02,  9.46it/s]\n"}
+,{"stream_name":"stdout","time":499.061743954,"data":"Capturing CUDA graphs (FULL):  46%|████▌     | 16/35 [00:01\u003c00:01,  9.59it/s]\n"}
+,{"stream_name":"stdout","time":499.061746519,"data":"Capturing CUDA graphs (FULL):  51%|█████▏    | 18/35 [00:01\u003c00:01, 10.34it/s]\n"}
+,{"stream_name":"stdout","time":499.061749127,"data":"Capturing CUDA graphs (FULL):  57%|█████▋    | 20/35 [00:02\u003c00:01, 10.84it/s]\n"}
+,{"stream_name":"stdout","time":499.061751723,"data":"Capturing CUDA graphs (FULL):  63%|██████▎   | 22/35 [00:02\u003c00:01, 11.28it/s]\n"}
+,{"stream_name":"stdout","time":499.061754412,"data":"Capturing CUDA graphs (FULL):  69%|██████▊   | 24/35 [00:02\u003c00:00, 11.61it/s]\n"}
+,{"stream_name":"stdout","time":499.061756994,"data":"Capturing CUDA graphs (FULL):  74%|███████▍  | 26/35 [00:02\u003c00:00, 11.95it/s]\n"}
+,{"stream_name":"stdout","time":499.061759612,"data":"Capturing CUDA graphs (FULL):  80%|████████  | 28/35 [00:02\u003c00:00, 12.31it/s]\n"}
+,{"stream_name":"stdout","time":499.061762214,"data":"Capturing CUDA graphs (FULL):  86%|████████▌ | 30/35 [00:02\u003c00:00, 12.85it/s]\n"}
+,{"stream_name":"stdout","time":499.061764897,"data":"Capturing CUDA graphs (FULL):  91%|█████████▏| 32/35 [00:03\u003c00:00, 13.58it/s]\n"}
+,{"stream_name":"stdout","time":499.061767518,"data":"Capturing CUDA graphs (FULL):  97%|█████████▋| 34/35 [00:03\u003c00:00, 14.22it/s]\n"}
+,{"stream_name":"stdout","time":499.061770112,"data":"Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:03\u003c00:00, 10.75it/s]\n"}
+,{"stream_name":"stdout","time":499.061772708,"data":"\n"}
+,{"stream_name":"stdout","time":499.061775199,"data":"vLLM 0.32.0 smoke passed: {'letter:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 1.5}, 'reasoning:dev_medqa': {'planned': 4, 'questions': 4, 'samples': 1, 'scored': 4, 'status': 'done', 'seconds': 14.0}}\n"}
+,{"stream_name":"stdout","time":499.061779815,"data":"ENGINE = vllm\n"}
+,{"stream_name":"stdout","time":519.098399121,"data":"06:30 answers written: 0\n"}
+,{"stream_name":"stdout","time":539.101763133,"data":"06:30 answers written: 0\n"}
+,{"stream_name":"stdout","time":559.100254041,"data":"06:31 answers written: 0\n"}
+,{"stream_name":"stdout","time":579.107266498,"data":"06:31 answers written: 0\n"}
+,{"stream_name":"stdout","time":599.103157443,"data":"06:31 answers written: 0\n"}
+,{"stream_name":"stdout","time":619.107818602,"data":"06:32 answers written: 0\n"}
+,{"stream_name":"stdout","time":639.106273706,"data":"06:32 answers written: 8\n"}
+,{"stream_name":"stdout","time":659.110983228,"data":"06:32 answers written: 8\n"}
+,{"stream_name":"stdout","time":679.109156235,"data":"06:33 answers written: 8\n"}
+,{"stream_name":"stdout","time":699.116449955,"data":"06:33 answers written: 8\n"}
+,{"stream_name":"stdout","time":719.112471333,"data":"06:33 answers written: 8\n"}
+,{"stream_name":"stdout","time":739.119668333,"data":"06:34 answers written: 8\n"}
+,{"stream_name":"stdout","time":759.115679461,"data":"06:34 answers written: 8\n"}
+,{"stream_name":"stdout","time":779.12226314,"data":"06:34 answers written: 8\n"}
+,{"stream_name":"stdout","time":799.118964577,"data":"06:35 answers written: 8\n"}
+,{"stream_name":"stdout","time":819.123535041,"data":"06:35 answers written: 8\n"}
+,{"stream_name":"stdout","time":839.122319805,"data":"06:35 answers written: 10\n"}
+,{"stream_name":"stdout","time":859.129642515,"data":"06:36 answers written: 10\n"}
+,{"stream_name":"stdout","time":879.125320367,"data":"06:36 answers written: 10\n"}
+,{"stream_name":"stdout","time":899.132855804,"data":"06:36 answers written: 10\n"}
+,{"stream_name":"stdout","time":919.128411732,"data":"06:37 answers written: 10\n"}
+,{"stream_name":"stdout","time":939.133849535,"data":"06:37 answers written: 10\n"}
+,{"stream_name":"stdout","time":959.131997846,"data":"06:37 answers written: 10\n"}
+,{"stream_name":"stdout","time":979.140704158,"data":"06:38 answers written: 10\n"}
+,{"stream_name":"stdout","time":999.135244779,"data":"06:38 answers written: 12\n"}
+,{"stream_name":"stdout","time":1019.140690977,"data":"06:38 answers written: 12\n"}
+,{"stream_name":"stdout","time":1019.162216677,"data":"--- outputs/smoke/base_dev GPU 1 log tail ---\n"}
+,{"stream_name":"stdout","time":1019.162236062,"data":"(EngineCore pid=1065) INFO 10-20 06:38:28 [jit_monitor.py:84] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.\n"}
+,{"stream_name":"stdout","time":1019.162241877,"data":"(EngineCore pid=1065) INFO 10-20 06:38:29 [core.py:395] init engine (profile, create kv cache, warmup model) took 106.49 s (compilation: 37.51 s)\n"}
+,{"stream_name":"stdout","time":1019.162246734,"data":"(EngineCore pid=1065) INFO 10-20 06:38:29 [kernel.py:467] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native'])\n"}
+,{"stream_name":"stdout","time":1019.162253547,"data":"(MainProcess pid=1029) INFO 10-20 06:38:29 [hf.py:648] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.\n"}
+,{"stream_name":"stdout","time":1019.16225833,"data":"(EngineCore pid=1065) WARNING 10-20 06:38:30 [jit_monitor.py:140] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":1019.162263365,"data":"t8b reasoning:weak: 2/2 done in 3s\n"}
+,{"stream_name":"stdout","time":1019.162267869,"data":"(MainProcess pid=1029) INFO 10-20 06:38:33 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore\n"}
+,{"stream_name":"stdout","time":1019.162272528,"data":"(EngineCore pid=1065) INFO 10-20 06:38:33 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":1019.162277103,"data":"(EngineCore pid=1065) INFO 10-20 06:38:33 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":1019.162282456,"data":"(EngineCore pid=1065) INFO 10-20 06:38:33 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":1019.162287321,"data":"(EngineCore pid=1065) INFO 10-20 06:38:33 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":1019.162300971,"data":"t8b (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":1019.162305048,"data":"\n"}
+,{"stream_name":"stdout","time":1019.162308656,"data":"smoke runs passed: {'base_dev1': 0}\n"}
+,{"stream_name":"stdout","time":1019.185134072,"data":"$ python -m training.teacher_traces merge --sets data/e2 data/e3t --out data/e3\n"}
+,{"stream_name":"stdout","time":1019.185153578,"data":"\n"}
+,{"stream_name":"stdout","time":1019.476308118,"data":"{\n"}
+,{"stream_name":"stdout","time":1019.476336763,"data":"  \"rows\": 5727,\n"}
+,{"stream_name":"stdout","time":1019.476343387,"data":"  \"max_seq\": 3968,\n"}
+,{"stream_name":"stdout","time":1019.47636574,"data":"  \"from\": {\n"}
+,{"stream_name":"stdout","time":1019.476369749,"data":"    \"e2\": 3978,\n"}
+,{"stream_name":"stdout","time":1019.476373185,"data":"    \"e3t\": 1749\n"}
+,{"stream_name":"stdout","time":1019.476376595,"data":"  },\n"}
+,{"stream_name":"stdout","time":1019.476379795,"data":"  \"seed\": 42\n"}
+,{"stream_name":"stdout","time":1019.476383167,"data":"}\n"}
+,{"stream_name":"stdout","time":1019.495667479,"data":"{\n"}
+,{"stream_name":"stdout","time":1019.495683805,"data":"  \"rows\": 5727,\n"}
+,{"stream_name":"stdout","time":1019.495688068,"data":"  \"max_seq\": 3968,\n"}
+,{"stream_name":"stdout","time":1019.495691514,"data":"  \"from\": {\n"}
+,{"stream_name":"stdout","time":1019.495695244,"data":"    \"e2\": 3978,\n"}
+,{"stream_name":"stdout","time":1019.495699002,"data":"    \"e3t\": 1749\n"}
+,{"stream_name":"stdout","time":1019.495702681,"data":"  },\n"}
+,{"stream_name":"stdout","time":1019.495706148,"data":"  \"seed\": 42\n"}
+,{"stream_name":"stdout","time":1019.495709535,"data":"}\n"}
+,{"stream_name":"stdout","time":1019.495712724,"data":"\n"}
+,{"stream_name":"stdout","time":1019.495715718,"data":"ok\n"}
+,{"stream_name":"stdout","time":1019.495718901,"data":"\n"}
+,{"stream_name":"stdout","time":1019.68183779,"data":"5,727 rows, max_seq 3968; training stops by itself after 4.00h at the latest\n"}
+,{"stream_name":"stdout","time":1019.681893349,"data":"$ python -m training.train --format v2 --data data/e3 --out outputs/e3_adapter --max-seq 3968 --batch-size 1 --grad-accum 16 --rank 16 --lr 5e-05 --epochs 1 --save-steps 100 --group-by-length --probe-steps 20 --no-probe-abort --stop-after-seconds 14400\n"}
+,{"stream_name":"stdout","time":1319.512409901,"data":"06:43 0%|          | 1/358 [01:41\u003c10:02:31, 101.27s/it]\n"}
+,{"stream_name":"stdout","time":1319.512468702,"data":"  1%|          | 2/358 [02:57\u003c8:32:26, 86.37s/it]\n"}
+,{"stream_name":"stdout","time":1619.506781238,"data":"06:48 2%|▏         | 6/358 [06:55\u003c6:01:35, 61.64s/it]\n"}
+,{"stream_name":"stdout","time":1619.506841321,"data":"  2%|▏         | 7/358 [07:47\u003c5:42:48, 58.60s/it]\n"}
+,{"stream_name":"stdout","time":1919.507945016,"data":"06:53 4%|▎         | 13/358 [12:12\u003c4:15:12, 44.38s/it]\n"}
+,{"stream_name":"stdout","time":1919.507985217,"data":"  4%|▍         | 14/358 [12:52\u003c4:07:02, 43.09s/it]\n"}
+,{"stream_name":"stdout","time":2219.509576178,"data":"06:58 6%|▋         | 23/358 [17:57\u003c2:53:26, 31.06s/it]\n"}
+,{"stream_name":"stdout","time":2219.509624982,"data":"  7%|▋         | 24/358 [18:24\u003c2:46:15, 29.87s/it]\n"}
+,{"stream_name":"stdout","time":2519.51094216,"data":"07:03 10%|▉         | 35/358 [22:53\u003c2:02:24, 22.74s/it]\n"}
+,{"stream_name":"stdout","time":2519.51098092,"data":" 10%|█         | 36/358 [23:12\u003c1:56:15, 21.66s/it]\n"}
+,{"stream_name":"stdout","time":2819.512536997,"data":"07:08 14%|█▍        | 50/358 [26:18\u003c48:32,  9.46s/it]\n"}
+,{"stream_name":"stdout","time":2819.512599639,"data":" 14%|█▍        | 51/358 [28:05\u003c3:17:55, 38.68s/it]\n"}
+,{"stream_name":"stdout","time":3119.514259699,"data":"07:13 15%|█▌        | 54/358 [31:55\u003c5:14:45, 62.12s/it]\n"}
+,{"stream_name":"stdout","time":3119.514309623,"data":" 15%|█▌        | 55/358 [32:56\u003c5:11:47, 61.74s/it]\n"}
+,{"stream_name":"stdout","time":3419.515862552,"data":"07:18 17%|█▋        | 60/358 [37:10\u003c4:14:36, 51.26s/it]\n"}
+,{"stream_name":"stdout","time":3419.515918189,"data":" 17%|█▋        | 61/358 [37:53\u003c4:00:20, 48.55s/it]\n"}
+,{"stream_name":"stdout","time":3719.517359091,"data":"07:23 19%|█▉        | 68/358 [42:25\u003c3:06:20, 38.55s/it]\n"}
+,{"stream_name":"stdout","time":3719.517403704,"data":" 19%|█▉        | 69/358 [42:59\u003c2:58:30, 37.06s/it]\n"}
+,{"stream_name":"stdout","time":4019.519965315,"data":"07:28 22%|██▏       | 80/358 [48:09\u003c2:03:09, 26.58s/it]\n"}
+,{"stream_name":"stdout","time":4319.520586381,"data":"07:33 27%|██▋       | 98/358 [53:17\u003c46:31, 10.74s/it]\n"}
+,{"stream_name":"stdout","time":4319.520623892,"data":" 28%|██▊       | 99/358 [53:25\u003c43:09, 10.00s/it]\n"}
+,{"stream_name":"stdout","time":4619.523576994,"data":"07:38 28%|██▊       | 102/358 [56:35\u003c3:33:25, 50.02s/it]\n"}
+,{"stream_name":"stdout","time":4619.523616126,"data":" 29%|██▉       | 103/358 [57:44\u003c3:56:55, 55.75s/it]\n"}
+,{"stream_name":"stdout","time":4919.525558856,"data":"07:43 30%|███       | 108/358 [1:02:25\u003c3:47:27, 54.59s/it]\n"}
+,{"stream_name":"stdout","time":4919.525603759,"data":" 30%|███       | 109/358 [1:03:14\u003c3:40:00, 53.01s/it]\n"}
+,{"stream_name":"stdout","time":5219.525588256,"data":"07:48 32%|███▏      | 115/358 [1:07:32\u003c2:54:13, 43.02s/it]\n"}
+,{"stream_name":"stdout","time":5219.525631755,"data":" 32%|███▏      | 116/358 [1:08:11\u003c2:48:23, 41.75s/it]\n"}
+,{"stream_name":"stdout","time":5519.527070588,"data":"07:53 35%|███▍      | 125/358 [1:12:59\u003c1:55:24, 29.72s/it]\n"}
+,{"stream_name":"stdout","time":5519.527108462,"data":" 35%|███▌      | 126/358 [1:13:26\u003c1:51:26, 28.82s/it]\n"}
+,{"stream_name":"stdout","time":5819.529299618,"data":"07:58 39%|███▊      | 138/358 [1:18:03\u003c1:15:13, 20.51s/it]\n"}
+,{"stream_name":"stdout","time":5819.529366473,"data":" 39%|███▉      | 139/358 [1:18:20\u003c1:12:00, 19.73s/it]\n"}
+,{"stream_name":"stdout","time":6119.530915717,"data":"08:03 42%|████▏     | 151/358 [1:22:03\u003c2:05:26, 36.36s/it]\n"}
+,{"stream_name":"stdout","time":6119.530988067,"data":" 42%|████▏     | 152/358 [1:23:18\u003c2:45:21, 48.16s/it]\n"}
+,{"stream_name":"stdout","time":6419.538936023,"data":"08:08 44%|████▎     | 156/358 [1:27:09\u003c3:01:40, 53.96s/it]\n"}
+,{"stream_name":"stdout","time":6419.538983112,"data":" 44%|████▍     | 157/358 [1:27:59\u003c2:56:52, 52.80s/it]\n"}
+,{"stream_name":"stdout","time":6719.538717059,"data":"08:13 46%|████▌     | 163/358 [1:32:18\u003c2:20:00, 43.08s/it]\n"}
+,{"stream_name":"stdout","time":6719.542484865,"data":" 46%|████▌     | 164/358 [1:32:56\u003c2:14:46, 41.69s/it]\n"}
+,{"stream_name":"stdout","time":7019.536757644,"data":"08:18 48%|████▊     | 173/358 [1:37:51\u003c1:34:10, 30.54s/it]\n"}
+,{"stream_name":"stdout","time":7019.536796387,"data":" 49%|████▊     | 174/358 [1:38:18\u003c1:30:43, 29.59s/it]\n"}
+,{"stream_name":"stdout","time":7319.538354453,"data":"08:23 52%|█████▏    | 186/358 [1:43:06\u003c1:02:56, 21.96s/it]\n"}
+,{"stream_name":"stdout","time":7319.538395973,"data":" 52%|█████▏    | 187/358 [1:43:25\u003c59:58, 21.04s/it]\n"}
+,{"stream_name":"stdout","time":7619.539080189,"data":"08:28 56%|█████▌    | 201/358 [1:47:50\u003c1:34:41, 36.19s/it]\n"}
+,{"stream_name":"stdout","time":7919.541210043,"data":"08:33 57%|█████▋    | 205/358 [1:52:14\u003c2:22:44, 55.98s/it]\n"}
+,{"stream_name":"stdout","time":7919.541266792,"data":" 58%|█████▊    | 206/358 [1:53:07\u003c2:19:54, 55.23s/it]\n"}
+,{"stream_name":"stdout","time":8219.543080206,"data":"08:38 59%|█████▉    | 212/358 [1:57:39\u003c1:49:01, 44.80s/it]\n"}
+,{"stream_name":"stdout","time":8219.543120566,"data":" 59%|█████▉    | 213/358 [1:58:19\u003c1:45:00, 43.45s/it]\n"}
+,{"stream_name":"stdout","time":8519.544528493,"data":"08:43 61%|██████▏   | 220/358 [2:02:27\u003c1:19:53, 34.73s/it]\n"}
+,{"stream_name":"stdout","time":8519.544570467,"data":" 62%|██████▏   | 221/358 [2:02:59\u003c1:17:26, 33.92s/it]\n"}
+,{"stream_name":"stdout","time":8819.546311302,"data":"08:48 65%|██████▍   | 232/358 [2:07:46\u003c52:36, 25.05s/it]\n"}
+,{"stream_name":"stdout","time":8819.546361757,"data":" 65%|██████▌   | 233/358 [2:08:09\u003c50:36, 24.29s/it]\n"}
+,{"stream_name":"stdout","time":9119.547929487,"data":"08:53 70%|██████▉   | 250/358 [2:12:21\u003c16:46,  9.32s/it]\n"}
+,{"stream_name":"stdout","time":9419.549707797,"data":"08:58 71%|███████   | 253/358 [2:16:47\u003c1:42:49, 58.76s/it]\n"}
+,{"stream_name":"stdout","time":9419.549757017,"data":" 71%|███████   | 254/358 [2:17:54\u003c1:46:15, 61.30s/it]\n"}
+,{"stream_name":"stdout","time":9719.551101909,"data":"09:03 73%|███████▎  | 260/358 [2:23:14\u003c1:25:20, 52.25s/it]\n"}
+,{"stream_name":"stdout","time":10019.552711489,"data":"09:08 74%|███████▍  | 266/358 [2:27:20\u003c1:03:19, 41.30s/it]\n"}
+,{"stream_name":"stdout","time":10019.552746914,"data":" 75%|███████▍  | 267/358 [2:27:57\u003c1:00:45, 40.06s/it]\n"}
+,{"stream_name":"stdout","time":10319.559373711,"data":"09:13 77%|███████▋  | 277/358 [2:32:55\u003c37:30, 27.78s/it]\n"}
+,{"stream_name":"stdout","time":10319.559439851,"data":" 78%|███████▊  | 278/358 [2:33:21\u003c36:13, 27.17s/it]\n"}
+,{"stream_name":"stdout","time":10619.556117161,"data":"09:18 82%|████████▏ | 292/358 [2:38:09\u003c18:45, 17.05s/it]\n"}
+,{"stream_name":"stdout","time":10619.556165481,"data":" 82%|████████▏ | 293/358 [2:38:23\u003c17:30, 16.16s/it]\n"}
+,{"stream_name":"stdout","time":10919.557052295,"data":"09:23 84%|████████▍ | 301/358 [2:41:08\u003c33:35, 35.36s/it]\n"}
+,{"stream_name":"stdout","time":10919.557088843,"data":" 84%|████████▍ | 302/358 [2:42:21\u003c43:32, 46.65s/it]\n"}
+,{"stream_name":"stdout","time":11219.561453687,"data":"09:28 86%|████████▌ | 307/358 [2:47:07\u003c45:36, 53.66s/it]\n"}
+,{"stream_name":"stdout","time":11219.561490538,"data":" 86%|████████▌ | 308/358 [2:47:58\u003c44:01, 52.83s/it]\n"}
+,{"stream_name":"stdout","time":11519.56149772,"data":"09:33 88%|████████▊ | 314/358 [2:52:13\u003c31:18, 42.69s/it]\n"}
+,{"stream_name":"stdout","time":11519.561539007,"data":" 88%|████████▊ | 315/358 [2:52:51\u003c29:39, 41.37s/it]\n"}
+,{"stream_name":"stdout","time":11819.562151188,"data":"09:38 91%|█████████ | 324/358 [2:57:45\u003c17:11, 30.34s/it]\n"}
+,{"stream_name":"stdout","time":11819.562197311,"data":" 91%|█████████ | 325/358 [2:58:13\u003c16:12, 29.46s/it]\n"}
+,{"stream_name":"stdout","time":12119.56496572,"data":"09:43 94%|█████████▍| 337/358 [3:03:01\u003c07:44, 22.11s/it]\n"}
+,{"stream_name":"stdout","time":12119.565016956,"data":" 94%|█████████▍| 338/358 [3:03:20\u003c07:04, 21.22s/it]\n"}
+,{"stream_name":"stdout","time":12419.569055519,"data":"09:48 98%|█████████▊| 351/358 [3:07:04\u003c03:20, 28.69s/it]\n"}
+,{"stream_name":"stdout","time":12419.569093079,"data":" 98%|█████████▊| 352/358 [3:07:50\u003c03:23, 33.92s/it]\n"}
+,{"stream_name":"stdout","time":12719.575786644,"data":"09:53 {'train_runtime': '1.141e+04', 'train_samples_per_second': '0.502', 'train_steps_per_second': '0.031', 'train_loss': '0.3607', 'epoch': '1'}\n"}
+,{"stream_name":"stdout","time":12719.575826245,"data":"saved adapter to outputs/e3_adapter\n"}
+,{"stream_name":"stdout","time":12719.763007345,"data":"{'loss': '0.4085', 'grad_norm': '0.291', 'learning_rate': '3.704e-05', 'epoch': '0.3632'}\n"}
+,{"stream_name":"stdout","time":12719.763052608,"data":"{'loss': '0.339', 'grad_norm': '0.2329', 'learning_rate': '3.501e-05', 'epoch': '0.3911'}\n"}
+,{"stream_name":"stdout","time":12719.763070621,"data":"{'loss': '0.1341', 'grad_norm': '0.2353', 'learning_rate': '3.29e-05', 'epoch': '0.4191'}\n"}
+,{"stream_name":"stdout","time":12719.763075046,"data":"{'loss': '0.4472', 'grad_norm': '0.1495', 'learning_rate': '3.072e-05', 'epoch': '0.447'}\n"}
+,{"stream_name":"stdout","time":12719.763079239,"data":"{'loss': '0.4402', 'grad_norm': '0.193', 'learning_rate': '2.85e-05', 'epoch': '0.4749'}\n"}
+,{"stream_name":"stdout","time":12719.763083657,"data":"{'loss': '0.3889', 'grad_norm': '0.1642', 'learning_rate': '2.624e-05', 'epoch': '0.5029'}\n"}
+,{"stream_name":"stdout","time":12719.763087869,"data":"{'loss': '0.3086', 'grad_norm': '0.2259', 'learning_rate': '2.398e-05', 'epoch': '0.5308'}\n"}
+,{"stream_name":"stdout","time":12719.763092174,"data":"{'loss': '0.1644', 'grad_norm': '0.2863', 'learning_rate': '2.173e-05', 'epoch': '0.5588'}\n"}
+,{"stream_name":"stdout","time":12719.763096926,"data":"{'loss': '0.4272', 'grad_norm': '0.1354', 'learning_rate': '1.95e-05', 'epoch': '0.5867'}\n"}
+,{"stream_name":"stdout","time":12719.763101358,"data":"{'loss': '0.4221', 'grad_norm': '0.1587', 'learning_rate': '1.732e-05', 'epoch': '0.6146'}\n"}
+,{"stream_name":"stdout","time":12719.763105876,"data":"{'loss': '0.3613', 'grad_norm': '0.202', 'learning_rate': '1.52e-05', 'epoch': '0.6426'}\n"}
+,{"stream_name":"stdout","time":12719.763110318,"data":"{'loss': '0.3208', 'grad_norm': '0.2304', 'learning_rate': '1.316e-05', 'epoch': '0.6705'}\n"}
+,{"stream_name":"stdout","time":12719.763114898,"data":"{'loss': '0.193', 'grad_norm': '0.219', 'learning_rate': '1.122e-05', 'epoch': '0.6984'}\n"}
+,{"stream_name":"stdout","time":12719.763119499,"data":"{'loss': '0.4482', 'grad_norm': '0.13', 'learning_rate': '9.387e-06', 'epoch': '0.7264'}\n"}
+,{"stream_name":"stdout","time":12719.76312438,"data":"{'loss': '0.413', 'grad_norm': '0.1715', 'learning_rate': '7.686e-06', 'epoch': '0.7543'}\n"}
+,{"stream_name":"stdout","time":12719.763129262,"data":"{'loss': '0.3736', 'grad_norm': '0.2319', 'learning_rate': '6.126e-06', 'epoch': '0.7823'}\n"}
+,{"stream_name":"stdout","time":12719.763133844,"data":"{'loss': '0.3332', 'grad_norm': '0.2448', 'learning_rate': '4.721e-06', 'epoch': '0.8102'}\n"}
+,{"stream_name":"stdout","time":12719.763138218,"data":"{'loss': '0.1619', 'grad_norm': '0.1798', 'learning_rate': '3.483e-06', 'epoch': '0.8381'}\n"}
+,{"stream_name":"stdout","time":12719.763142948,"data":"{'loss': '0.4479', 'grad_norm': '0.1855', 'learning_rate': '2.42e-06', 'epoch': '0.8661'}\n"}
+,{"stream_name":"stdout","time":12719.763147739,"data":"{'loss': '0.4204', 'grad_norm': '0.2054', 'learning_rate': '1.542e-06', 'epoch': '0.894'}\n"}
+,{"stream_name":"stdout","time":12719.763161525,"data":"{'loss': '0.3718', 'grad_norm': '0.2047', 'learning_rate': '8.567e-07', 'epoch': '0.9219'}\n"}
+,{"stream_name":"stdout","time":12719.763177401,"data":"{'loss': '0.3172', 'grad_norm': '0.2508', 'learning_rate': '3.69e-07', 'epoch': '0.9499'}\n"}
+,{"stream_name":"stdout","time":12719.763184018,"data":"{'loss': '0.1919', 'grad_norm': '0.2353', 'learning_rate': '8.295e-08', 'epoch': '0.9778'}\n"}
+,{"stream_name":"stdout","time":12719.763187917,"data":"{'train_runtime': '1.141e+04', 'train_samples_per_second': '0.502', 'train_steps_per_second': '0.031', 'train_loss': '0.3607', 'epoch': '1'}\n"}
+,{"stream_name":"stdout","time":12719.763191959,"data":"saved adapter to outputs/e3_adapter\n"}
+,{"stream_name":"stdout","time":12719.763196112,"data":"\n"}
+,{"stream_name":"stdout","time":12719.76319985,"data":"adapter saved: ['README.md', 'adapter_config.json', 'adapter_model.safetensors', 'chat_template.jinja', 'loss_curve.json', 'tokenizer.json', 'tokenizer_config.json', 'train_stats.json']\n"}
+,{"stream_name":"stdout","time":12719.763204644,"data":"--- outputs/e3/base_dev GPU 1 log tail ---\n"}
+,{"stream_name":"stdout","time":12719.763208306,"data":"(MainProcess pid=1820) INFO 10-20 08:15:18 [hf.py:648] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.\n"}
+,{"stream_name":"stdout","time":12719.763212086,"data":"(EngineCore pid=1855) WARNING 10-20 08:15:18 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_stats_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":12719.763217071,"data":"(EngineCore pid=1855) WARNING 10-20 08:15:19 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_step_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":12719.763220984,"data":"(EngineCore pid=1855) WARNING 10-20 08:15:20 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_mask_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":12719.763224768,"data":"(EngineCore pid=1855) WARNING 10-20 08:40:20 [jit_monitor.py:140] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":12719.763228692,"data":"t8b reasoning:weak: 120/120 done in 1522s\n"}
+,{"stream_name":"stdout","time":12719.763231988,"data":"(MainProcess pid=1820) INFO 10-20 08:40:40 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore\n"}
+,{"stream_name":"stdout","time":12719.763235527,"data":"(EngineCore pid=1855) INFO 10-20 08:40:40 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":12719.763238756,"data":"(EngineCore pid=1855) INFO 10-20 08:40:40 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":12719.763242233,"data":"(EngineCore pid=1855) INFO 10-20 08:40:40 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":12719.763246557,"data":"(EngineCore pid=1855) INFO 10-20 08:40:40 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":12719.763250197,"data":"t8b (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":12719.763253533,"data":"\n"}
+,{"stream_name":"stdout","time":12719.763256729,"data":"base evaluation exit codes: {1: 0}\n"}
+,{"stream_name":"stdout","time":13319.647873065,"data":"10:03 answers written: 0\n"}
+,{"stream_name":"stdout","time":13919.654046408,"data":"10:13 answers written: 0\n"}
+,{"stream_name":"stdout","time":14519.65256966,"data":"10:23 answers written: 192\n"}
+,{"stream_name":"stdout","time":15119.65569778,"data":"10:33 answers written: 792\n"}
+,{"stream_name":"stdout","time":15719.659428906,"data":"10:43 answers written: 792\n"}
+,{"stream_name":"stdout","time":16319.663278758,"data":"10:53 answers written: 1200\n"}
+,{"stream_name":"stdout","time":16319.697620242,"data":"--- outputs/e3/e3_dev GPU 0 log tail ---\n"}
+,{"stream_name":"stdout","time":16319.697649882,"data":"(EngineCore pid=2061) WARNING 10-20 09:58:02 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_stats_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697657869,"data":"(EngineCore pid=2061) WARNING 10-20 09:58:10 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_step_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697664711,"data":"(EngineCore pid=2061) WARNING 10-20 09:58:11 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_mask_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697686792,"data":"(EngineCore pid=2061) WARNING 10-20 10:25:50 [jit_monitor.py:140] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697693732,"data":"e3 reasoning:dev_medqa: 300/300 done in 2776s\n"}
+,{"stream_name":"stdout","time":16319.697699414,"data":"e3 letter:dev_medqa: 300/300 done in 64s\n"}
+,{"stream_name":"stdout","time":16319.697705196,"data":"(MainProcess pid=2026) INFO 10-20 10:45:20 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore\n"}
+,{"stream_name":"stdout","time":16319.697711324,"data":"(EngineCore pid=2061) INFO 10-20 10:45:20 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":16319.69771767,"data":"(EngineCore pid=2061) INFO 10-20 10:45:20 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":16319.697723779,"data":"(EngineCore pid=2061) INFO 10-20 10:45:20 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":16319.69772999,"data":"(EngineCore pid=2061) INFO 10-20 10:45:20 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":16319.697735488,"data":"e3 (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":16319.697740355,"data":"\n"}
+,{"stream_name":"stdout","time":16319.697745058,"data":"--- outputs/e3/e3_dev GPU 1 log tail ---\n"}
+,{"stream_name":"stdout","time":16319.697750036,"data":"(EngineCore pid=2070) WARNING 10-20 09:58:01 [jit_monitor.py:140] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.69776323,"data":"(EngineCore pid=2070) WARNING 10-20 09:59:36 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_stats_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697767572,"data":"(EngineCore pid=2070) WARNING 10-20 09:59:37 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_step_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.697772261,"data":"(EngineCore pid=2070) WARNING 10-20 09:59:37 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _topp_sb_mask_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.\n"}
+,{"stream_name":"stdout","time":16319.69780379,"data":"e3 reasoning:dev_medmcqa: 300/300 done in 1588s\n"}
+,{"stream_name":"stdout","time":16319.69780889,"data":"e3 letter:dev_medmcqa: 300/300 done in 18s\n"}
+,{"stream_name":"stdout","time":16319.697813008,"data":"(MainProcess pid=2027) INFO 10-20 10:24:46 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore\n"}
+,{"stream_name":"stdout","time":16319.697817177,"data":"(EngineCore pid=2070) INFO 10-20 10:24:46 [core.py:1454] [shutdown] EngineCore: trigger received signal=SIGTERM\n"}
+,{"stream_name":"stdout","time":16319.697821284,"data":"(EngineCore pid=2070) INFO 10-20 10:24:46 [core.py:1635] [shutdown] EngineCore: start mode=abort timeout=0s\n"}
+,{"stream_name":"stdout","time":16319.697825418,"data":"(EngineCore pid=2070) INFO 10-20 10:24:46 [core.py:1666] [shutdown] EngineCore: request processing complete; starting resource teardown\n"}
+,{"stream_name":"stdout","time":16319.697829576,"data":"(EngineCore pid=2070) INFO 10-20 10:24:46 [core.py:1499] [shutdown] EngineCore: exiting busy loop\n"}
+,{"stream_name":"stdout","time":16319.697833691,"data":"e3 (vllm): exit 0\n"}
+,{"stream_name":"stdout","time":16319.697837506,"data":"\n"}
+,{"stream_name":"stdout","time":16319.697841234,"data":"e3 evaluation exit codes: {0: 0, 1: 0}\n"}
+,{"stream_name":"stdout","time":16319.697845146,"data":"$ python -m training.eval_report --root /kaggle/working/e3_base_dev_predictions --root /kaggle/working/e3_e3_dev_predictions --bench-dir data/v3 --out /kaggle/working/e3_report.json --export /kaggle/working/e3_per_question.jsonl\n"}
+,{"stream_name":"stdout","time":16319.697849703,"data":"\n"}
+,{"stream_name":"stdout","time":16319.961275812,"data":"stage                   model              n     acc     any  think med   vs base        p  95% CI\n"}
+,{"stream_name":"stdout","time":16319.961299895,"data":"reasoning:weak          t14b             120   50.8%       -        764\n"}
+,{"stream_name":"stdout","time":16319.961303823,"data":"reasoning:weak          t8b              120   46.7%       -       1309\n"}
+,{"stream_name":"stdout","time":16319.961307438,"data":"letter:dev_medqa        base             300   61.7%       -          -\n"}
+,{"stream_name":"stdout","time":16319.961311035,"data":"letter:dev_medqa        e3               300   61.7%       -          -      +0.0   1.0000  [-2.6, +2.6] on 300\n"}
+,{"stream_name":"stdout","time":16319.961314565,"data":"reasoning:dev_medqa     base             300   68.3%       -        872\n"}
+,{"stream_name":"stdout","time":16319.961317874,"data":"reasoning:dev_medqa     e3               300   66.3%       -        690      -2.0   0.4408  [-6.2, +2.2] on 300\n"}
+,{"stream_name":"stdout","time":16319.961321307,"data":"letter:dev_medmcqa      base             300   59.0%       -          -\n"}
+,{"stream_name":"stdout","time":16319.96132491,"data":"letter:dev_medmcqa      e3               300   59.3%       -          -      +0.3   1.0000  [-2.0, +2.7] on 300\n"}
+,{"stream_name":"stdout","time":16319.96132851,"data":"reasoning:dev_medmcqa   base             300   67.7%       -        508\n"}
+,{"stream_name":"stdout","time":16319.961331884,"data":"reasoning:dev_medmcqa   e3               300   67.7%       -        486      +0.0   1.0000  [-3.8, +3.8] on 300\n"}
+,{"stream_name":"stdout","time":16319.96137106,"data":"wrote /kaggle/working/e3_per_question.jsonl\n"}
+,{"stream_name":"stdout","time":16319.961374584,"data":"\n"}
+,{"stream_name":"stdout","time":16319.961377738,"data":"wrote /kaggle/working/e3_report.json\n"}
+,{"stream_name":"stdout","time":16319.977212374,"data":"stage                   model              n     acc     any  think med   vs base        p  95% CI\n"}
+,{"stream_name":"stdout","time":16319.977266251,"data":"reasoning:weak          t14b             120   50.8%       -        764\n"}
+,{"stream_name":"stdout","time":16319.977270076,"data":"reasoning:weak          t8b              120   46.7%       -       1309\n"}
+,{"stream_name":"stdout","time":16319.977272511,"data":"letter:dev_medqa        base             300   61.7%       -          -\n"}
+,{"stream_name":"stdout","time":16319.977274861,"data":"letter:dev_medqa        e3               300   61.7%       -          -      +0.0   1.0000  [-2.6, +2.6] on 300\n"}
+,{"stream_name":"stdout","time":16319.977277161,"data":"reasoning:dev_medqa     base             300   68.3%       -        872\n"}
+,{"stream_name":"stdout","time":16319.977279397,"data":"reasoning:dev_medqa     e3               300   66.3%       -        690      -2.0   0.4408  [-6.2, +2.2] on 300\n"}
+,{"stream_name":"stdout","time":16319.977281696,"data":"letter:dev_medmcqa      base             300   59.0%       -          -\n"}
+,{"stream_name":"stdout","time":16319.977283969,"data":"letter:dev_medmcqa      e3               300   59.3%       -          -      +0.3   1.0000  [-2.0, +2.7] on 300\n"}
+,{"stream_name":"stdout","time":16319.977286243,"data":"reasoning:dev_medmcqa   base             300   67.7%       -        508\n"}
+,{"stream_name":"stdout","time":16319.977288459,"data":"reasoning:dev_medmcqa   e3               300   67.7%       -        486      +0.0   1.0000  [-3.8, +3.8] on 300\n"}
+,{"stream_name":"stdout","time":16319.97729075,"data":"wrote /kaggle/working/e3_per_question.jsonl\n"}
+,{"stream_name":"stdout","time":16319.977293078,"data":"\n"}
+,{"stream_name":"stdout","time":16319.977295176,"data":"wrote /kaggle/working/e3_report.json\n"}
+,{"stream_name":"stdout","time":16319.977297364,"data":"\n"}
+,{"stream_name":"stdout","time":16319.977299417,"data":"ok\n"}
+,{"stream_name":"stdout","time":16319.977301554,"data":"\n"}
+,{"stream_name":"stdout","time":16320.032374693,"data":"Done. Everything is in the Output panel.\n"}
+,{"stream_name":"stderr","time":16323.587870035,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":16323.587899286,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":16323.854781211,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":16323.854807117,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":16325.207390419,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":16325.31077207,"data":"[NbConvertApp] Writing 207269 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":16327.725775177,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":16328.540217049,"data":"[NbConvertApp] Writing 531589 bytes to __results__.html\n"}
+]

@@ -1,6 +1,6 @@
 {
   "experiment_id": "E3",
-  "status": "E3a complete 2026-10-20 02:05 (t30b teacher). E3b (train and evaluate, with a re-pilot of t14b and t8b at 0.90 GPU memory on GPU 1) next",
+  "status": "complete 2026-10-20 16:26 (E3b version 2); pre-registered success criterion not met; the base stays champion",
   "git_commit": "98f2ebd",
   "dataset_version": "v3 pool and dev split (fingerprint f102ed1e8991077c); weak set data/e3 (1,418 pool questions the base got wrong in E2's generation: 952 MedQA, 466 MedMCQA)",
   "hypothesis": "Gold-verified reasoning from a stronger Qwen3 teacher on the base model's weak questions, added to E2's training set, corrects errors that E2's self-traces could not. Success: E3 > base on pooled dev reasoning accuracy (dev_medqa + dev_medmcqa, 600 paired questions), McNemar p < 0.05, with E3 >= E2 and median thinking within 20% of the base. Failure: no significant gain over the base; the base stays champion.",
@@ -29,27 +29,60 @@
       "gb1105/medical-ft-data-e3",
       "gb1105/medical-ft-data-e3t"
     ],
-    "teacher_generation": "results/e3/e3a"
+    "teacher_generation": "results/e3/e3a",
+    "train_stats": "results/e3/e3b/train_stats.json",
+    "loss_curve": "results/e3/e3b/loss_curve.json",
+    "adapter_sha256": "5c04eca5e44a141a40685e598b01c8065535c821920b70d9bc6ff2fea829e4ca",
+    "adapter_local_dir": "training/outputs/e3 (git-ignored)",
+    "evaluation": "results/e3/e3b",
+    "teacher_pilot_3way": "results/e3/teacher_pilot_3way.json"
   },
   "evaluation": {
     "format": "v2_predictions",
     "bench_dir": "data/v3",
     "protocol": "dev split only (dev_medqa 300, dev_medmcqa 300), reasoning and letter; vLLM 0.32.0; budget 3,072; seed 1234; Qwen thinking sampling. Compared with base and E2's dev predictions from E2's session (same settings) and with a base re-run in E3b's session.",
-    "models": {}
+    "models": {
+      "base": {
+        "label": "Qwen3-4B (base), re-scored in E3b",
+        "quantization": "fp16",
+        "dirs": [
+          "results/e3/e3b/e3_base_dev_predictions/gpu1/base"
+        ]
+      },
+      "e3": {
+        "label": "Qwen3-4B + E3 adapter (fp16 base)",
+        "trained": true,
+        "dirs": [
+          "results/e3/e3b/e3_e3_dev_predictions/gpu0/e3",
+          "results/e3/e3b/e3_e3_dev_predictions/gpu1/e3"
+        ]
+      }
+    }
   },
   "notes": "Teacher models: Qwen/Qwen3-8B-AWQ, Qwen/Qwen3-14B-AWQ, Qwen/Qwen3-30B-A3B-GPTQ-Int4 (Apache-2.0); chosen by rescued weak questions per hour in a 120-question pilot.",
   "pilot": {
+    "same_120_questions": true,
     "t30b": {
-      "answered": 120,
       "rescued": 62,
       "rescue_rate": 0.5167,
       "seconds": 350.5,
-      "rescued_per_hour": 636.8,
-      "setup": "Qwen/Qwen3-30B-A3B-GPTQ-Int4, tensor parallel 2"
+      "rescued_per_hour": 636.8
     },
-    "t14b": "failed in E3a: CUDA out of memory at vLLM start-up at 0.95 GPU memory; re-pilot in E3b at 0.90",
-    "t8b": "failed in E3a: CUDA out of memory at vLLM start-up at 0.95 GPU memory; re-pilot in E3b at 0.90",
-    "note": "the choice of t30b is by default until a re-pilot measures 8B and 14B"
+    "t14b": {
+      "rescued": 61,
+      "rescue_rate": 0.5083,
+      "seconds": 1866.6,
+      "rescued_per_hour": 117.6,
+      "run": "E3b GPU 1, expandable_segments off"
+    },
+    "t8b": {
+      "rescued": 54,
+      "rescue_rate": 0.45,
+      "seconds": 1522.0,
+      "rescued_per_hour": 127.7,
+      "run": "E3b GPU 1, expandable_segments off"
+    },
+    "verdict": "t30b chosen on evidence: as accurate as t14b and 5.4x faster"
   },
   "teacher_traces": {
     "teacher": "Qwen/Qwen3-30B-A3B-GPTQ-Int4 (tensor parallel 2, vLLM 0.32.0)",
@@ -70,5 +103,76 @@
     },
     "rebuilt_locally": "byte-identical",
     "artifacts": "results/e3/e3a"
+  },
+  "git_commits": {
+    "teacher_traces": "98f2ebd",
+    "train_and_evaluate": "42b7b18"
+  },
+  "result": {
+    "verdict": "fail: E3 does not beat the base on pooled dev reasoning; the base stays champion",
+    "pooled_dev_reasoning": {
+      "base_e3b_run": 0.68,
+      "base_e2_run": 0.695,
+      "e2": 0.683,
+      "e3": 0.67,
+      "n": 600
+    },
+    "e3_vs_base_same_session": {
+      "diff": -0.01,
+      "ci95": [
+        -0.038,
+        0.018
+      ],
+      "wins": 35,
+      "losses": 41,
+      "p": 0.567
+    },
+    "e3_vs_e2": {
+      "diff": -0.013,
+      "ci95": [
+        -0.043,
+        0.016
+      ],
+      "p": 0.434
+    },
+    "per_stage_e3_vs_base": {
+      "reasoning_dev_medqa": [
+        0.663,
+        0.683,
+        0.441
+      ],
+      "reasoning_dev_medmcqa": [
+        0.677,
+        0.677,
+        1.0
+      ],
+      "letter_dev_medqa": [
+        0.617,
+        0.617,
+        1.0
+      ],
+      "letter_dev_medmcqa": [
+        0.593,
+        0.59,
+        1.0
+      ]
+    },
+    "median_think_tokens": {
+      "dev_medqa": {
+        "base": 872,
+        "e3": 690
+      },
+      "dev_medmcqa": {
+        "base": 508,
+        "e3": 486
+      }
+    },
+    "noise_floor": "the base re-scored with identical settings: 68.0% vs 69.5% (281/300 dev MedQA letters identical), p 0.078",
+    "train": {
+      "rows": 5727,
+      "steps": 358,
+      "runtime_h": 3.17,
+      "train_loss": 0.3607
+    }
   }
 }

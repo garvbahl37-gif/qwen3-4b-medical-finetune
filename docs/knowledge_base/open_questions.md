@@ -12,8 +12,24 @@ are used for selection. The benchmarks are reported, never tuned on.
 | H4 | Run 3's update was too large (rank 64, lr 1e-4) | none direct | low–medium | E1: same v2 data, rank 16, lr 2e-5 | E1 thinking ≥ run 3 + 3 points on dev | ≤ run 3 | deprioritised (decisions D2) |
 | H5 | GRPO with a binary MCQ reward beats E2 | AlphaMed [paper], on 8B, 8 × A800, non-thinking backbone; an Unsloth T4 GRPO notebook exists [docs] | low on a T4 | ~200-step QLoRA GRPO pilot, short completions, MedQA train | dev gain over base and E2 | no gain, or length collapse | only after E2 (the earlier plan's rule: no RL before E2 evidence) |
 | H6 | vLLM fp16 on a T4 reproduces transformers' letter choices | none | unknown | score dev letter mode with both engines in one session | ≥ 98% agreement, accuracy within 0.5 points | below either | **answered: base letter choice by vLLM (E2) vs transformers (run 3) agrees on 99.6–100% of questions, accuracy within 0.08 points.** Engines are interchangeable for comparisons. |
-| H8 | Corrective traces from a stronger Qwen3, on the base's weak questions, raise dev accuracy where self-traces (E2) could not | MMOPD +10.9 MedQA with 40k verified teacher traces [reported, not reproduced]; E2 tie [measured] | low–medium at our scale (about 1,000 traces, LoRA, 1 epoch) | **E3** (E3a teacher traces, E3b train and score) | E3 > base on pooled dev reasoning (600 paired), McNemar p < 0.05, E3 ≥ E2, thinking within 20% | no significant gain: the base stays champion | **running** (E3a launched 2026-10-19 20:36) |
+| H8 | Corrective traces from a stronger Qwen3, on the base's weak questions, raise dev accuracy where self-traces (E2) could not | MMOPD +10.9 MedQA with 40k verified teacher traces [reported, not reproduced]; E2 tie [measured] | low–medium at our scale (about 1,000 traces, LoRA, 1 epoch) | **E3** (E3a teacher traces, E3b train and score) | E3 > base on pooled dev reasoning (600 paired), McNemar p < 0.05, E3 ≥ E2, thinking within 20% | no significant gain: the base stays champion | **answered 2026-10-20: fail.** Pooled dev reasoning E3 67.0 vs base 68.0 in the same session (−1.0, CI [−3.8, +1.8], p 0.57), vs E2 68.3. Dev MedQA thinking −21%. 1,749 corrective rows from a 30B teacher did not move the 4B. |
 | H7 | Data defects in v2 (nested think, contradictions) cause part of run 3's loss | audit [measured]: about 1–2% of rows | low | v2 minus flagged rows, otherwise like run 3 | thinking improves ≥ 2 points | no change | low priority; E2 replaces v2 |
+
+## After E3 (2026-10-20): SFT of any kind has not moved the base
+
+E2 (own traces) and E3 (own + 30B-teacher corrective traces) both land
+within noise of the base on dev, and below it in point estimate. **The noise
+floor is now measured:** the same base, re-scored with identical settings in
+another session, moved 1.5 points (68.0 vs 69.5; 19 of 300 dev MedQA letters
+changed). Any claimed gain on 600 dev questions needs to clear about ±3
+points, or must be averaged over repeats. The next steps that do not depend
+on SFT:
+1. **H3, self-consistency** (no training): majority of 5 samples on dev.
+   This also averages away the sampling noise.
+2. **H5, GRPO** on weak questions that the base solves only sometimes.
+3. If more SFT is ever tried: MMOPD's scale (about 40k traces, a stronger
+   teacher, full fine-tuning, 4 epochs) is the reference, and it is far
+   beyond a T4.
 
 ## After E2 (2026-10-19): the "tie" branch
 

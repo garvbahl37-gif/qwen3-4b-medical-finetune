@@ -319,7 +319,31 @@ fetches and short reports.
         that worked had it off.
       - Fixed: AWQ teachers run without it, and the re-pilot entries are
         optional, so they can never block training again (with a test).
-- [ ] **Check the other two teachers properly.** Folded into E3b:
+- [x] **E3b complete (2026-10-20 16:26): E3 fails its criterion. The base
+      stays champion.**
+      | Pooled dev reasoning, 600 paired | Accuracy |
+      |---|---:|
+      | Base (same session) | 68.0 |
+      | Base (E2 session) | 69.5 |
+      | E2 | 68.3 |
+      | E3 | 67.0 |
+      - E3 vs same-session base: −1.0 (95% CI −3.8 to +1.8, p 0.57).
+      - Dev MedQA thinking fell 21%.
+      - **Noise floor measured:** the identical base re-scored moved 1.5
+        points (19 of 300 letters changed).
+      - Saved: `results/e3/e3b`; the adapter is in `training/outputs/e3`.
+- [x] **Teacher re-pilot.** The fix worked: same 120 questions, all three
+      measured.
+      | Teacher | Rescued | Rescued per hour |
+      |---|---:|---:|
+      | 30B-A3B | 51.7% | 637 |
+      | 14B-AWQ | 50.8% | 118 |
+      | 8B-AWQ | 45.0% | 128 |
+      The 30B choice is confirmed on evidence.
+- [ ] **Next: H3, self-consistency.** Majority vote over 5 base samples on
+      dev, with no training; it also averages away the measured noise.
+- [ ] **Then H5, GRPO** on weak questions the base solves only sometimes.
+- [x] ~~Check the other two teachers properly.~~ Done in E3b:
       GPU 1 reruns the 120-question pilot for the 14B and 8B at 0.90, with the
       same questions and seeds, while GPU 0 trains.
       1. When E3a ends, read `e3_pilot-gpu0.log` and `e3_pilot-gpu1.log` for
@@ -336,7 +360,7 @@ fetches and short reports.
       2. upload `e3t/` as `medical-ft-data-e3t`;
       3. build and push `e3b`;
       4. compare base, E2 and E3 on dev.
-- [ ] **Then H3, self-consistency.** Majority vote over 5 samples from the
+- [x] ~~Then H3, self-consistency~~: moved up, see above. Majority vote over 5 samples from the
       base, on dev and then MedQA, with no training. About one session.
 - [ ] **Then H5, a GRPO pilot.** Binary gold-letter reward, on pool questions
       the base solves sometimes but not always; Unsloth's T4 GRPO recipe.
